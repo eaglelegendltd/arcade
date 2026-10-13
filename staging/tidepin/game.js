@@ -4,13 +4,21 @@
  * anyone with the files can edit or strip it. Real protection is contractual (licence agreement), plus server-side
  * hosting controls (licensee-specific builds, signed URLs, CSP frame-ancestors on our hosts). See LICENSING.md.
  * Per-licensee builds: edit EAGLE_CONFIG here, or ship a licensee.js loaded before game.js that sets
- * window.EAGLE_LICENSEE = { tier, licensee, allowedDomains:[...], sprites:{...} } (merged over the defaults).
+ * window.EAGLE_LICENSEE = { tier, licensee, allowedDomains:[...], allowedAppIds:[...], sprites:{...} } (merged over the defaults).
+ *
+ * SOURCE tier (plan C source licence / E exclusive buy-out): no logo, no outbound links, NO domain or app lock.
+ * Use and coverage are governed entirely by the signed licence contract for that buyer (sites/apps covered, no resale,
+ * exclusivity for E). [PLACEHOLDER: contract reference / solicitor-drafted terms per buyer]
  */
 var EAGLE_CONFIG = {
   // tier -> plan tier (see /workspace/licensing/tier_mapping.md, DRAFT pending Richie):
   //   STANDARD = A (as-is with credit), WHITE_LABEL = B (unbranded; buyer may add own logo), ENTERPRISE_RESKIN = D (reskin).
-  //   C (source) and E (buy-out) have no config value; they are handled by contract.
-  tier: 'STANDARD',                 // 'STANDARD' | 'WHITE_LABEL' | 'ENTERPRISE_RESKIN'
+  //   SOURCE = C (source licence) and E (exclusive buy-out): unbranded, unlocked, scope set by the contract.
+  tier: 'STANDARD',                 // 'STANDARD' | 'WHITE_LABEL' | 'ENTERPRISE_RESKIN' | 'SOURCE'
+  // wrapped apps (WebView/Capacitor/PWA store builds): app ids the wrapper may pass via postMessage {type:'app-id', appId}
+  // or ?appId=. The game runs if the domain check passes OR the app id is listed. Deterrent only; the contract enforces.
+  allowedAppIds: [],
+  appIdWaitMs: 1500,                // how long to wait for the wrapper's app-id message before showing the not-licensed screen
   clientLogo: '',                   // WHITE_LABEL only, optional: the licensee's logo shown in place of ours
   clientLink: '',                   // WHITE_LABEL only, optional: opened _blank with noopener on click (https only)
   demoTierSwitch: true,             // ?tier= demo switch (localhost/staging only). MUST be false for production/licensee builds
@@ -26,7 +34,7 @@ var EAGLE_CONFIG = {
 (function () { var o = window.EAGLE_LICENSEE; if (o && typeof o === 'object') for (var k in o) EAGLE_CONFIG[k] = o[k];
   // DEMO SWITCH (local test host only): ?tier=... is honoured ONLY on localhost/127.0.0.1, never on production hosts.
   // ENTERPRISE_RESKIN demo uses assets/demo_reskin/ (locally generated recolours, labelled DEMO).
-  var h = location.hostname; if (EAGLE_CONFIG.demoTierSwitch && (h === 'localhost' || h === '127.0.0.1')) { var m = /[?&]tier=(STANDARD|WHITE_LABEL|ENTERPRISE_RESKIN)\b/.exec(location.search);
+  var h = location.hostname; if (EAGLE_CONFIG.demoTierSwitch && (h === 'localhost' || h === '127.0.0.1')) { var m = /[?&]tier=(STANDARD|WHITE_LABEL|ENTERPRISE_RESKIN|SOURCE)\b/.exec(location.search);
     if (m) { EAGLE_CONFIG.tier = m[1]; if (m[1] !== 'WHITE_LABEL') EAGLE_CONFIG.clientLogo = EAGLE_CONFIG.clientLink = ''; EAGLE_CONFIG.showLogo = m[1] === 'STANDARD'; if (m[1] === 'ENTERPRISE_RESKIN') EAGLE_CONFIG.sprites = { pin: 'assets/demo_reskin/pin.png', hammer: 'assets/demo_reskin/hammer.png', bg: 'assets/demo_reskin/bg.png' }; } }
   if (EAGLE_CONFIG.tier !== 'STANDARD') EAGLE_CONFIG.showLogo = false;
   if (EAGLE_CONFIG.tier !== 'WHITE_LABEL') { EAGLE_CONFIG.clientLogo = ''; EAGLE_CONFIG.clientLink = ''; }
@@ -45,10 +53,28 @@ function eagleHostAllowed(host) {
 var GROUND = 430, PINX = 180, ZONE_Y = GROUND - 70, DUR_MAX = 5, NOTCHES = 5, OB_KEY = 'tidepin3-onboarded';
 var groundCanvas = null;
 
-if (!eagleHostAllowed(window.location.hostname)) {
-  // polite block screen; the game never starts and no bridge events are sent
-  document.addEventListener('DOMContentLoaded', blockScreen); if (document.readyState !== 'loading') blockScreen();
-} else startTidepin();
+// Licence gate. App-wrapper schemes (file:, capacitor:, ionic:, app:, ...) never get a free pass from the
+// localhost/'' defaults once allowedAppIds is set: an app build must present a listed app id. Plain http(s) hosts use
+// the domain list as normal (http(s)://localhost still passes, for dev; note Capacitor Android serves https://localhost,
+// so on that platform the lock is weaker - deterrent only).
+function eagleDomainOk() {
+  if (EAGLE_CONFIG.tier === 'SOURCE') return true;
+  var proto = location.protocol, ids = EAGLE_CONFIG.allowedAppIds || [];
+  if (ids.length && !/^https?:$/.test(proto)) return false;
+  return eagleHostAllowed(location.hostname);
+}
+function eagleAppIdOk(id) { var ids = EAGLE_CONFIG.allowedAppIds || []; return !!id && ids.indexOf(String(id)) >= 0; }
+(function gate() {
+  var started = false, timer = 0;
+  function go(how) { if (started) return; started = true; clearTimeout(timer); window.__eagleLicensedBy = how; startTidepin(); }
+  function block() { if (started) return; started = true; removeEventListener('message', onMsg);
+    document.addEventListener('DOMContentLoaded', blockScreen); if (document.readyState !== 'loading') blockScreen(); }
+  function onMsg(e) { var d = e.data; if (d && d.type === 'app-id') { removeEventListener('message', onMsg); eagleAppIdOk(d.appId) ? go('app-id-message') : block(); } }
+  if (eagleDomainOk()) return go('domain');
+  if (!(EAGLE_CONFIG.allowedAppIds || []).length) return block();
+  var q = /[?&]appId=([^&#]+)/.exec(location.search); if (q) return eagleAppIdOk(decodeURIComponent(q[1])) ? go('app-id-param') : block();
+  addEventListener('message', onMsg); timer = setTimeout(block, EAGLE_CONFIG.appIdWaitMs || 1500);
+})();
 
 function blockScreen() {
   if (document.getElementById('eg-license')) return;
