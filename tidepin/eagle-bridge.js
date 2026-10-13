@@ -60,6 +60,9 @@
     var g = W.__eagle = {
       id: def.id, W: VW, H: VH, ctx: ctx, t: 0, score: 0, level: 1, best: best, state: 'title', // title|play|over
       paused: false, hostPaused: false, hidden: false, muted: false, themeName: 'dark', theme: THEMES.dark,
+      // bottom-safe rule: host bars + device safe area. Nothing important may be drawn below g.safeBottom (logical y).
+      insets: { top: 0, bottom: 80 }, safeTop: 0, safeBottom: VH,
+      safeY: function (y, h) { return Math.min(y, g.safeBottom - 6 - (h || 0)); },
       shakeAmt: 0, shake: function (a) { g.shakeAmt = Math.max(g.shakeAmt, a); },
       reducedMotion: !!(W.matchMedia && W.matchMedia('(prefers-reduced-motion: reduce)').matches),
       vibrate: function (ms) { if (!g.reducedMotion && navigator.vibrate) try { navigator.vibrate(ms); } catch (e) {} },
@@ -76,7 +79,7 @@
       },
       gameOver: function (reason) {
         if (g.state !== 'play') return;
-        g.state = 'over'; g.runs++; g.sfx(def.overSfx || 'gameOver', null, 'gameOver'); music && music.stop();
+        g.state = 'over'; g.overReason = reason || ''; g.runs++; g.sfx(def.overSfx || 'gameOver', null, 'gameOver'); music && music.stop();
         g.newBest = g.score > g.best && g.score > 0; g.overAt = performance.now(); if (g.score > g.best) { g.best = g.score; try { localStorage.setItem(bestKey, g.best); } catch (e) {} }
         bridge.send('gameover', g, { reason: reason || '' });
         if (!g.likePrompted && (g.runs >= 3 || (g.score >= (def.likeScore || 20)))) { g.likePrompted = true; bridge.send('like-prompt', g); }
@@ -129,7 +132,7 @@
       var who = g.player ? '<p>' + esc(g.player.name) + ' · Lv ' + (g.player.level | 0) + '</p>' : '';
       if (isPaused() && g.state === 'play') ov.innerHTML = '<h1>Paused</h1>' + who + '<p class="big">Tap to resume</p>';
       else if (g.state === 'title') ov.innerHTML = '<h1>' + esc(def.title) + '</h1><p>' + esc(def.howto) + '</p>' + who + '<p>Best ' + g.best + '</p><p class="big">Tap to start</p>';
-      else ov.innerHTML = '<h1>' + (g.newBest ? '🎉 New best!' : 'Game over') + '</h1><p>Score ' + g.score + ' · Best ' + g.best + '</p>' + who + '<p class="big">Tap to retry</p>';
+      else ov.innerHTML = '<h1>' + (g.newBest ? '🎉 New best!' : 'Game over') + '</h1>' + (g.overReason ? '<p>' + esc(g.overReason.charAt(0).toUpperCase() + g.overReason.slice(1)) + '</p>' : '') + '<p>Score ' + g.score + ' · Best ' + g.best + '</p>' + who + '<p class="big">Tap to retry</p>';
     }
     function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return '&#' + c.charCodeAt(0) + ';'; }); }
 
@@ -165,6 +168,7 @@
     bridge.on('restart', function () { start(); });
     bridge.on('set-theme', function (d) { setTheme(d.theme); });
     bridge.on('player-info', function (d) { g.player = { name: String(d.name || 'Player').slice(0, 24), xp: d.xp | 0, level: d.level | 0 }; overlay(); });
+    bridge.on('set-insets', function (d) { g.insets = { top: Math.max(0, +d.top || 0), bottom: Math.max(0, d.bottom == null ? 80 : +d.bottom || 0) }; applyInsets(); });
     bridge.on('set-motion', function (d) { g.reducedMotion = !!d.reduced; });
     bridge.on('set-best', function (d) { var b = d.best | 0; if (b >= 0) { g.best = b; try { localStorage.setItem(bestKey, b); } catch (e) {} overlay(); } });
 
@@ -174,8 +178,18 @@
     document.addEventListener('visibilitychange', function () { visTab = !document.hidden; vis(); });
     if ('IntersectionObserver' in W) new IntersectionObserver(function (es) { visIO = es[es.length - 1].intersectionRatio >= 0.5; vis(); }, { threshold: [0, 0.5, 1] }).observe(wrap);
 
+    // device safe-area insets (CSS px), read via a probe using env()
+    var probe = document.createElement('div'); probe.style.cssText = 'position:fixed;left:0;top:0;width:0;visibility:hidden;pointer-events:none;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)'; document.body.appendChild(probe);
+    function applyInsets() {
+      var cs = getComputedStyle(probe), st = parseFloat(cs.paddingTop) || 0, sb = parseFloat(cs.paddingBottom) || 0;
+      var r = wrap.getBoundingClientRect(), vh = W.innerHeight || r.bottom, k = VH / (r.height || VH);
+      var coverB = Math.max(0, r.bottom - (vh - (g.insets.bottom + sb))), coverT = Math.max(0, (g.insets.top + st) - r.top);
+      g.safeBottom = VH - coverB * k; g.safeTop = coverT * k;
+      mute.style.top = pbtn.style.top = (8 + Math.max(0, g.insets.top + st - r.top)) + 'px';
+      ov.style.paddingBottom = (24 + coverB) + 'px';
+    }
     function resize() { var r = wrap.getBoundingClientRect(), dpr = Math.min(W.devicePixelRatio || 1, 2); cv.width = Math.round(r.width * dpr); cv.height = Math.round(r.height * dpr); }
-    W.addEventListener('resize', resize);
+    W.addEventListener('resize', function () { resize(); applyInsets(); });
 
     var last = performance.now();
     function hud() {
@@ -198,7 +212,7 @@
       def.draw(g, ctx); ctx.setTransform(s, 0, 0, cv.height / VH, 0, 0); if (def.drawOver) def.drawOver(g, ctx); hud();
       requestAnimationFrame(frame);
     }
-    resize(); setTheme('dark'); setMute(false); def.init(g); overlay();
+    resize(); applyInsets(); setTheme('dark'); setMute(false); def.init(g); overlay();
     requestAnimationFrame(frame);
     bridge.send('ready', g, { title: def.title });
     g._api = { start: start, pause: pause, resume: resume };

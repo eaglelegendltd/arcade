@@ -2,12 +2,12 @@
 // score popups, perfect streaks, onboarding hint, new-best celebration. Ground is pre-rendered for 60 fps.
 var GROUND = 430, PINX = 180, NOTCH = 11, OB_KEY = 'tidepin-onboarded';
 var ground = null;
-EagleGame.run({ id: 'tidepin', title: 'Tidepin', howto: 'Each wave shows its strength (▲). Tap to hammer the pin that many notches before it hits. One extra notch is fine; two snaps the pin.',
+EagleGame.run({ id: 'tidepin', title: 'Tidepin', howto: 'Each wave shows its strength (▲). Tap to hammer the pin that many notches before it hits. One extra notch is fine; two snaps the pin. One mistake ends the run.',
   art: ['pin', 'hammer', 'wave', 'beach', 'splash_sheet', 'snap_sheet'], levelEvery: 8, likeScore: 15, overSfx: 'washAway',
   achievements: [{ id: 'exact10', score: 10, name: 'Steady Hand' }, { id: 'tide30', score: 30, name: 'Tide Breaker' }, { id: 'tide60', score: 60, name: 'Sea Wall' }],
   init: function (g) {
     var ob = false; try { ob = !localStorage.getItem(OB_KEY); } catch (e) {}
-    g.data = { d: 0, vd: 0, lives: 3, wave: null, swing: 0, n: 0, fx: null, parts: [], pops: [], streak: 0, ok: 0, onboard: ob, bestShown: false, bestAt: g.best, tideT: 0 };
+    g.data = { d: 0, vd: 0, lives: 1, wave: null, swing: 0, n: 0, fx: null, parts: [], pops: [], streak: 0, ok: 0, onboard: ob, bestShown: false, bestAt: g.best, tideT: 0 };
     spawn(g, 400);
   },
   down: function (g) {
@@ -16,7 +16,7 @@ EagleGame.run({ id: 'tidepin', title: 'Tidepin', howto: 'Each wave shows its str
     g.shake(2.5); sand(g, 6);
     if (D.wave && D.d > D.wave.s + 1) {
       D.fx = { kind: 'snap', t: 0 }; D.streak = 0; g.sfx('snap', null, 'hit'); g.shake(9); g.vibrate([30, 40, 30]);
-      pop(g, 'SNAPPED', '#ff5a6a', 26); egLoseLife(g, 'snapped', true); D.d = 0; D.vd = 0; if (g.state === 'play') spawn(g, 430);
+      pop(g, 'SNAPPED', '#ff5a6a', 26); g.gameOver('snapped'); // single life: every fail ends the run
     }
   },
   update: function (g, dt) {
@@ -25,7 +25,7 @@ EagleGame.run({ id: 'tidepin', title: 'Tidepin', howto: 'Each wave shows its str
     if (D.fx) { D.fx.t += dt; if (D.fx.t > 0.55) D.fx = null; }
     w.x -= Math.min(200, 60 + g.level * 12) * dt; w.bob += dt;
     if (w.x <= PINX) {
-      if (D.d < w.s) { D.streak = 0; g.shake(7); splash(g, 18); pop(g, 'WASHED AWAY', '#ff5a6a', 24); egLoseLife(g, 'washed away', true); }
+      if (D.d < w.s) { D.streak = 0; g.shake(7); splash(g, 18); pop(g, 'WASHED AWAY', '#ff5a6a', 24); g.gameOver('washed away'); }
       else {
         var perfect = D.d === w.s; D.streak = perfect ? D.streak + 1 : 0; D.ok++;
         var pts = perfect ? 2 + Math.min(2, Math.floor(D.streak / 4)) : 1; /* streak bonus capped at +2 */
@@ -64,8 +64,8 @@ EagleGame.run({ id: 'tidepin', title: 'Tidepin', howto: 'Each wave shows its str
       if (p.spin) { c.save(); c.translate(p.x, p.y); c.rotate(p.r); c.fillRect(-p.s, -p.s / 2, p.s * 2, p.s); c.restore(); } else c.fillRect(p.x - p.s / 2, p.y - p.s / 2, p.s, p.s); });
     c.globalAlpha = 1;
     c.fillStyle = th.fg; c.font = '14px system-ui'; c.textAlign = 'center';
-    if (w) c.fillText('depth ' + D.d + ' · aim for ' + w.s + (D.streak >= 2 ? ' · streak ' + D.streak : ''), 180, 610);
-    egLives(g, c); egFlash(g, c);
+    if (w) c.fillText('depth ' + D.d + ' · aim for ' + w.s + (D.streak >= 2 ? ' · streak ' + D.streak : ''), 180, g.safeY(GROUND + 92));
+    egFlash(g, c);
   },
   drawOver: function (g, c) {
     var D = g.data; if (!D) return;
@@ -75,9 +75,9 @@ EagleGame.run({ id: 'tidepin', title: 'Tidepin', howto: 'Each wave shows its str
     c.globalAlpha = 1;
     // onboarding: pulsing finger + exact instruction for the current wave
     if (D.onboard && g.state === 'play' && D.wave) { var left = D.wave.s - D.d, pulse = g.reducedMotion ? 0 : (Math.sin(g.t * 8) + 1) * 0.5;
-      c.fillStyle = 'rgba(0,0,0,.45)'; rr(c, 50, 528, 260, 50, 14); c.fill();
+      c.fillStyle = 'rgba(0,0,0,.45)'; rr(c, 50, 238, 260, 50, 14); c.fill();
       c.fillStyle = '#fff'; c.font = 'bold 18px system-ui'; c.textAlign = 'center';
-      c.fillText(left > 0 ? 'Tap ' + left + '× before the wave hits' : left === 0 ? 'Perfect! Now wait…' : 'Careful, one more snaps it', 180, 560);
+      c.fillText(left > 0 ? 'Tap ' + left + '× before the wave hits' : left === 0 ? 'Perfect! Now wait…' : 'Careful, one more snaps it', 180, 270);
       if (left > 0) { c.globalAlpha = 0.6 + pulse * 0.4; c.beginPath(); c.arc(PINX + 70, GROUND - 120, 14 + pulse * 6, 0, 7); c.strokeStyle = '#fff'; c.lineWidth = 3; c.stroke(); c.globalAlpha = 1; } }
   }
 });
