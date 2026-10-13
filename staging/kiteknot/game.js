@@ -42,9 +42,8 @@ function newRing(g) { var D = g.data, k = kite(D), best = null, bestD = -1, a = 
   for (var i = 0; i < 16; i++) { var L = LMIN + 40 + Math.random() * (Math.min(LMAX - 20, 260 + g.level * 30) - LMIN - 40), x = SX + L * Math.cos(a), y = SY - L * Math.sin(a);
     var d = Math.min(Math.hypot(x - k.x, y - k.y), segDist(x, y, SX, SY - 20, k.x, k.y));
     if (d > bestD) { bestD = d; best = { x: x, y: y, L: L }; } if (d >= RING_GAP) break; }
-  // same angle as the line can leave no valid spot: then push the ring sideways off the line
-  if (bestD < RING_GAP) { var nx = -(k.y - SY), ny = k.x - SX, nl = Math.hypot(nx, ny) || 1, off = RING_GAP + 10;
-    var c1 = { x: best.x + nx / nl * off, y: best.y + ny / nl * off }, c2 = { x: best.x - nx / nl * off, y: best.y - ny / nl * off },
-      on = function (p) { return p.x > 30 && p.x < 330 && p.y > 120 && p.y < SY - 60; };
-    var pick = on(c1) ? c1 : on(c2) ? c2 : c1; best.x = Math.max(30, Math.min(330, pick.x)); best.y = Math.max(120, Math.min(SY - 60, pick.y)); }
+  // rings stay on the wind ray (reachable by reeling to ring.L). If no candidate clears RING_GAP (kite already near max line
+  // on the same angle), keep the candidate farthest from kite and line; the RING_GRACE window still blocks an instant hit.
+  if (bestD < RING_GAP) { for (var j = 0; j < 24; j++) { var L2 = LMIN + 40 + j / 23 * (Math.min(LMAX - 20, 260 + g.level * 30) - LMIN - 40), x2 = SX + L2 * Math.cos(a), y2 = SY - L2 * Math.sin(a),
+      d2 = Math.min(Math.hypot(x2 - k.x, y2 - k.y), segDist(x2, y2, SX, SY - 20, k.x, k.y)); if (d2 > bestD) { bestD = d2; best = { x: x2, y: y2, L: L2 }; } } }
   D.ring = { x: best.x, y: best.y, L: best.L, t: Math.max(2.6, 4.6 - g.level * 0.2), age: 0 }; }

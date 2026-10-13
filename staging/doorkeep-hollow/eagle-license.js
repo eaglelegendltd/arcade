@@ -1,4 +1,4 @@
-/* eagle-license.js: shared B2B licensing for every Eagle Legend game (master copy: /workspace/batch1/eagle-license.js,
+/* eagle-license.js: shared B2B licensing runtime (master copy: /workspace/batch1/eagle-license.js,
  * copied into each game by build.sh). Load order: [licensee.js] -> eagle-bridge.js -> eagle-license.js -> game.js.
  *
  * CLIENT-SIDE DETERRENT ONLY. Anyone holding the files can edit or strip this. Real protection is the signed licence
@@ -21,6 +21,7 @@
     logoUrl: 'https://www.eaglelegend.com',
     logoSrc: 'assets/eagle_legend_logo.png',
     clientLogo: '',                   // WHITE_LABEL only, optional: licensee logo shown in place of ours
+    clientTitle: '',                  // non-STANDARD, optional: tab title (else the game title). Was read below but never declared.
     clientLink: '',                   // WHITE_LABEL only, optional: https only, opened _blank with noopener
     // allowed hosts. 'x' = x, www.x and any subdomain (exact '.'+x suffix, never substring). '*.x' = subdomains only.
     // '' = file:// page. Defaults apply to every licensee; allowedDomains adds the licensee's own.
@@ -45,6 +46,9 @@
   if (TIERS.indexOf(C.tier) < 0) C.tier = 'STANDARD';
   if (C.tier !== 'STANDARD') C.showLogo = false;
   if (C.tier !== 'WHITE_LABEL') { C.clientLogo = ''; C.clientLink = ''; }
+  // never leak our company name on unbranded tiers (it is the default and is used in the client-logo aria-label)
+  if (C.tier !== 'STANDARD' && C.licensee === 'Eagle Legend LTD') C.licensee = '';
+  if (C.tier === 'STANDARD') C.clientTitle = '';
   if (C.tier !== 'ENTERPRISE_RESKIN') C.sprites = {};
 
   function hostAllowed(host) {
@@ -66,7 +70,7 @@
     if (document.getElementById('eg-license')) return;
     document.body.style.cssText = 'margin:0;height:100vh;display:flex;align-items:center;justify-content:center;background:#10141f;color:#f2f4f8;font-family:system-ui,sans-serif;text-align:center';
     var d = document.createElement('div'); d.id = 'eg-license'; d.setAttribute('role', 'alert'); d.style.cssText = 'max-width:300px;padding:24px';
-    var h1 = document.createElement('h1'); h1.style.cssText = 'font-size:24px;margin:0 0 10px'; h1.textContent = title || 'Eagle Legend game';
+    var h1 = document.createElement('h1'); h1.style.cssText = 'font-size:24px;margin:0 0 10px'; h1.textContent = title || 'This game';
     d.appendChild(h1);
     d.insertAdjacentHTML('beforeend', '<p style="opacity:.85;line-height:1.4">Sorry, this game isn\u2019t licensed for this site.</p>' +
       '<p style="opacity:.6;font-size:13px">If you run this site, contact the game\u2019s publisher to arrange a licence.</p>');
@@ -110,7 +114,12 @@
       'font:bold 10px system-ui,sans-serif;letter-spacing:.06em;color:#fff;background:rgba(214,40,60,.8);padding:2px 8px;border-radius:8px;white-space:nowrap';
     wrap.appendChild(b);
   }
-  W.EagleLicense = { config: C, demoActive: demoActive, hostAllowed: hostAllowed, domainOk: domainOk, appIdOk: appIdOk };
+  // tier: resolved tier string. neutral: true on WHITE_LABEL / ENTERPRISE_RESKIN / SOURCE. art(n): picks the neutral variant
+  // of brand-bearing art when one exists, e.g. art('thumbnail_1080x1920') -> 'assets/thumbnail_neutral_1080x1920.png'.
+  var NEUTRAL_ART = { thumbnail_1080x1920: 'thumbnail_neutral_1080x1920' };
+  W.EagleLicense = { config: C, tier: C.tier, neutral: C.tier !== 'STANDARD',
+    art: function (n) { return 'assets/' + (C.tier !== 'STANDARD' && NEUTRAL_ART[n] ? NEUTRAL_ART[n] : n) + '.png'; },
+    demoActive: demoActive, hostAllowed: hostAllowed, domainOk: domainOk, appIdOk: appIdOk };
   if (!W.EagleGame || !W.EagleGame.run) return;
   var run0 = W.EagleGame.run;
   W.EagleGame.run = function (def) {
@@ -118,6 +127,9 @@
     if (C.tier === 'ENTERPRISE_RESKIN') keys.forEach(function (k) {
       var p = (C.sprites || {})[k] || (demoReskin ? 'assets/demo_reskin/' + k + '.png' : ''); if (p) paths[k] = p; });
     def.artPaths = paths; W.EagleLicense.reskinKeys = keys; W.EagleLicense.artPaths = paths;
+    // tab title: '<Game> · Eagle Legend' only on STANDARD; every other tier stays neutral (clientTitle if set, else the game title)
+    var gt = def.title || document.title.replace(/\s*\u00b7\s*Eagle Legend\s*$/, '');
+    document.title = C.tier === 'STANDARD' ? gt + ' \u00b7 Eagle Legend' : (C.clientTitle || gt);
     var res; gate(def.title, function () {
       res = run0(def); if (demoActive) stagingBadge();
       if (C.showLogo) watermark(def.logo, C.logoSrc, C.logoUrl, 'Eagle Legend: opens eaglelegend.com in a new tab', 'EL');

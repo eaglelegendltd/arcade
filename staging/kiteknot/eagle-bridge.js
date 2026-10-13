@@ -14,6 +14,8 @@
     var self = this;
     W.addEventListener('message', function (e) {
       var d = e.data;
+      // native 'eagle-host' {action}; compat: site-theme style 'el-command'/'el-host' {action|command} (theme sends none today)
+      if (d && (d.type === 'el-command' || d.type === 'el-host') && typeof (d.action || d.command) === 'string') d = { type: 'eagle-host', action: d.action || d.command, game: d.game };
       if (!d || d.type !== 'eagle-host' || typeof d.action !== 'string') return;
       if (d.game && d.game !== self.game) return;
       var h = self.handlers[d.action]; if (h) h(d);
@@ -25,6 +27,11 @@
     if (extra) for (var k in extra) msg[k] = extra[k];
     W.__eagleLog = W.__eagleLog || []; W.__eagleLog.push(msg);
     if (W.parent && W.parent !== W) W.parent.postMessage(msg, '*');
+    // compat: the site theme listens only for { type:'el-score', value:<number> } (theme_with_consent.xml ~4945)
+    if (event === 'score' || event === 'gameover' || event === 'start') {
+      var el = { type: 'el-score', value: g.score | 0, game: this.game, event: event };
+      W.__eagleLog.push(el); if (W.parent && W.parent !== W) W.parent.postMessage(el, '*');
+    }
   };
 
   function css() {

@@ -14,6 +14,8 @@
     var self = this;
     W.addEventListener('message', function (e) {
       var d = e.data;
+      // native 'eagle-host' {action}; compat: site-theme style 'el-command'/'el-host' {action|command} (theme sends none today)
+      if (d && (d.type === 'el-command' || d.type === 'el-host') && typeof (d.action || d.command) === 'string') d = { type: 'eagle-host', action: d.action || d.command, game: d.game };
       if (!d || d.type !== 'eagle-host' || typeof d.action !== 'string') return;
       if (d.game && d.game !== self.game) return;
       var h = self.handlers[d.action]; if (h) h(d);
@@ -25,6 +27,11 @@
     if (extra) for (var k in extra) msg[k] = extra[k];
     W.__eagleLog = W.__eagleLog || []; W.__eagleLog.push(msg);
     if (W.parent && W.parent !== W) W.parent.postMessage(msg, '*');
+    // compat: the site theme listens only for { type:'el-score', value:<number> } (theme_with_consent.xml ~4945)
+    if (event === 'score' || event === 'gameover' || event === 'start') {
+      var el = { type: 'el-score', value: g.score | 0, game: this.game, event: event };
+      W.__eagleLog.push(el); if (W.parent && W.parent !== W) W.parent.postMessage(el, '*');
+    }
   };
 
   function css() {
@@ -211,8 +218,26 @@
     if (W.visualViewport) W.visualViewport.addEventListener('resize', onResize);
     // fill the letterbox around the play area with CSS gradient bands built from the canvas's outer rows/columns
     // (12 averaged samples each), re-sampled ~1x/s and on resize. No per-frame cost; no empty bar on tall/wide screens.
+    // Declared fills (preferred): def.fill = { top: '#sky', bottom: '#ground' | { tile: 'beach', size: 64, originY: 430, tint: 'rgba(..)' } }
+    // -> two CSS bands under the canvas, laid out once per resize; tiles continue the in-game tile grid, so no seam.
+    var bandT = null, bandB = null;
+    function layoutFill() {
+      var f = def.fill, c = view.css; if (!f || !c.vw) return false;
+      if (!bandT) { bandT = document.createElement('div'); bandB = document.createElement('div'); bandT.className = bandB.className = 'eg-band'; wrap.insertBefore(bandB, cv); wrap.insertBefore(bandT, cv); }
+      var k = c.w / VW, side = 'linear-gradient(' + (f.top || g.theme.bg) + ',' + (typeof f.bottom === 'string' ? f.bottom : (f.bottomColor || g.theme.bg)) + ')';
+      wrap.style.background = c.x > 0 ? side : (f.top || g.theme.bg);
+      bandT.style.cssText = 'position:absolute;left:0;top:0;width:100%;height:' + (c.y + 1) + 'px;background:' + (f.top || g.theme.bg);
+      var bs = 'position:absolute;left:0;top:' + (c.y + c.h - 1) + 'px;width:100%;bottom:0;';
+      if (f.bottom && typeof f.bottom === 'object') { var t = f.bottom, sz = (t.size || 64) * k, oy = (((t.originY || 0) - VH) * k) % sz;
+        bs += 'background-color:' + (t.color || '#000') + ';background-image:' + (t.tint ? 'linear-gradient(' + t.tint + ',' + t.tint + '),' : '') + 'url(assets/' + t.tile + '.png);' +
+          'background-size:' + (t.tint ? '100% 100%,' : '') + sz + 'px ' + sz + 'px;background-repeat:' + (t.tint ? 'no-repeat,' : '') + 'repeat;' +
+          'background-position:' + (t.tint ? '0 0,' : '') + (c.x % sz) + 'px ' + (oy + 1) + 'px'; }
+      else bs += 'background:' + (f.bottom || g.theme.bg);
+      bandB.style.cssText = bs; return true;
+    }
     function fillEdges() {
       if (edgeTick++ % 60) return; var c = view.css; if (!c.vw) return;
+      if (def.fill) { if (edgeTick === 1) layoutFill(); return; }
       var sx = c.x > 0, sy = c.y > 0; if (!sx && !sy) { wrap.style.background = ''; return; }
       try {
         var e = edgeCv || (edgeCv = document.createElement('canvas')); e.width = 12; e.height = 4; var ec = e.getContext('2d', { willReadFrequently: true });

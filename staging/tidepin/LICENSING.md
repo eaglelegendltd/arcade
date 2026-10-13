@@ -49,3 +49,6 @@ Then run `build.sh` and delete `assets/demo_reskin/`.
 ## Tests
 - `node test-licensing-all.js`: 39 checks per game across all 10 games: tiers, client logo, https-only links, reskin keys, SOURCE, domains, app IDs, staging switch and badge, demo flag, logo taps, logo placement and safe area, canvas filling the viewport and following resizes.
 - `node test-licensing.js` (Tidepin detail), `test-stagingpath.js`, `test-appscheme.js` (file:/capacitor: rules), `test-shots.js` (STANDARD screenshots plus a logo/HUD overlap check).
+
+## Page title (round 7)
+`document.title` is `<Game> · Eagle Legend` only on STANDARD. WHITE_LABEL, ENTERPRISE_RESKIN and SOURCE show `config.clientTitle` if it is set, otherwise just the game title. The static `<title>` in index.html is now neutral (game name only), so nothing branded flashes before the JS runs. The not-licensed screen is neutral too: it shows the game title and "isn’t licensed for this site", and has no Eagle Legend text. Test: `test-lock.js`.
