@@ -1,0 +1,318 @@
+<!doctype html>
+<html lang="en"><head><script>window["__codeletBootstrap__"]=JSON.parse('{"A":"A","B":"20261013-02-665664f","C":{"Abril Fatface":"YACgEZbkUVE,0","Albert Sans":"YAHO2HRfeh4,0","Alfa Slab One":"YACgEYS9sJU,0","Anton":"YACgEcYqQ-A,0","Archivo Black":"YACgEZulLoA,0","Archivo":"YAHO2-t-jNE,0","Arial":"YAGyDvJ_4Ts,0","Baloo 2":"YAHO2IcQUcM,0","Barlow Condensed":"YAFdJljEuFc,0","Barlow":"YAFdJsyuOPM,1","Bebas Neue":"YACgESME5ew,0","Bricolage Grotesque":"YAFyMcdwzpc,0","Canva Sans":"YAFdJjTk5UU,1","Caveat":"YALBs2ploWQ,0","Cinzel":"YACgEeV8bIQ,0","Cormorant Garamond":"YAFdJhX-538,0","Courier New":"YAGzXiGs0_8,0","Courier Prime":"YAD1aFjegN8,0","DM Sans":"YAD1aU3sLnI,0","DM Serif Display":"YAD1aYG82rc,0","Figtree":"YAHO2b-mV7A,0","Forum":"YACgEcnnqB4,0","Fraunces":"YAFdJpU7Kkk,0","Fredoka":"YACgEZml080,0","Georgia":"YAGzXkO0pEM,0","Hanken Grotesk":"YAHO2VB9G0I,0","Helvetica":"YAFcf7zkXN0,0","IBM Plex Mono":"YAFdJkmvhGI,0","IBM Plex Sans":"YAFdJgT0SHI,0","Impact":"YAFcfnjI7Vk,0","Instrument Sans":"YAHO2bKyaSQ,0","Instrument Serif":"YAHFeOnZNEk,0","Inter":"YAFdJvSyp_k,3","Italiana":"YAHO2Toik_w,0","Jacques Francois":"YAHO2a5g66Q,0","JetBrains Mono":"YAFdJksXcAk,0","Josefin Sans":"YAFdJjvw9Ps,0","Karla":"YAHO2V2NSXM,0","Lato":"YAFdJuFCnaw,0","Libre Baskerville":"YACgEUFdPdA,0","Libre Caslon Display":"YAHO2XhLmt0,0","Lobster":"YAD8SnSjSFI,0","Lora":"YACgEXvxf8Q,0","Manrope":"YAHO2b2feC4,0","Merriweather":"YACgEXvHxxs,0","Montserrat":"YAFdtQi73Xs,0","Noto Sans JP":"YAFdJiHXlcI,0","Noto Sans KR":"YAGsojZj-RQ,0","Nunito Sans":"YAFdtQJYB9w,1","Nunito":"YAFdJoNRMmU,1","Oleo Script":"YACgEQQ14jI,0","Oswald":"YACgEQY10lw,0","Outfit":"YAHO2nVlg14,0","Pacifico":"YADLjORQ1u4,0","Playfair Display":"YAFdJhem5V8,1","Plus Jakarta Sans":"YAHO2gdhi18,0","Poppins":"YAFdJjbTu24,1","Press Start 2P":"YAFyGr-8pmQ,0","Public Sans":"YAFdJj8NdaU,1","Quicksand":"YAFdJpYtCxE,1","Raleway":"YAFdJhmxbVQ,1","Roboto Slab":"YAFdJswIKAg,0","Rockwell":"YAFcfyVZnN0,0","Rye":"YACgEdQP21k,0","Sarabun":"YAFdJssSnME,0","Schibsted Grotesk":"YAHO2sWydRk,0","Segoe UI":"YAHNdRD1Klw,0","Source Sans 3":"YAG4lO1Mj10,0","Space Grotesk":"YAHO2sjPCSM,0","Space Mono":"YADW1-vpsoc,0","Spectral":"YAHO2rVUHIM,0","Times New Roman":"YAGzXW3gftg,0","Trebuchet MS":"YAFcfrglpVA,0","Ubuntu":"YACgERDU--Q,0","Verdana":"YAGzXTctYtQ,0","Work Sans":"YAGXhLOKv44,0","Yellowtail":"YACgEYG4kG4,0"}}');</script><script src="/_sdk/05db820ba1544614.telemetry_sdk.js" integrity="sha512-a7JzkQDDcioSXpM61nxTfeRW7PcxWQy5+BrhyeTFmQFsXJ+Gncm0y50u7fTA7qOPegFnRgqCfa0mGUOK1yjDWQ=="></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tomato Bounce</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700;800&amp;family=Fraunces:opsz,wght@9..144,700;9..144,800;9..144,900&amp;display=swap" rel="stylesheet">
+  <style>
+    :root{--ink:#183038;--cream:#fff9df;--tomato:#ef493f;--tomato-dark:#bd272d;--leaf:#4fae2b;--leaf-dark:#26771f;--sun:#ffd54f}
+    *{box-sizing:border-box} html{background:#d6f2f4}
+    body{width:100%;min-height:100%;margin:0;color:var(--ink);font-family:"DM Sans",sans-serif;overflow-x:hidden}
+    button,a{-webkit-tap-highlight-color:transparent} button:focus-visible,a:focus-visible,canvas:focus-visible{outline:4px solid var(--ink);outline-offset:3px}
+    .game-shell{width:100%;min-height:calc(100 * min(var(--vh,1vh),1vh));position:relative;overflow:hidden;padding:20px;background:radial-gradient(circle at 16% 8%,rgba(255,255,255,.9) 0 4%,transparent 4.3%),radial-gradient(circle at 80% 14%,rgba(255,255,255,.7) 0 3.5%,transparent 3.8%),linear-gradient(180deg,#7ed7e8 0%,#d9f4f0 66%,#95ca63 66%,#70a64b 100%)}
+    .game-shell:before{content:"";position:absolute;inset:0;opacity:.12;pointer-events:none;background-image:repeating-linear-gradient(0deg,rgba(24,48,56,.28) 0 1px,transparent 1px 5px);mix-blend-mode:multiply}
+    .game-layout{width:100%;max-width:1060px;margin:0 auto;position:relative;z-index:1}
+    .brand-row{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:14px}
+    .brand-mark{display:flex;align-items:center;gap:10px;font-family:"Fraunces",serif;font-size:.95rem;font-weight:900;letter-spacing:.04em;color:var(--ink);text-transform:uppercase}
+    .brand-mark img{width:42px;height:34px;object-fit:contain;filter:drop-shadow(1px 2px 0 rgba(255,255,255,.55))}
+    .garden-tag{color:#24494f;background:rgba(255,249,223,.72);border:2px solid rgba(24,48,56,.48);border-radius:999px;padding:6px 11px;font-size:.72rem;font-weight:800;text-align:right}
+    .title-board{text-align:center;background:var(--cream);border:4px solid var(--ink);box-shadow:7px 7px 0 var(--ink);border-radius:20px;padding:14px 22px 16px;margin:0 auto 18px;max-width:650px;transform:rotate(-1deg)}
+    .title-board h1{margin:0;font-family:"Fraunces",serif;color:var(--tomato-dark);text-transform:uppercase;line-height:.9;letter-spacing:-.055em;text-shadow:2px 2px 0 #ffce53}
+    .title-board p{margin:8px 0 0;font-size:.78rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase}
+    .arcade-panel{background:var(--cream);border:4px solid var(--ink);border-radius:24px;box-shadow:10px 10px 0 rgba(24,48,56,.92);overflow:hidden}
+    .hud{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:11px;background:var(--leaf);border-bottom:4px solid var(--ink)}
+    .hud-card{color:var(--cream);text-align:center;border:2px solid rgba(24,48,56,.7);border-radius:10px;background:rgba(24,48,56,.18);padding:6px;min-width:0}
+    .hud-card span{display:block;font-size:.64rem;letter-spacing:.1em;font-weight:800;text-transform:uppercase}
+    .hud-card strong{display:block;margin-top:1px;font-size:1.15rem;line-height:1;font-weight:900}
+    .stage-wrap{position:relative;width:100%;background:#87ddec;touch-action:none;user-select:none}
+    canvas{display:block;width:100%;aspect-ratio:16/9;max-height:585px;background:#87ddec;cursor:grab}
+    canvas:active{cursor:grabbing}
+    .screen-overlay{position:absolute;inset:0;padding:18px;display:flex;align-items:center;justify-content:center;background:rgba(24,48,56,.38)}
+    .screen-overlay[hidden]{display:none}
+    .overlay-card{width:min(440px,96%);text-align:center;color:var(--ink);background:var(--cream);border:4px solid var(--ink);border-radius:18px;box-shadow:7px 7px 0 var(--ink);padding:22px}
+    .overlay-card h2{font-family:"Fraunces",serif;color:var(--tomato-dark);line-height:.98;margin:0;text-transform:uppercase}
+    .overlay-card p{margin:12px auto 16px;max-width:350px;font-size:.9rem;line-height:1.4;font-weight:700}
+    .swipe-demo{height:75px;position:relative;margin:5px auto 13px;border:2px solid var(--ink);border-radius:13px;background:#e0f4c8;overflow:hidden}
+    .swipe-track{position:absolute;left:16%;right:16%;top:36px;height:4px;border-radius:99px;background:rgba(24,48,56,.28)}
+    .swipe-arrow{position:absolute;left:18%;right:18%;top:28px;display:flex;justify-content:space-between;color:var(--leaf-dark)}
+    .swipe-finger{position:absolute;top:15px;left:calc(50% - 15px);width:30px;height:39px;color:var(--tomato-dark);animation:swipeFinger 1.8s ease-in-out infinite}
+    .swipe-finger svg{width:100%;height:100%;stroke-width:2.7}
+    @keyframes swipeFinger{0%,100%{transform:translateX(-78px) rotate(-8deg)}50%{transform:translateX(78px) rotate(8deg)}}
+    .swipe-note{margin:0 0 8px;font-size:.8rem;font-weight:900}
+    .fallback-note{margin:0 0 15px!important;font-size:.7rem!important;font-weight:700!important;color:#46656a}
+    .control-bar{display:grid;grid-template-columns:1fr 1fr;align-items:center;gap:10px;padding:12px;background:var(--cream)}
+    .action-button{display:inline-flex;align-items:center;justify-content:center;gap:7px;border:3px solid var(--ink);font-family:"DM Sans",sans-serif;font-weight:900;cursor:pointer;transition:transform .12s ease,box-shadow .12s ease,filter .12s ease;padding:9px 13px;border-radius:10px;box-shadow:3px 3px 0 var(--ink);font-size:.78rem}
+    .action-button:hover{filter:brightness(1.06)}.action-button:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--ink)}
+    .primary-button{background:var(--tomato);color:var(--cream)}.secondary-button{background:var(--sun);color:var(--ink)}.sound-button{background:#dbeecb;color:var(--ink)}
+    .status-line{min-height:23px;padding:0 12px 12px;color:#3c5e25;font-size:.78rem;text-align:center;font-weight:800}
+    footer{text-align:center;padding:18px 10px 4px;color:#173b42;font-size:.76rem;font-weight:700}
+    footer a{color:#173b42;text-decoration:underline;text-decoration-thickness:2px}.footer-note{display:block;margin-top:4px;font-size:.66rem;font-weight:500}
+    @media(max-width:560px){.game-shell{padding:11px}.brand-row{margin-bottom:10px}.garden-tag{font-size:.62rem}.title-board{padding:12px 14px;margin-bottom:13px}.title-board p{font-size:.63rem}.arcade-panel{border-width:3px;box-shadow:6px 6px 0 var(--ink)}.hud{padding:7px;gap:5px;border-bottom-width:3px}.hud-card{padding:5px 3px}.hud-card span{font-size:.53rem}.hud-card strong{font-size:.92rem}.overlay-card{padding:17px 13px;border-width:3px;box-shadow:5px 5px 0 var(--ink)}.overlay-card p{font-size:.78rem;margin:9px auto 12px}.swipe-demo{height:65px}.control-bar{gap:7px;padding:9px}.action-button{padding:8px 9px;font-size:.68rem}}
+  </style>
+  <script src="https://cdn.tailwindcss.com/3.4.17" type="text/javascript"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.577.0/dist/umd/lucide.min.js" type="text/javascript"></script>
+  <script src="/_sdk/570d53629f0b998d.data_sdk.js" type="text/javascript" integrity="sha512-JEN39+V+Nvv9ZZOVS8vNk1iA9ErZJHTdgOw9KzPuMiK7m0I+KPEr/wmTnCFIQVsDjCZgJWfGnFi1IQh2Io2qyA=="></script>
+  <script src="/_sdk/436edb4ed2a23f63.editing_sdk.js" type="text/javascript" integrity="sha512-eoa+TIswQfRWHNxDCBo3gFMWQv4guhxR8ijesoX484mbq829oRd+K0jVEzPbkgmTFRlpvrjhzJyXMMJkxWP4Zw=="></script>
+  <script src="/_sdk/f195026a424c1f85.resizing_sdk.js" type="text/javascript" integrity="sha512-8On4Z+AXh1abEzZJ9Dbn9wOvFg+k1LsAaAzKGQ7LlfgXajZ9xEmZaZ1QVzv0AWhCZtCsEpWSOG9DgLri06TS7A=="></script>
+ </head>
+ <body data-template-id="__page-root" style="background: linear-gradient(rgb(126, 215, 232), rgb(112, 166, 75));">
+  <div class="game-shell">
+   <div class="game-layout">
+    <header>
+     <div class="brand-row">
+      <div class="brand-mark">
+       <img data-template-id="eagle-legend-logo" class="canva-image" loading="lazy" src="assets/eagle-legend-logo.png" alt="Green Eagle Legend wing mark"> <span data-template-id="brand-name" class="canva-text" style="color: rgb(24, 48, 56); font-weight: 900; font-style: normal; font-size: 15px;">Eagle Legend</span>
+      </div><span data-template-id="garden-tag" class="garden-tag canva-tag" style="background: rgb(255, 249, 223); color: rgb(36, 73, 79); font-weight: 800; font-style: normal; font-size: 12px;">Garden arcade</span>
+     </div>
+     <section data-template-id="title-board" class="title-board canva-banner" aria-labelledby="game-title" style="background: rgb(255, 249, 223);">
+      <h1 data-template-id="game-title" class="canva-text" style="color: rgb(189, 39, 45); font-weight: 900; font-style: normal; font-size: 32px;">Tomato Bounce</h1>
+      <p data-template-id="game-subtitle" class="canva-text" style="color: rgb(24, 48, 56); font-weight: 800; font-style: normal; font-size: 13px; letter-spacing: 0.08rem;">Garden-arcade tomato mayhem</p>
+     </section>
+    </header>
+    <main>
+     <section data-template-id="arcade-panel" class="arcade-panel canva-panel" aria-label="Tomato Bounce arcade game" style="background: rgb(255, 249, 223);">
+      <div class="hud" aria-label="Game score board">
+       <div class="hud-card"><span data-template-id="score-label" class="canva-text" style="color: rgb(255, 249, 223); font-weight: 800; font-style: normal; font-size: 11px;">Score</span><strong id="score-value" aria-live="polite">0000</strong>
+       </div>
+       <div class="hud-card"><span data-template-id="harvest-label" class="canva-text" style="color: rgb(255, 249, 223); font-weight: 800; font-style: normal; font-size: 11px;">Harvest</span><strong id="harvest-value" aria-live="polite">0 / 12</strong>
+       </div>
+       <div class="hud-card"><span data-template-id="chances-label" class="canva-text" style="color: rgb(255, 249, 223); font-weight: 800; font-style: normal; font-size: 11px;">Chances</span><strong id="lives-value" aria-live="polite">♥ ♥ ♥</strong>
+       </div>
+      </div>
+      <div id="stage-wrap" class="stage-wrap">
+       <canvas id="game-canvas" aria-label="Tomato Bounce play field. Swipe left or right to move the garden paddle and bounce the tomato." tabindex="0"></canvas>
+       <div id="start-screen" class="screen-overlay">
+        <div class="overlay-card">
+         <h2 data-template-id="start-heading" class="canva-text" style="color: rgb(189, 39, 45); font-weight: 900; font-style: normal; font-size: 24px;">Swipe to bounce the tomato</h2>
+         <p data-template-id="start-copy" class="canva-text" style="color: rgb(24, 48, 56); font-weight: 700; font-style: normal; font-size: 15px; line-height: 1.4;">Swipe left or right to move the tomato and keep it bouncing. Collect suns and survive as long as you can.</p>
+         <div class="swipe-demo" aria-hidden="true">
+          <div class="swipe-track"></div>
+          <div class="swipe-arrow"><i data-lucide="arrow-left"></i><i data-lucide="arrow-right"></i>
+          </div>
+          <div class="swipe-finger"><i data-lucide="hand"></i>
+          </div>
+         </div>
+         <p data-template-id="button-note" class="swipe-note canva-text" style="color: rgb(24, 48, 56); font-weight: 900; font-style: normal; font-size: 13px;">Buttons are not used for gameplay.</p>
+         <p data-template-id="fallback-note" class="fallback-note canva-text" style="color: rgb(70, 101, 106); font-weight: 700; font-style: normal; font-size: 11px;">Keyboard arrows are an optional alternative.</p><button id="start-button" data-template-id="start-button" class="action-button primary-button canva-button" type="button" style="background: rgb(239, 73, 63); color: rgb(255, 249, 223); font-weight: 900; font-style: normal; font-size: 15px;">Start Game</button>
+        </div>
+       </div>
+       <div id="pause-screen" class="screen-overlay" hidden="">
+        <div class="overlay-card">
+         <h2 data-template-id="pause-heading" class="canva-text" style="color: rgb(189, 39, 45); font-weight: 900; font-style: normal; font-size: 24px;">Garden break</h2>
+         <p data-template-id="pause-copy" class="canva-text" style="color: rgb(24, 48, 56); font-weight: 700; font-style: normal; font-size: 15px;">The tomato is taking a breather. Resume when your swipe hand is ready.</p><button id="resume-button" data-template-id="resume-button" class="action-button secondary-button canva-button" type="button" style="background: rgb(255, 213, 79); color: rgb(24, 48, 56); font-weight: 900; font-style: normal; font-size: 15px;">Resume</button>
+        </div>
+       </div>
+       <div id="gameover-screen" class="screen-overlay" hidden="">
+        <div class="overlay-card">
+         <h2 data-template-id="gameover-heading" class="canva-text" style="color: rgb(189, 39, 45); font-weight: 900; font-style: normal; font-size: 24px;">Splat!</h2>
+         <p data-template-id="gameover-copy" class="canva-text" style="color: rgb(24, 48, 56); font-weight: 700; font-style: normal; font-size: 15px;">The tomato rolled into the soil. Give the garden another bounce!</p><button id="replay-button" data-template-id="replay-button" class="action-button primary-button canva-button" type="button" style="background: rgb(239, 73, 63); color: rgb(255, 249, 223); font-weight: 900; font-style: normal; font-size: 15px;">Try again</button>
+        </div>
+       </div>
+       <div id="win-screen" class="screen-overlay" hidden="">
+        <div class="overlay-card">
+         <h2 data-template-id="win-heading" class="canva-text" style="color: rgb(189, 39, 45); font-weight: 900; font-style: normal; font-size: 24px;">Harvest hero!</h2>
+         <p data-template-id="win-copy" class="canva-text" style="color: rgb(24, 48, 56); font-weight: 700; font-style: normal; font-size: 15px;">You gathered every sun token and made this tomato the pride of the patch!</p><button id="harvest-again-button" data-template-id="harvest-again-button" class="action-button primary-button canva-button" type="button" style="background: rgb(239, 73, 63); color: rgb(255, 249, 223); font-weight: 900; font-style: normal; font-size: 15px;">Play again</button>
+        </div>
+       </div>
+      </div>
+      <div class="control-bar">
+       <button id="restart-button" data-template-id="restart-button" class="action-button secondary-button canva-button" type="button" style="background: rgb(255, 213, 79); color: rgb(24, 48, 56);"> <i data-lucide="rotate-ccw" aria-hidden="true" width="15"></i><span data-template-id="restart-button-text" class="canva-text" style="color: rgb(24, 48, 56); font-weight: 900; font-style: normal; font-size: 13px;">Restart</span> </button> <button id="mute-button" data-template-id="mute-button" class="action-button sound-button canva-button" type="button" aria-label="Mute sound" style="background: rgb(219, 238, 203); color: rgb(24, 48, 56);"> <span id="sound-icon-slot"><i data-lucide="volume-2" aria-hidden="true" width="15"></i></span><span data-template-id="sound-button-text" class="canva-text" style="color: rgb(24, 48, 56); font-weight: 900; font-style: normal; font-size: 13px;">Sound</span> </button>
+      </div>
+      <div id="status-line" class="status-line" aria-live="polite"></div>
+     </section>
+    </main>
+    <footer>
+     <a data-template-id="footer-link" class="canva-link" href="https://www.eaglelegend.com" target="_blank" rel="noopener noreferrer" style="color: rgb(23, 59, 66); font-weight: 700; font-style: normal; font-size: 12px;">Eagle Legend • www.eaglelegend.com</a> <span data-template-id="footer-note" class="footer-note canva-text" style="color: rgb(23, 59, 66); font-weight: 500; font-style: normal; font-size: 11px;">A cheerful garden arcade game.</span>
+    </footer>
+   </div>
+  </div>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      lucide.createIcons();
+
+      const canvas = document.getElementById("game-canvas");
+      const ctx = canvas.getContext("2d");
+      const stage = document.getElementById("stage-wrap");
+      const startScreen = document.getElementById("start-screen");
+      const pauseScreen = document.getElementById("pause-screen");
+      const gameoverScreen = document.getElementById("gameover-screen");
+      const winScreen = document.getElementById("win-screen");
+      const scoreValue = document.getElementById("score-value");
+      const harvestValue = document.getElementById("harvest-value");
+      const livesValue = document.getElementById("lives-value");
+      const statusLine = document.getElementById("status-line");
+      const muteButton = document.getElementById("mute-button");
+      const soundIconSlot = document.getElementById("sound-icon-slot");
+
+      let W=960,H=540,state="start",score=0,harvest=0,lives=3,lastTime=0,spawnTimer=0,muted=false,audioContext=null,particles=[],difficulty=0;
+      const basePaddleWidth=145;
+      const keys={left:false,right:false};
+      const paddle={x:480,y:492,w:145,h:23,speed:570};
+      const tomato={x:480,y:445,r:22,vx:260,vy:-330,attached:true,squash:0,expression:"happy",expressionTimer:0,blink:0};
+      let sun={x:720,y:160,r:16,active:true,pulse:0};
+      let swipe={active:false,lastX:0};
+
+      function resizeCanvas(){
+        const rect=stage.getBoundingClientRect(),dpr=Math.min(window.devicePixelRatio||1,2);
+        canvas.width=Math.floor(rect.width*dpr);canvas.height=Math.floor(rect.width*9/16*dpr);
+        canvas.style.height=`${rect.width*9/16}px`;
+        ctx.setTransform(canvas.width/W,0,0,canvas.height/H,0,0);
+      }
+      function setStatus(message){statusLine.textContent=message}
+      function updateHud(){scoreValue.textContent=String(score).padStart(4,"0");harvestValue.textContent=String(harvest);livesValue.textContent="♥ ".repeat(lives).trim()||"—"}
+      function setExpression(name,duration=.45){tomato.expression=name;tomato.expressionTimer=duration}
+      function getAudio(){if(!audioContext)audioContext=new(window.AudioContext||window.webkitAudioContext)();if(audioContext.state==="suspended")audioContext.resume();return audioContext}
+      function sound(type){
+        if(muted)return;
+        const ac=getAudio(),osc=ac.createOscillator(),gain=ac.createGain(),now=ac.currentTime;
+        const tones={bounce:[190,290,"triangle",.055],collect:[480,860,"sine",.08],miss:[180,76,"sawtooth",.14],win:[392,784,"triangle",.25],click:[280,420,"square",.05]};
+        const [start,end,wave,duration]=tones[type];
+        osc.type=wave;osc.frequency.setValueAtTime(start,now);osc.frequency.exponentialRampToValueAtTime(end,now+duration);
+        gain.gain.setValueAtTime(.075,now);gain.gain.exponentialRampToValueAtTime(.001,now+duration);
+        osc.connect(gain).connect(ac.destination);osc.start(now);osc.stop(now+duration);
+      }
+      function resetRound(){
+        paddle.w=Math.max(108,basePaddleWidth-difficulty*1.35);paddle.x=W/2;tomato.x=paddle.x;tomato.y=paddle.y-32;
+        const speedScale=1+Math.min(.9,difficulty*.045);tomato.vx=(Math.random()>.5?1:-1)*250*speedScale;tomato.vy=-345*speedScale;
+        tomato.attached=true;tomato.squash=0;setExpression("happy",1.5);
+      }
+      function resetGame(){score=0;harvest=0;lives=3;difficulty=0;particles=[];spawnTimer=0;sun={x:660,y:150,r:16,active:true,pulse:0};resetRound();updateHud()}
+      function beginGame(){
+        getAudio();resetGame();state="playing";startScreen.hidden=true;pauseScreen.hidden=true;gameoverScreen.hidden=true;winScreen.hidden=true;
+        setStatus("Swipe across the garden to guide the tomato.");sound("click");canvas.focus();
+      }
+      function launch(){if(state==="playing"&&tomato.attached){tomato.attached=false;setExpression("delighted",.5);sound("bounce");setStatus("Tomato launched!")}}
+      function togglePause(){
+        if(state==="playing"){state="paused";pauseScreen.hidden=false;setStatus("Game paused.")}
+        else if(state==="paused"){state="playing";pauseScreen.hidden=true;setStatus("Back to the garden!")}
+      }
+      function endGame(won){
+        state=won?"won":"gameover";
+        if(won){setExpression("delighted",2);winScreen.hidden=false;setStatus(`Harvest complete! Final score: ${score}.`);sound("win")}
+        else{setExpression("dizzy",2);gameoverScreen.hidden=false;setStatus(`The garden needs another try. Final score: ${score}.`);sound("miss")}
+      }
+      function burst(x,y,color,count){for(let i=0;i<count;i++){const a=Math.random()*Math.PI*2,s=55+Math.random()*180;particles.push({x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s-25,life:.45+Math.random()*.45,maxLife:.9,color,size:3+Math.random()*5})}}
+      function collectSun(){
+        score+=125+Math.floor(difficulty*8);harvest++;difficulty++;sun.active=false;spawnTimer=Math.max(.28,.7-difficulty*.012);setExpression("delighted",.8);burst(sun.x,sun.y,"#ffd54f",20);sound("collect");updateHud();
+        tomato.vx*=1.018;tomato.vy*=1.012;setStatus(`Sunshine collected! ${harvest} gathered — keep going!`);
+      }
+      function respawnSun(){sun.x=95+Math.random()*(W-190);sun.y=85+Math.random()*235;sun.active=true;sun.pulse=0}
+      function loseTomato(){
+        lives--;setExpression("dizzy",1.1);updateHud();burst(tomato.x,H-35,"#ef493f",15);
+        if(lives<=0)endGame(false);else{resetRound();setStatus(`Oops! ${lives} chance${lives===1?"":"s"} left. Swipe to launch again.`);sound("miss")}
+      }
+      function update(dt){
+        if(state!=="playing")return;
+        let move=0;if(keys.left)move--;if(keys.right)move++;
+        paddle.x+=move*paddle.speed*dt;paddle.x=Math.max(paddle.w/2+18,Math.min(W-paddle.w/2-18,paddle.x));
+        tomato.blink+=dt;
+        if(tomato.expressionTimer>0)tomato.expressionTimer-=dt;
+        if(tomato.attached){tomato.x+=(paddle.x-tomato.x)*Math.min(1,dt*15);tomato.y=paddle.y-32}
+        else{
+          tomato.x+=tomato.vx*dt;tomato.y+=tomato.vy*dt;tomato.vy+=(570+Math.min(260,difficulty*9))*dt;tomato.squash=Math.max(0,tomato.squash-dt*5);
+          if(tomato.expressionTimer<=0){
+            if(tomato.vy>175&&tomato.y>H*.62)setExpression("worried",.18);
+            else if(Math.abs(tomato.vx)>315)setExpression("focused",.18);
+            else if(tomato.vy<0)setExpression("happy",.18);
+          }
+          if(tomato.x-tomato.r<13){tomato.x=tomato.r+13;tomato.vx=Math.abs(tomato.vx);tomato.squash=.32;setExpression("surprised",.25);sound("bounce")}
+          if(tomato.x+tomato.r>W-13){tomato.x=W-tomato.r-13;tomato.vx=-Math.abs(tomato.vx);tomato.squash=.32;setExpression("surprised",.25);sound("bounce")}
+          if(tomato.y-tomato.r<13){tomato.y=tomato.r+13;tomato.vy=Math.abs(tomato.vy);tomato.squash=.32;setExpression("surprised",.25);sound("bounce")}
+          const onPaddle=tomato.vy>0&&tomato.y+tomato.r>=paddle.y-paddle.h/2&&tomato.y-tomato.r<=paddle.y+paddle.h/2&&tomato.x>=paddle.x-paddle.w/2-tomato.r&&tomato.x<=paddle.x+paddle.w/2+tomato.r;
+          if(onPaddle){
+            tomato.y=paddle.y-paddle.h/2-tomato.r;const impact=(tomato.x-paddle.x)/(paddle.w/2);
+            tomato.vx=impact*390+move*110;tomato.vy=-Math.max(325,Math.abs(tomato.vy)*1.025);tomato.squash=.75;setExpression("delighted",.45);
+            score+=10;burst(tomato.x,tomato.y+tomato.r,"#f7d47b",7);sound("bounce");updateHud();
+          }
+          if(tomato.y-tomato.r>H+18)loseTomato();
+          if(sun.active){sun.pulse+=dt*4;const dx=tomato.x-sun.x,dy=tomato.y-sun.y;if(Math.hypot(dx,dy)<tomato.r+sun.r+3)collectSun()}
+        }
+        if(!sun.active&&state==="playing"){spawnTimer-=dt;if(spawnTimer<=0)respawnSun()}
+        particles=particles.filter(p=>{p.life-=dt;p.x+=p.vx*dt;p.y+=p.vy*dt;p.vy+=230*dt;return p.life>0});
+      }
+      function roundedRect(x,y,w,h,r){ctx.beginPath();ctx.roundRect(x,y,w,h,r)}
+      function drawCloud(x,y,s){ctx.fillStyle="rgba(255,255,255,.78)";ctx.beginPath();ctx.arc(x,y,18*s,0,Math.PI*2);ctx.arc(x+23*s,y-10*s,25*s,0,Math.PI*2);ctx.arc(x+50*s,y,18*s,0,Math.PI*2);ctx.fill()}
+      function drawBackground(){
+        const sky=ctx.createLinearGradient(0,0,0,H);sky.addColorStop(0,"#79d6e7");sky.addColorStop(.67,"#def7e9");sky.addColorStop(.671,"#91c960");sky.addColorStop(1,"#638e40");ctx.fillStyle=sky;ctx.fillRect(0,0,W,H);
+        drawCloud(102,87,1);drawCloud(704,92,.8);drawCloud(445,54,.45);
+        ctx.fillStyle="#67ac58";ctx.beginPath();ctx.moveTo(0,333);ctx.quadraticCurveTo(120,245,245,330);ctx.quadraticCurveTo(410,220,560,330);ctx.quadraticCurveTo(700,260,960,323);ctx.lineTo(960,390);ctx.lineTo(0,390);ctx.fill();
+        ctx.fillStyle="#7dc058";ctx.beginPath();ctx.moveTo(0,372);ctx.quadraticCurveTo(150,298,292,371);ctx.quadraticCurveTo(480,275,665,371);ctx.quadraticCurveTo(790,312,960,365);ctx.lineTo(960,420);ctx.lineTo(0,420);ctx.fill();
+        ctx.fillStyle="#94512d";ctx.fillRect(0,H-65,W,65);
+        for(let i=0;i<34;i++){ctx.fillStyle=i%2?"rgba(73,42,28,.35)":"rgba(255,203,112,.23)";ctx.fillRect((i*43+15)%W,H-48+(i%3)*11,20,4)}
+        for(let x=36;x<W;x+=98){ctx.strokeStyle="#2d7b27";ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(x,H-66);ctx.quadraticCurveTo(x+1,H-90,x+12,H-102);ctx.stroke();ctx.fillStyle="#ffd451";ctx.beginPath();ctx.arc(x+15,H-106,7,0,Math.PI*2);ctx.fill()}
+      }
+      function drawSun(){
+        if(!sun.active)return;const pulse=1+Math.sin(sun.pulse)*.08;ctx.save();ctx.translate(sun.x,sun.y);ctx.scale(pulse,pulse);ctx.strokeStyle="#f5a524";ctx.lineWidth=4;
+        for(let i=0;i<8;i++){ctx.rotate(Math.PI/4);ctx.beginPath();ctx.moveTo(0,-25);ctx.lineTo(0,-34);ctx.stroke()}
+        ctx.fillStyle="#ffd54f";ctx.strokeStyle="#82421d";ctx.lineWidth=3;ctx.beginPath();ctx.arc(0,0,sun.r,0,Math.PI*2);ctx.fill();ctx.stroke();
+        ctx.fillStyle="#82421d";ctx.beginPath();ctx.arc(-5,-2,2,0,Math.PI*2);ctx.arc(5,-2,2,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.arc(0,3,6,0,Math.PI);ctx.stroke();ctx.restore();
+      }
+      function drawPaddle(){
+        ctx.save();ctx.translate(paddle.x,paddle.y);ctx.fillStyle="#225e2b";roundedRect(-paddle.w/2,-paddle.h/2+4,paddle.w,paddle.h,9);ctx.fill();ctx.strokeStyle="#183038";ctx.lineWidth=4;ctx.stroke();
+        ctx.fillStyle="#64b944";roundedRect(-paddle.w/2+7,-paddle.h/2-3,paddle.w-14,paddle.h-7,8);ctx.fill();ctx.stroke();
+        for(let i=-45;i<=45;i+=30){ctx.strokeStyle="rgba(24,48,56,.35)";ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(i,-7);ctx.lineTo(i-7,7);ctx.stroke()}ctx.restore();
+      }
+      function drawEye(x,y,state){
+        ctx.fillStyle="#fff";ctx.strokeStyle="#183038";ctx.lineWidth=1.8;
+        if(state==="dizzy"){ctx.strokeStyle="#183038";ctx.lineWidth=2.4;ctx.beginPath();ctx.moveTo(x-4,y-4);ctx.lineTo(x+4,y+4);ctx.moveTo(x+4,y-4);ctx.lineTo(x-4,y+4);ctx.stroke();return}
+        if(tomato.blink%3.7<.1){ctx.beginPath();ctx.moveTo(x-4,y);ctx.lineTo(x+4,y);ctx.stroke();return}
+        const tall=state==="surprised"||state==="worried"?7:5.5;ctx.beginPath();ctx.ellipse(x,y,4.8,tall,0,0,Math.PI*2);ctx.fill();ctx.stroke();ctx.fillStyle="#183038";ctx.beginPath();ctx.arc(x+(state==="focused"?1:0),y+1,2.3,0,Math.PI*2);ctx.fill();
+      }
+      function drawTomato(){
+        const stretch=tomato.squash,face=tomato.expression;ctx.save();ctx.translate(tomato.x,tomato.y);ctx.scale(1+stretch*.17,1-stretch*.12);
+        ctx.fillStyle="#bd272d";ctx.beginPath();ctx.ellipse(2,4,tomato.r,tomato.r*.93,0,0,Math.PI*2);ctx.fill();
+        const red=ctx.createRadialGradient(-8,-10,3,0,0,tomato.r+4);red.addColorStop(0,"#ff8170");red.addColorStop(.38,"#ef493f");red.addColorStop(1,"#bd272d");
+        ctx.fillStyle=red;ctx.strokeStyle="#183038";ctx.lineWidth=3.5;ctx.beginPath();ctx.ellipse(0,0,tomato.r,tomato.r*.93,0,0,Math.PI*2);ctx.fill();ctx.stroke();
+        ctx.fillStyle="#3e9f29";ctx.beginPath();ctx.moveTo(-4,-tomato.r+3);ctx.lineTo(-14,-tomato.r-9);ctx.lineTo(-2,-tomato.r-4);ctx.lineTo(1,-tomato.r-15);ctx.lineTo(6,-tomato.r-4);ctx.lineTo(18,-tomato.r-9);ctx.lineTo(9,-tomato.r+4);ctx.closePath();ctx.fill();ctx.stroke();
+        if(face==="focused"){ctx.strokeStyle="#183038";ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(-13,-5);ctx.lineTo(-4,-2);ctx.moveTo(13,-5);ctx.lineTo(4,-2);ctx.stroke()}
+        if(face==="worried"){ctx.strokeStyle="#183038";ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(-12,-3);ctx.quadraticCurveTo(-7,-8,-3,-3);ctx.moveTo(3,-3);ctx.quadraticCurveTo(7,-8,12,-3);ctx.stroke()}
+        drawEye(-7,1,face);drawEye(7,1,face);
+        ctx.strokeStyle="#183038";ctx.fillStyle="#183038";ctx.lineWidth=2.3;
+        if(face==="surprised"||face==="worried"){ctx.beginPath();ctx.ellipse(0,9,face==="surprised"?5.4:4.2,face==="surprised"?6:4.8,0,0,Math.PI*2);face==="surprised"?ctx.fill():ctx.stroke()}
+        else if(face==="dizzy"){ctx.beginPath();ctx.arc(0,9,6,0,Math.PI*2);ctx.stroke();ctx.beginPath();ctx.moveTo(-2,7);ctx.lineTo(2,11);ctx.moveTo(2,7);ctx.lineTo(-2,11);ctx.stroke()}
+        else if(face==="focused"){ctx.beginPath();ctx.moveTo(-6,10);ctx.lineTo(6,10);ctx.stroke()}
+        else{ctx.beginPath();ctx.arc(0,6,7,.15,Math.PI-.15);ctx.stroke()}
+        if(face==="delighted"){ctx.fillStyle="#ffb0a3";ctx.beginPath();ctx.arc(-13,8,3,0,Math.PI*2);ctx.arc(13,8,3,0,Math.PI*2);ctx.fill()}
+        ctx.fillStyle="rgba(255,255,255,.72)";ctx.beginPath();ctx.ellipse(-9,-10,5,8,-.5,0,Math.PI*2);ctx.fill();ctx.restore();
+      }
+      function drawParticles(){particles.forEach(p=>{ctx.globalAlpha=Math.max(0,p.life/p.maxLife);ctx.fillStyle=p.color;ctx.fillRect(p.x-p.size/2,p.y-p.size/2,p.size,p.size)});ctx.globalAlpha=1}
+      function draw(){drawBackground();drawSun();drawPaddle();drawTomato();drawParticles();ctx.fillStyle="rgba(24,48,56,.08)";for(let y=0;y<H;y+=5)ctx.fillRect(0,y,W,1)}
+      function loop(timestamp){const dt=Math.min(.033,(timestamp-lastTime)/1000||0);lastTime=timestamp;update(dt);draw();requestAnimationFrame(loop)}
+
+      function moveWithSwipe(clientX){
+        const rect=canvas.getBoundingClientRect(),delta=((clientX-swipe.lastX)/rect.width)*W;
+        paddle.x=Math.max(paddle.w/2+18,Math.min(W-paddle.w/2-18,paddle.x+delta));
+        swipe.lastX=clientX;
+        if(state==="playing"&&tomato.attached)launch();
+      }
+
+      document.getElementById("start-button").addEventListener("click",beginGame);
+      document.getElementById("resume-button").addEventListener("click",togglePause);
+      document.getElementById("replay-button").addEventListener("click",beginGame);
+      document.getElementById("harvest-again-button").addEventListener("click",beginGame);
+      document.getElementById("restart-button").addEventListener("click",beginGame);
+
+      muteButton.addEventListener("click",()=>{
+        muted=!muted;muteButton.setAttribute("aria-label",muted?"Unmute sound":"Mute sound");
+        soundIconSlot.innerHTML=`<i data-lucide="${muted?"volume-x":"volume-2"}" aria-hidden="true" width="15"></i>`;
+        lucide.createIcons();setStatus(muted?"Sound muted.":"Sound on.");if(!muted)sound("click");
+      });
+
+      canvas.addEventListener("pointerdown",event=>{canvas.setPointerCapture(event.pointerId);swipe.active=true;swipe.lastX=event.clientX});
+      canvas.addEventListener("pointermove",event=>{if(swipe.active)moveWithSwipe(event.clientX)});
+      canvas.addEventListener("pointerup",()=>{swipe.active=false});
+      canvas.addEventListener("pointercancel",()=>{swipe.active=false});
+
+      window.addEventListener("keydown",event=>{
+        if(["ArrowLeft","ArrowRight"," ","a","A","d","D"].includes(event.key))event.preventDefault();
+        if(event.key==="ArrowLeft"||event.key==="a"||event.key==="A")keys.left=true;
+        if(event.key==="ArrowRight"||event.key==="d"||event.key==="D")keys.right=true;
+        if(event.key===" "){if(state==="start")beginGame();else if(state==="playing"&&tomato.attached)launch();else if(state==="playing"||state==="paused")togglePause()}
+      });
+      window.addEventListener("keyup",event=>{if(event.key==="ArrowLeft"||event.key==="a"||event.key==="A")keys.left=false;if(event.key==="ArrowRight"||event.key==="d"||event.key==="D")keys.right=false});
+      window.addEventListener("resize",resizeCanvas);
+      resizeCanvas();resetGame();updateHud();draw();requestAnimationFrame(loop);
+    });
+  </script>
+ 
+</body></html>
