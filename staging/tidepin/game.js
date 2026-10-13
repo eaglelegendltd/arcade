@@ -40,7 +40,7 @@ var PERFECT = 0.14, GOOD = 0.3, COVER = 0.62, HURT_COOL = 0.8; // HURT_COOL: s a
 
 function strike(g) {
   var D = g.data; if (D.breaking >= 0 || D.cool > 0) return;
-  D.swing = 1; D.cool = coolFor(g); waterDrop(PINX, D.tide > COVER ? 1.4 : 0.7, 0.07); g.sfx('hammer', null, 'jump'); g.vibrate(8); sand(g, 5); g.shake(2);
+  D.swing = 1; D.cool = coolFor(g); g.sfx('hammer', null, 'jump'); g.vibrate(8); sand(g, 5); g.shake(2);
   var h = D.tide, j; D.tried = true; // any strike this cycle counts as an attempt (no extra 'missed low tide' on top)
   if (h > COVER) { j = 'underwater'; damage(g, 1, 'UNDERWATER −1'); g.sfx('waterImpact', 0.9, 'hit'); splash(g, 10); }
   else if (D.struck) { j = 'double'; damage(g, 1, 'TOO MANY −1'); }
@@ -73,7 +73,7 @@ function update(g, dt) { g.dt = dt;
   var cyc = D.ph % 1;
   // new low-tide window opens after each high tide
   if (D.tide > COVER) { D.struck = false; if (D.ph % 1 > 0.25 && D.ph % 1 < 0.75) D.tried = false; }
-  if (D.tide > 0.97 && !D.peakDone) { D.peakDone = true; g.sfx('waterImpact', 0.3); D.splashT = 0; D.wave = 0; waterDrop(PINX, 1.0, 0.12); splash(g, 6); }
+  if (D.tide > 0.97 && !D.peakDone) { D.peakDone = true; g.sfx('waterImpact', 0.3); D.splashT = 0; D.wave = 0; splash(g, 6); }
   if (D.tide < 0.5) D.peakDone = false;
   // a low tide that passes with no strike loosens the pin (pressure to act every cycle). Grace: first 2 cycles.
   if (D.tide <= GOOD && cyc > 0.5) D.troughSeen = true;
@@ -99,8 +99,7 @@ function draw(g, c) {
   if (D.splashT >= 0) { if (g.art.splash_sheet) g.frame('splash_sheet', Math.min(5, D.splashT * 12 | 0), 0, 6, 1, PINX, ZONE_Y + 4 + D.depth * 10, 96, 96); else splashRing(g, c, D.splashT); }
   // water: level from below ground (low) to over the target zone (high)
   var lowY = GROUND + 28, highY = TIDE_MAX_Y, wy = lowY + (highY - lowY) * D.tide, bob = g.reducedMotion ? 0 : Math.sin(g.t * 3) * 2;
-  var wgl = waterGL(g);
-  if (!(wgl && wgl.render(c, { surfaceY: wy + bob, groundY: GROUND, t: g.t, dt: g.dt || 1 / 60 }))) { // visual only; 2D fallback below
+  { // 2D water
   c.fillStyle = 'rgba(52,130,210,.55)'; c.fillRect(0, wy + bob, 360, 660 - wy) /* past the bottom edge: no untinted sub-pixel row (tan seam) */;
   c.fillStyle = 'rgba(220,240,255,.7)'; c.fillRect(0, wy + bob - 2, 360, 3);
   if (g.art.wave) { var off = (g.t * 40) % 36; for (var x = -36 + off; x < 360; x += 36) c.drawImage(g.art.wave, x, wy + bob - 26, 36, 36); }
@@ -156,20 +155,6 @@ function splashRing(g, c, t) { var k = t / 0.5; c.globalAlpha = Math.max(0, 0.7 
 // y=430 (y1290) = GROUND. The animated water rises from below GROUND to TIDE_MAX_Y.
 var TIDE_MAX_Y = 320;
 
-// ---------------- WebGL water (prototype, visual only) ----------------
-// Flag: TIDEPIN_WATER = '2d' (default) | 'gl' | 'auto'. Set window.TIDEPIN_WATER before game.js, or ?water=gl|2d|auto.
-// 'gl'/'auto' use water-gl.js when WebGL works; anything else (no WebGL, context loss, reduced motion, too slow) -> 2D water.
-var TIDEPIN_WATER = (function () { var m = /[?&]water=(gl|2d|auto)\b/i.exec(location.search); return String((m && m[1]) || window.TIDEPIN_WATER || '2d').toLowerCase(); })();
-var waterState = { tried: false, w: null };
-function waterGL(g) {
-  if (TIDEPIN_WATER === '2d' || g.reducedMotion || !window.WaterGL) return null;
-  if (!waterState.tried && g.art.beach) { waterState.tried = true;
-    var tm = /[?&]waterTier=(high|med|low)\b/.exec(location.search);
-    waterState.w = WaterGL.create({ sand: g.art.beach, sky: '#d8f0fb', deep: '#3482d2', reduceMotion: g.reducedMotion, tier: tm ? tm[1] : null, lockTier: !!tm, frameMs: function () { return (g.dt || 1 / 60) * 1000; } });
-    window.__tidepinWater = waterState.w; }
-  var w = waterState.w; return w && w.active ? w : null;
-}
-function waterDrop(x, k, r) { var w = waterState.w; if (w && w.active) w.drop(x / 360, k, r); }
 function drawGround(g, c) {
   var top = GROUND, hh = 640 - top;
   if ((!groundCanvas || groundCanvas.top !== top) && g.art.beach) { groundCanvas = document.createElement('canvas'); groundCanvas.top = top; groundCanvas.width = 720; groundCanvas.height = hh * 2; var gc = groundCanvas.getContext('2d'); gc.scale(2, 2);

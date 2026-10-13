@@ -1,4 +1,4 @@
-/* Eagle Legend game bridge + tiny one-touch runtime. No deps, no network.
+/* Game bridge + tiny one-touch runtime. No deps, no network.
    Protocol: see PROTOCOL.md. Usage: EagleGame.run({ id, title, init, update, draw, down, up, music }) */
 (function (W) {
   'use strict';
@@ -30,7 +30,8 @@
     // compat: the site theme listens only for { type:'el-score', value:<number> } (theme_with_consent.xml ~4945)
     if (event === 'score' || event === 'gameover' || event === 'start') {
       var el = { type: 'el-score', value: g.score | 0, game: this.game, event: event };
-      W.__eagleLog.push(el); if (W.parent && W.parent !== W) W.parent.postMessage(el, '*');
+      // logged only in __elLog, so __eagleLog stays native-only (tests count events like 'gameover' there)
+      (W.__elLog = W.__elLog || []).push(el); if (W.parent && W.parent !== W) W.parent.postMessage(el, '*');
     }
   };
 
