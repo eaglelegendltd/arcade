@@ -1,5 +1,5 @@
 # Tidepin: STAGING / DEMO build (not for production)
-This is a copy of /workspace/batch1/tidepin (Tidepin v3). It is local and uncommitted.
+This is a copy of /workspace/batch1/tidepin (Tidepin v3 with the shared eagle-license.js + eagle-bridge.js; assets/_v1 and _v2 excluded). It is local and uncommitted.
 
 **Demo tier switch:** `index.html?tier=STANDARD|WHITE_LABEL|ENTERPRISE_RESKIN|SOURCE` changes the licence tier, for staging/demo only. It works only on localhost/127.0.0.1 and only while `EAGLE_CONFIG.demoTierSwitch` is `true`. The ENTERPRISE_RESKIN demo uses `assets/demo_reskin/`, which holds hue-shifted DEMO art and is not licensee art.
 

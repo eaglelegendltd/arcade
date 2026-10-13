@@ -7,7 +7,7 @@
     dark:  { bg: '#10141f', fg: '#f2f4f8', dim: '#7c869c', accent: '#ffb547', good: '#5ee08a', bad: '#ff5a6a', panel: 'rgba(0,0,0,.55)' },
     light: { bg: '#f4f1ea', fg: '#1d2230', dim: '#8a8f9c', accent: '#e07a00', good: '#1f9d55', bad: '#d6283c', panel: 'rgba(255,255,255,.75)' }
   };
-  var AK = W.AudioKit || null, PACK = null, bgCache = null;
+  var AK = W.AudioKit || null, PACK = null, bgCache = null, edgeCv = null, edgeTick = 0;
 
   function Bridge(gameId) {
     this.game = gameId; this.handlers = {};
@@ -31,8 +31,11 @@
     var s = document.createElement('style');
     s.textContent = 'html,body{margin:0;height:100%;overflow:hidden;touch-action:none;user-select:none;-webkit-user-select:none;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif}' +
       'body{display:flex;align-items:center;justify-content:center;transition:background .3s}' +
-      '#eg-wrap{position:relative;aspect-ratio:9/16;height:100%;max-width:100%;max-height:calc(100vw*16/9)}' +
-      '#eg-wrap canvas{width:100%;height:100%;display:block}' +
+      /* full-viewport canvas (fills Android dynamic-toolbar space; JS sets the exact visualViewport height). The 9:16 play area is
+         drawn 'contain' inside it and the edge rows/columns are stretched into the leftover space, so there is never an empty bar. */
+      '#eg-wrap{position:fixed;left:0;top:0;width:100vw;height:100vh;height:100dvh;overflow:hidden}' +
+      '#eg-wrap canvas{position:absolute;display:block}' +
+      '#eg-area{position:absolute;pointer-events:none}#eg-area>*{pointer-events:auto}#eg-area>#eg-ov.hide{pointer-events:none}' +
       '.eg-btn{position:absolute;top:8px;right:8px;width:40px;height:40px;border-radius:20px;border:0;font-size:20px;cursor:pointer;z-index:5;background:rgba(0,0,0,.35);color:#fff}' +
       '#eg-pause{right:54px}' +
       '#eg-ov{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;z-index:4;padding:24px;box-sizing:border-box}' +
@@ -48,7 +51,8 @@
     var mute = document.createElement('button'); mute.className = 'eg-btn'; mute.id = 'eg-mute'; mute.setAttribute('aria-label', 'Mute');
     var pbtn = document.createElement('button'); pbtn.className = 'eg-btn'; pbtn.id = 'eg-pause'; pbtn.setAttribute('aria-label', 'Pause'); pbtn.textContent = '❚❚';
     var ov = document.createElement('div'); ov.id = 'eg-ov'; ov.setAttribute('role', 'status'); ov.setAttribute('aria-live', 'polite');
-    wrap.appendChild(mute); wrap.appendChild(pbtn); wrap.appendChild(ov); document.body.appendChild(wrap);
+    var area = document.createElement('div'); area.id = 'eg-area'; wrap.appendChild(area);
+    area.appendChild(mute); area.appendChild(pbtn); area.appendChild(ov); document.body.appendChild(wrap);
     cv.setAttribute('role', 'img'); cv.setAttribute('aria-label', def.title + ': ' + (def.howto || ''));
     // milestones: a game may route them to the host's XP API (def.onMilestone returns true when handled), else postMessage
     function milestone(kind, data) { if (!def.onMilestone) return false; try { return !!def.onMilestone(g, kind, data); } catch (e) { return false; } }
@@ -98,10 +102,11 @@
       },
       // bg is pre-scaled once to device pixels (and theme wash baked in) so each frame is a 1:1 blit
       bg: function () { var im = g.art.bg; if (!im) return false;
-        if (!bgCache || bgCache.w !== cv.width || bgCache.h !== cv.height || bgCache.th !== g.themeName) {
-          var oc = document.createElement('canvas'); oc.width = cv.width; oc.height = cv.height; var o = oc.getContext('2d');
+        var bw = Math.max(1, Math.round(VW * view.k)), bh = Math.max(1, Math.round(VH * view.k));
+        if (!bgCache || bgCache.w !== bw || bgCache.h !== bh || bgCache.th !== g.themeName) {
+          var oc = document.createElement('canvas'); oc.width = bw; oc.height = bh; var o = oc.getContext('2d');
           o.drawImage(im, 0, 0, oc.width, oc.height); if (g.themeName === 'light') { o.fillStyle = 'rgba(255,255,255,.35)'; o.fillRect(0, 0, oc.width, oc.height); }
-          bgCache = { c: oc, w: cv.width, h: cv.height, th: g.themeName }; }
+          bgCache = { c: oc, w: bw, h: bh, th: g.themeName }; }
         ctx.drawImage(bgCache.c, 0, 0, VW, VH); return true; },
       sprite: function (n, x, y, w, h, fb, rot, flip) {
         var im = g.art[n];
@@ -184,15 +189,45 @@
     var probe = document.createElement('div'); probe.style.cssText = 'position:fixed;left:0;top:0;width:0;visibility:hidden;pointer-events:none;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)'; document.body.appendChild(probe);
     function applyInsets() {
       var cs = getComputedStyle(probe), st = parseFloat(cs.paddingTop) || 0, sb = parseFloat(cs.paddingBottom) || 0;
-      var r = wrap.getBoundingClientRect(), vh = W.innerHeight || r.bottom, k = VH / (r.height || VH);
+      var r = area.getBoundingClientRect(), vh = W.innerHeight || r.bottom, k = VH / (r.height || VH);
       var coverB = Math.max(0, r.bottom - (vh - (g.insets.bottom + sb))), coverT = Math.max(0, (g.insets.top + st) - r.top);
       g.safeBottom = VH - coverB * k; g.safeTop = coverT * k;
       mute.style.top = pbtn.style.top = (8 + Math.max(0, g.insets.top + st - r.top)) + 'px';
       ov.style.paddingBottom = (24 + coverB) + 'px';
     }
-    function resize() { var r = wrap.getBoundingClientRect(), dpr = Math.min(W.devicePixelRatio || 1, 2); cv.width = Math.round(r.width * dpr); cv.height = Math.round(r.height * dpr); }
-    W.addEventListener('resize', function () { resize(); applyInsets(); });
-
+    // view: play-area placement in device px (k = scale, ox/oy = offset) and CSS px (css); recomputed on every viewport change
+    var view = g.view = { k: 1, ox: 0, oy: 0, css: { x: 0, y: 0, w: VW, h: VH } };
+    function resize() {
+      var vw = W.innerWidth || document.documentElement.clientWidth, vh = W.innerHeight || document.documentElement.clientHeight; // layout viewport: tracks Chrome's dynamic toolbar
+      edgeTick = 0; wrap.style.height = Math.round(vh) + 'px'; wrap.style.width = Math.round(vw) + 'px';
+      var dpr = Math.min(W.devicePixelRatio || 1, 2), kc = Math.min(vw / VW, vh / VH), aw = VW * kc, ah = VH * kc, ax = Math.round((vw - aw) / 2), ay = Math.round((vh - ah) / 2);
+      // the canvas covers only the 9:16 play area (cheap); the leftover viewport is filled by CSS bands (see fillEdges)
+      cv.width = Math.round(aw * dpr); cv.height = Math.round(ah * dpr); cv.style.cssText = 'left:' + ax + 'px;top:' + ay + 'px;width:' + aw + 'px;height:' + ah + 'px';
+      view.css = { x: ax, y: ay, w: aw, h: ah, vw: vw, vh: vh }; view.k = cv.width / VW; view.ox = 0; view.oy = 0;
+      area.style.cssText = 'left:' + ax + 'px;top:' + ay + 'px;width:' + aw + 'px;height:' + ah + 'px';
+    }
+    function onResize() { resize(); applyInsets(); requestAnimationFrame(function () { resize(); applyInsets(); }); } // re-measure after the toolbar animation settles
+    W.addEventListener('resize', onResize); W.addEventListener('orientationchange', onResize);
+    if (W.visualViewport) W.visualViewport.addEventListener('resize', onResize);
+    // fill the letterbox around the play area with CSS gradient bands built from the canvas's outer rows/columns
+    // (12 averaged samples each), re-sampled ~1x/s and on resize. No per-frame cost; no empty bar on tall/wide screens.
+    function fillEdges() {
+      if (edgeTick++ % 60) return; var c = view.css; if (!c.vw) return;
+      var sx = c.x > 0, sy = c.y > 0; if (!sx && !sy) { wrap.style.background = ''; return; }
+      try {
+        var e = edgeCv || (edgeCv = document.createElement('canvas')); e.width = 12; e.height = 4; var ec = e.getContext('2d', { willReadFrequently: true });
+        var t = Math.max(1, Math.round(4 * view.k)); ec.clearRect(0, 0, 12, 4);
+        ec.drawImage(cv, 0, 0, cv.width, t, 0, 0, 12, 1); ec.drawImage(cv, 0, cv.height - t, cv.width, t, 0, 1, 12, 1);
+        ec.drawImage(cv, 0, 0, t, cv.height, 0, 2, 12, 1); ec.drawImage(cv, cv.width - t, 0, t, cv.height, 0, 3, 12, 1);
+        var d = ec.getImageData(0, 0, 12, 4).data;
+        var grad = function (row, dir) { var st = []; for (var i = 0; i < 12; i++) { var o = (row * 12 + i) * 4; st.push('rgb(' + d[o] + ',' + d[o + 1] + ',' + d[o + 2] + ') ' + Math.round(i / 11 * 100) + '%'); }
+          return 'linear-gradient(' + dir + ',' + st.join(',') + ')'; };
+        var bg = [];
+        if (sy) { bg.push(grad(0, 'to right') + ' left top/100% ' + (c.y + 1) + 'px no-repeat', grad(1, 'to right') + ' left bottom/100% ' + (c.vh - c.y - c.h + 1) + 'px no-repeat'); }
+        if (sx) { bg.push(grad(2, 'to bottom') + ' left top/' + (c.x + 1) + 'px 100% no-repeat', grad(3, 'to bottom') + ' right top/' + (c.vw - c.x - c.w + 1) + 'px 100% no-repeat'); }
+        wrap.style.background = bg.join(',') + ',' + g.theme.bg;
+      } catch (err) {}
+    }
     var last = performance.now();
     function hud() {
       var th = g.theme; ctx.fillStyle = th.fg; ctx.textAlign = 'center'; var pz = g.reducedMotion ? 0 : (g.scorePulse || 0); g.scorePulse = Math.max(0, (g.scorePulse || 0) - 0.08);
@@ -206,12 +241,12 @@
     function frame(now) {
       var dt = Math.min(0.05, (now - last) / 1000); last = now;
       if (g.state === 'play' && !isPaused()) { g.t += dt; def.update(g, dt); if (g.toast) g.toast.t -= dt; }
-      var s = cv.width / VW, sx = 0, sy = 0;
+      var s = view.k, sx = 0, sy = 0;
       if (g.shakeAmt > 0.2 && !g.reducedMotion && !isPaused()) { sx = (Math.random() - 0.5) * g.shakeAmt; sy = (Math.random() - 0.5) * g.shakeAmt; }
       g.shakeAmt *= Math.pow(0.002, dt);
-      ctx.setTransform(s, 0, 0, cv.height / VH, Math.round(sx * s), Math.round(sy * s)); /* integer device px keeps the bg blit cheap */
+      ctx.setTransform(s, 0, 0, s, view.ox + Math.round(sx * s), view.oy + Math.round(sy * s)); /* integer device px keeps the bg blit cheap */
       ctx.fillStyle = g.theme.bg; ctx.fillRect(-10, -10, VW + 20, VH + 20);
-      def.draw(g, ctx); ctx.setTransform(s, 0, 0, cv.height / VH, 0, 0); if (def.drawOver) def.drawOver(g, ctx); hud();
+      def.draw(g, ctx); ctx.setTransform(s, 0, 0, s, view.ox, view.oy); if (def.drawOver) def.drawOver(g, ctx); hud(); fillEdges();
       requestAnimationFrame(frame);
     }
     resize(); applyInsets(); setTheme('dark'); setMute(false); def.init(g); overlay();

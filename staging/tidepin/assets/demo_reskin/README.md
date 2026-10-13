@@ -1,1 +1,1 @@
-DEMO ONLY. Hue-shifted copies of Luna's pin/hammer/bg, generated locally to show the ENTERPRISE_RESKIN tier on the test host (?tier=ENTERPRISE_RESKIN). Not real licensee art; do not ship.
+DEMO ONLY. Hue-shifted copies of Luna's art for keys pin, hammer, bg, generated locally to show ENTERPRISE_RESKIN via ?tier=enterprise_reskin on localhost/staging. Not licensee art; delete for production/licensee builds.

@@ -30,3 +30,21 @@ Rebuild: `cd /workspace/art_src && /workspace/.venv/bin/python render_v2.py batc
 
 ## eagle_legend_logo.png (13 Oct 2026)
 384x384 transparent PNG. This is the official Eagle Legend LTD company logo, supplied by Richie Legend (the owner): a green wing made of an upside-down L plus two feather strokes, reading EL. Luna only trimmed, centred and resized it, keeping the original transparency, with fill #4FA62C. The shape is unchanged.
+
+## Update 13 Oct 2026, 15:30: clean beach `bg.png` + `beach.png` (no painted water)
+The previous v2 versions are backed up in `_v2/`: `bg.png/.svg`, `beach.png/.svg`, and the old `demo_reskin_bg.png`. The v1 flat files are still in `_v1/`.
+- **`bg.png`** (1080x1920, opaque) has **no water anywhere**. From top to bottom:
+  - **Sky, y 0–840:** sky gradient, a sun at the top right (880, 270) and two clouds.
+  - **Horizon, y ≈ 840:** low green dunes/headland, with an ink line at y 840.
+  - **Dry sand, y 840–960:** with grass tufts and two shells, kept clear of the pin column.
+  - **Plain sand, y 960–1290:** slightly darker, with faint ripple marks only. y 960 is the highest point the tide reaches.
+  - **Ground, y 1290–1920:** compacted ground in the beach-tile colour, so it matches where the code tiles `beach.png` from GROUND = 430 (1290 px).
+  - **Tide range:** the game's tide rises from y 1374 (low) to y 960 (high) (game.js: lowY = GROUND+28, highY = ZONE_Y−40, ×3).
+  - Rendered with the v2 hand-drawn pass and softer mottling (`mott=0.35`).
+- **`beach.png`** (192x192, opaque, seamless): compacted tan sand with grains, a shell and a pebble, all wrapped across the edges, with stitched noise and no wobble so it tiles cleanly.
+- **`demo_reskin/bg.png`** (1080x1920): DEMO ONLY. The same new bg with a hue shift of +110/256 (matching the previous demo) applied **above the horizon only**, because shifting the sand turned it water-blue.
+- **Generator:** `/workspace/art_src/tidepin_beach.py`. Original work by Luna for Eagle Legend LTD.
+- **Preview:** `/workspace/batch1/screenshots/tidepin_bg_v3_preview.png`, showing the bg alone, low tide, high tide, and the demo reskin, composited with the pin, wave row and tide overlay at their in-game positions.
+
+## Update 13 Oct 2026, 16:20 (art audit): `splash_sheet.png` redrawn with no pin
+Same name and size: 1152x192, 6 frames of 192x192. The old version had a pin baked into every frame, so game.js skips it. The new one is water only: a splash mound rises and falls while droplets scatter outwards and shrink. It's centred on x 96 per frame with the base at y ≈ 177. It's opaque colour throughout, because translucent fades turn dark under the ink pass. Old version backed up as `_v2/splash_sheet.png/.svg`. Original work by Luna for Eagle Legend LTD.
