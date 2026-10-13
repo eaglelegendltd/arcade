@@ -34,8 +34,8 @@ var EAGLE_CONFIG = {
 (function () { var o = window.EAGLE_LICENSEE; if (o && typeof o === 'object') for (var k in o) EAGLE_CONFIG[k] = o[k];
   // DEMO SWITCH (local test host only): ?tier=... is honoured ONLY on localhost/127.0.0.1, never on production hosts.
   // ENTERPRISE_RESKIN demo uses assets/demo_reskin/ (locally generated recolours, labelled DEMO).
-  var h = location.hostname; if (EAGLE_CONFIG.demoTierSwitch && (h === 'localhost' || h === '127.0.0.1')) { var m = /[?&]tier=(STANDARD|WHITE_LABEL|ENTERPRISE_RESKIN|SOURCE)\b/.exec(location.search);
-    if (m) { EAGLE_CONFIG.tier = m[1]; if (m[1] !== 'WHITE_LABEL') EAGLE_CONFIG.clientLogo = EAGLE_CONFIG.clientLink = ''; EAGLE_CONFIG.showLogo = m[1] === 'STANDARD'; if (m[1] === 'ENTERPRISE_RESKIN') EAGLE_CONFIG.sprites = { pin: 'assets/demo_reskin/pin.png', hammer: 'assets/demo_reskin/hammer.png', bg: 'assets/demo_reskin/bg.png' }; } }
+  var h = location.hostname; if (EAGLE_CONFIG.demoTierSwitch && (h === 'localhost' || h === '127.0.0.1' || (h === 'eaglelegendltd.github.io' && location.pathname.indexOf('/arcade/staging/') === 0))) { var m = /[?&]tier=(STANDARD|WHITE_LABEL|ENTERPRISE_RESKIN|SOURCE)\b/i.exec(location.search);
+    if (m) { m[1] = m[1].toUpperCase(); EAGLE_CONFIG.tier = m[1]; if (m[1] !== 'WHITE_LABEL') EAGLE_CONFIG.clientLogo = EAGLE_CONFIG.clientLink = ''; EAGLE_CONFIG.showLogo = m[1] === 'STANDARD'; if (m[1] === 'ENTERPRISE_RESKIN') EAGLE_CONFIG.sprites = { pin: 'assets/demo_reskin/pin.png', hammer: 'assets/demo_reskin/hammer.png', bg: 'assets/demo_reskin/bg.png' }; } }
   if (EAGLE_CONFIG.tier !== 'STANDARD') EAGLE_CONFIG.showLogo = false;
   if (EAGLE_CONFIG.tier !== 'WHITE_LABEL') { EAGLE_CONFIG.clientLogo = ''; EAGLE_CONFIG.clientLink = ''; }
   if (EAGLE_CONFIG.tier !== 'ENTERPRISE_RESKIN') EAGLE_CONFIG.sprites = {}; })();
