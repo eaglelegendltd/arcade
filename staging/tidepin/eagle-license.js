@@ -24,7 +24,7 @@
     clientTitle: '',                  // non-STANDARD, optional: tab title (else the game title). Was read below but never declared.
     clientLink: '',                   // WHITE_LABEL only, optional: https only, opened _blank with noopener
     // allowed hosts. 'x' = x, www.x and any subdomain (exact '.'+x suffix, never substring). '*.x' = subdomains only.
-    // '' = file:// page. Defaults apply to every licensee; allowedDomains adds the licensee's own.
+    // '' = file:// page only (not about:blank/srcdoc, data: or blob:, which also have an empty hostname). Defaults apply to every licensee; allowedDomains adds the licensee's own.
     defaultDomains: ['eaglelegend.com', 'eaglelegendltd.github.io', 'localhost', '127.0.0.1', ''],
     allowedDomains: [],
     // wrapped apps: ids the wrapper may pass via postMessage {type:'app-id', appId} or ?appId=. Runs if the domain
@@ -56,7 +56,7 @@
     var list = (C.defaultDomains || []).concat(C.allowedDomains || []);
     for (var i = 0; i < list.length; i++) { var d = String(list[i]).toLowerCase();
       if (d.slice(0, 2) === '*.') { d = d.slice(2); if (d && host.slice(-(d.length + 1)) === '.' + d) return true; continue; }
-      if (d === '' ? host === '' : (host === d || host.slice(-(d.length + 1)) === '.' + d)) return true; }
+      if (d === '' ? (host === '' && L.protocol === 'file:') : (host === d || host.slice(-(d.length + 1)) === '.' + d)) return true; }
     return false;
   }
   function domainOk() {

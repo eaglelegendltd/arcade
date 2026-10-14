@@ -33,3 +33,6 @@ Rebuild: `cd /workspace/art_src && /workspace/.venv/bin/python render_v2.py batc
 | `vine_segment.png` (+ `.svg` source) | 96x96 | NEW: vertically tileable vine segment (cut from the middle of a 3-tile render) |
 | `fall_sheet.png` (+ `.svg` source) | 576x144 | NEW: 4-frame pod tumble, 144x144 each |
 | `bg.png` (+ `.svg` source) | 1080x1920 | REPLACED: plainer sky-to-rock gradient, no painted cliffs |
+
+## Update 14 Oct 2026 (Ruby's polish ask): `bg.png` made plainer
+Same name and size (1080x1920). Previous version backed up to `assets/_v2/bg.png` (+ `bg.svg`). Removed the heavy purple mottling, pulled the sky-to-rock gradient 15% toward a neutral mid tone (luminance std 13.3 → 10.3, range 150–236 → 186–237), kept two very faint clouds and a fine paper grain. Ledges now read cleanly against it (checked with ledge.png composited). Generated in numpy/PIL (inline script); `bg.svg` is the old gradient source. Original work by Luna for Eagle Legend LTD.

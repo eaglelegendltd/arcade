@@ -37,7 +37,8 @@
     var s = c.createBufferSource(); s.buffer = noiseBuf; s.loop = true; return s;
   }
 
-  // Generic tone: type, freq start/end, duration, gain, start time
+  // Generic tone: type, freq start/end, duration, gain, start time.
+  // Optional o.filter ('lowpass'|'highpass'|'bandpass'), o.filterFreq, o.filterQ for noise colour.
   function tone(o) {
     var c = getCtx(); if (!c) return;
     var t = o.t != null ? o.t : c.currentTime, d = o.dur || 0.15, g = c.createGain();
@@ -52,7 +53,17 @@
     g.gain.setValueAtTime(0.0001, t);
     g.gain.linearRampToValueAtTime(peak, t + 0.005);
     g.gain.exponentialRampToValueAtTime(0.0001, t + d);
-    src.connect(g); g.connect(o.dest || master);
+    src.connect(g);
+    var dest = o.dest || master;
+    if (o.filter) {
+      var f = c.createBiquadFilter();
+      f.type = o.filter;
+      f.frequency.setValueAtTime(o.filterFreq || 1000, t);
+      if (o.filterQ != null) f.Q.value = o.filterQ;
+      g.connect(f); f.connect(dest);
+    } else {
+      g.connect(dest);
+    }
     src.start(t); src.stop(t + d + 0.02);
   }
 
@@ -103,8 +114,9 @@
       if (s.square && (f = noteFreq(s.square[i % s.square.length]))) tone({ type: 'square', f0: f, dur: stepDur * 0.9, gain: 0.12, t: t });
       if (s.triangle && (f = noteFreq(s.triangle[i % s.triangle.length]))) tone({ type: 'triangle', f0: f, dur: stepDur * 0.95, gain: 0.3, t: t });
       if (s.noise) { var k = s.noise[i % s.noise.length];
-        if (k === 'x') tone({ type: 'noise', dur: 0.12, gain: 0.25, t: t });
-        else if (k === 'o') tone({ type: 'noise', dur: 0.03, gain: 0.12, t: t }); }
+        // x = snare body (bandpass), o = closed hat (bright highpass) — distinct percussion colour
+        if (k === 'x') tone({ type: 'noise', dur: 0.12, gain: 0.22, t: t, filter: 'bandpass', filterFreq: 1800, filterQ: 0.85 });
+        else if (k === 'o') tone({ type: 'noise', dur: 0.028, gain: 0.1, t: t, filter: 'highpass', filterFreq: 7000, filterQ: 0.7 }); }
       this._q.push([t, i]); if (this._q.length > 64) this._q.shift();
       this.next += stepDur; this.step++;
       if (this.step >= len) { if (this.loop) this.step = 0; else { this.stop(); } }

@@ -1,10 +1,10 @@
 // Draft title. Dark quarry: forks are visible but which branch is safe is only revealed by a sonar ping.
 var CARTY = 520, ZONE = 170, BR = 35; // fork_sheet: split ~15 px above frame bottom, branch top centres at +-70 of 192 px -> +-35 logical at the frame top (y-144)
-EagleGame.run({ id: 'echo-quarry', title: 'Echo Quarry', howto: 'Forks come at you in the dark. Tap near a fork to switch track. Tap anywhere else to ping sonar and see which branch is safe, but each ping cuts your multiplier.',
+EagleGame.run({ id: 'echo-quarry', title: 'Echo Quarry', howto: 'Forks come at you in the dark. The first fork is free. Tap near a fork to switch track. Tap elsewhere to ping sonar (cuts your multiplier).',
   art: ['cart', 'track', 'junction_sign', 'ping_sheet', 'fork_sheet', 'rubble'], reskinKeys: ['cart', 'track', 'rubble', 'bg'], logo: { side: 'left', top: 52 }, fill: { top: '#070607', bottom: '#272329' }, levelEvery: 8, likeScore: 15, overSfx: 'crash',
   achievements: [{ id: 'mine10', score: 10, name: 'Deep Digger' }, { id: 'mine50', score: 50, name: 'Echo Master' }],
-  init: function (g) { g.data = { lives: 3, j: [], dist: 0, side: 'L', mult: 1, ping: 0, pingT: -1, clack: 0, jn: 0 };
-    for (var i = 0; i < 4; i++) addJ(g); g.data.j[0].seen = 1; },
+  init: function (g) { g.data = { lives: 3, j: [], dist: 0, side: 'L', mult: 2, ping: 0, pingT: -1, clack: 0, jn: 0 };
+    for (var i = 0; i < 4; i++) addJ(g); g.data.j[0].seen = 1; g.data.j[0].freeReveal = 1; },
   down: function (g) {
     var D = g.data, nj = D.j.find(function (j) { return !j.done; }), dy = nj ? CARTY - jy(D, nj) : 1e9;
     if (nj && dy < ZONE && dy > -10) { D.side = D.side === 'L' ? 'R' : 'L'; g.sfx('switchTrack', null, 'jump'); }
@@ -24,7 +24,7 @@ EagleGame.run({ id: 'echo-quarry', title: 'Echo Quarry', howto: 'Forks come at y
   draw: function (g, c) {
     var D = g.data, th = g.theme; g.bg();
     var off = D.dist % 64; for (var y = -64; y < 640; y += 64) g.sprite('track', 180, y + off + 32, 64, 64, function (c, x, y) { c.fillStyle = th.dim; c.fillRect(x - 18, y - 32, 4, 64); c.fillRect(x + 14, y - 32, 4, 64); });
-    D.j.forEach(function (j) { var y = jy(D, j); if (y < -40) return; var show = j.seen && (D.ping > 0 || j.done);
+    D.j.forEach(function (j) { var y = jy(D, j); if (y < -40) return; var show = j.seen && (D.ping > 0 || j.done || j.freeReveal);
       // fork_sheet: frame 0 = left branch, 1 = right branch (192x288 each), drawn bottom-anchored at the fork point
       ['L', 'R'].forEach(function (s) { var dx = s === 'L' ? -1 : 1, fi = s === 'L' ? 0 : 1;
         if (show) { c.globalAlpha = 0.5; c.fillStyle = s === j.safe ? th.good : th.bad; c.beginPath(); c.arc(180 + dx * BR, y - 128, 20, 0, 7); c.fill(); c.globalAlpha = 1; }

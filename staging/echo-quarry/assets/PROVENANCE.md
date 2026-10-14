@@ -34,3 +34,6 @@ Rebuild: `cd /workspace/art_src && /workspace/.venv/bin/python render_v2.py batc
 
 ## Update 13 Oct 2026, 11:30 (Ivy's ask): `fork_sheet.png` widened
 Same file name, size (384x288, 2 frames of 192x288), frame order (0 = left branch, 1 = right branch) and v2 hand-drawn style. The branch now leaves the straight track near the bottom (y ≈ 273 px) and curves out, so its centreline reaches **±70 px from the frame's 96 px centre line at the top edge**: x ≈ 26 px in frame 0 and x ≈ 166 px in frame 1. Before, it was about ±30. Branch rails sit ±24 px either side of that centreline, and the straight track (rails at x 60 and 132 px) continues to the top. Generator: `fork()` in `/workspace/art_src/asks.py`. Original work by Luna for Eagle Legend LTD.
+
+## Check 14 Oct 2026: `fork_sheet.png` spread
+Ruby asked for ~±70 px of 96 at the top. Verified the current file (13 Oct widening, `fork()` in `/workspace/art_src/asks.py`) already reaches ±70 px (branch centreline x ≈ 26 / 166 px at the top edge). Unchanged, so no backup needed.
