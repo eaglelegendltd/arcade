@@ -34,6 +34,23 @@
   function isChordTone(x, chord) { return Math.abs(nearestChordTone(x, chord) - toFreq(x)) < 0.5; }
   function chordFreqs(octave, chord) { var ch = chord || currentChord(); return ch.tones.map(function (t) { return K.noteFreq(t + (octave || 4)); }); }
 
+
+  // [loop gain] per-pack music level: a pack-only reimplementation of AudioKit.Player._sched that routes this pack's loop
+  // through its own GainNode (-> kit master, so mute/pause/volume still apply). Only active for songs with song.gain set.
+  (function () { var P = K.Player && K.Player.prototype; if (!P || P.__loopGainPatched) return; P.__loopGainPatched = true; var orig = P._sched;
+    P._sched = function () { var s = this.song; if (!s || s.gain == null) return orig.call(this);
+      var c = K.getContext(); if (!c) return; if (K.isPaused && K.isPaused()) return;
+      if (!s.__bus || s.__bus.context !== c) { s.__bus = c.createGain(); s.__bus.gain.value = s.gain; s.__bus.connect(K.getOutput()); }
+      var d = s.__bus, spb = s.stepsPerBeat || 4, len = this._len(), stepDur = 60 / this.bpm / spb, f;
+      if (this.next < c.currentTime) this.next = c.currentTime + 0.05;
+      while (this.playing && this.next < c.currentTime + 0.12) { var i = this.step, t = this.next;
+        if (s.square && (f = K.noteFreq(s.square[i % s.square.length]))) K.tone({ type: 'square', f0: f, dur: stepDur * 0.9, gain: 0.12, t: t, dest: d });
+        if (s.triangle && (f = K.noteFreq(s.triangle[i % s.triangle.length]))) K.tone({ type: 'triangle', f0: f, dur: stepDur * 0.95, gain: 0.3, t: t, dest: d });
+        if (s.noise) { var k = s.noise[i % s.noise.length];
+          if (k === 'x') K.tone({ type: 'noise', dur: 0.12, gain: 0.22 * (s.noiseGain || 1), t: t, filter: 'bandpass', filterFreq: 1800, filterQ: 0.85, dest: d });
+          else if (k === 'o') K.tone({ type: 'noise', dur: 0.028, gain: 0.1 * (s.noiseGain || 1), t: t, filter: 'highpass', filterFreq: 7000, filterQ: 0.7, dest: d }); }
+        this._q.push([t, i]); if (this._q.length > 64) this._q.shift();
+        this.next += stepDur; this.step++; if (this.step >= len) { if (this.loop) this.step = 0; else this.stop(); } } }; })();
   K.games = K.games || {};
   K.games['gravel-choir'] = {
     // Bind the music Player so currentChord() follows the loop; or call setChord(i or name) manually.
@@ -56,7 +73,7 @@
       chordChange: function () { var t = n(); chordFreqs(5).forEach(function (f, i) { T({ type: 'triangle', f0: f, dur: 0.12, gain: 0.14, t: t + i * 0.05 }); }); },
       collapse: function () { var t = n(); for (var i = 0; i < 8; i++) T({ type: 'noise', dur: 0.06, gain: 0.25 - i * 0.02, t: t + i * 0.07 }); T({ type: 'triangle', f0: 262, f1: 65, dur: 1.0, gain: 0.3, t: t }); }
     },
-    loop: { bpm: 90, stepsPerBeat: SPB,
+    loop: { bpm: 90, stepsPerBeat: SPB, gain: 1.5, // [loop gain] approx +3.5 dB (machine QA 14 Oct: bring music to ~-33 dBFS)
       // C (16 steps) | Am | F | G
       square: ('E5 . G5 . . E5 D5 . C5 . . . E5 . G5 . ' + 'A4 . C5 . E5 . . C5 B4 . A4 . . . C5 . ' +
                'F5 . . E5 C5 . A4 . . . C5 . F5 . A5 . ' + 'G5 . . F5 D5 . B4 . D5 . . . G4 . . .').trim().split(' '),

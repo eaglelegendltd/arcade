@@ -9,6 +9,8 @@
       gust: function () { T({ type: 'noise', dur: 0.6, gain: 0.12 }); T({ type: 'sine', f0: 200, f1: 500, dur: 0.6, gain: 0.08 }); },
       glance: function () { T({ type: 'square', f0: 1200, f1: 1800, dur: 0.05, gain: 0.1 }); },
       spin: function () { var t = n(); for (var i = 0; i < 6; i++) T({ type: 'square', f0: 600 - i * 60, dur: 0.05, gain: 0.15, t: t + i * 0.05 }); },
+      // tick(n): very soft score tick for the passive score trickle (game.js line 10 addScore). Unused until game.js calls g.sfx('tick', n).
+      tick: function () { T({ type: 'triangle', f0: 1760, dur: 0.05, gain: 0.05 }); },
       douse: function () { var t = n(); T({ type: 'noise', dur: 0.5, gain: 0.3, t: t }); T({ type: 'triangle', f0: 330, f1: 82, dur: 1.0, gain: 0.3, t: t + 0.1 }); }
     },
     loop: { bpm: 84, stepsPerBeat: 4,
