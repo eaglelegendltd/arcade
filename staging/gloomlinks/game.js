@@ -6,17 +6,20 @@ function glHole(g) { var D = g.data, B = glBot(g), n = Math.min(7, 2 + Math.floo
   D.ball = { x: 100 + hwRand() * 160, y: B - 40, vx: 0, vy: 0, f: 0 }; D.hole = { x: 60 + hwRand() * 240, y: GL_T + 30 + hwRand() * 70 }; D.stones = [];
   while (D.stones.length < n && tries++ < 400) { var s = { x: GL_L + 30 + hwRand() * (GL_R - GL_L - 60), y: GL_T + 40 + hwRand() * (B - GL_T - 110), k: Math.floor(hwRand() * 3) };
     if (Math.hypot(s.x - D.ball.x, s.y - D.ball.y) < 60 || Math.hypot(s.x - D.hole.x, s.y - D.hole.y) < 52 || D.stones.some(function (o) { return Math.hypot(o.x - s.x, o.y - s.y) < 56; })) continue; D.stones.push(s); }
-  D.par = 2 + (n >= 5 ? 1 : 0); D.taken = 0; D.sunk = 0; D.aim = -Math.PI / 2; }
+  D.par = 2 + (n >= 5 ? 1 : 0); D.lastB = B; D.taken = 0; D.sunk = 0; D.aim = -Math.PI / 2; }
+// resize / rotation: the green's bottom follows safeBottom, so keep ball, hole and tombstones in normalised course coordinates
+function glRescale(D, B) { if (!D.lastB || D.lastB === B) { D.lastB = B; return; } var k = (B - GL_T) / (D.lastB - GL_T), f = function (o) { o.y = GL_T + (o.y - GL_T) * k; };
+  f(D.ball); D.ball.vy *= k; f(D.hole); D.stones.forEach(f); D.lastB = B; }
 function glShoot(g, dx, dy) { var D = g.data, b = D.ball; if (D.sunk || Math.hypot(b.vx, b.vy) > 0 || D.strokes <= 0) return; var len = Math.hypot(dx, dy); if (len < 12) return;
   var v = Math.min(GL_MAXV, len * 4.2); b.vx = dx / len * v; b.vy = dy / len * v; D.strokes--; D.taken++; g.sfx('link', v / GL_MAXV, 'hit'); D.swing = 0.25; }
 EagleGame.run({ id: 'gloomlinks', title: HW_NAMES['gloomlinks'], howto: 'Drag back from anywhere on the screen and let go to putt the ball; the further you pull, the harder the shot. Bounce off tombstones and walls to reach the flag. You share one stroke budget across endless holes: sinking a ball tops it up, more for beating par. Run out of strokes and the round ends. Keys: Left / Right arrows aim, hold Space / Enter to charge and release to putt.',
   art: ['golf_ball_roll_sheet', 'golf_club', 'hole_flag_sheet', 'putting_green_tile_256', 'tombstone_sheet'], levelEvery: 60, likeScore: 60, fill: { top: '#1b1b3c', bottom: { tile: 'band_bottom', size: 180, originY: 640, color: '#2c4639' } },
   achievements: [{ id: 'g50', score: 50, name: 'Tombstone Putter' }, { id: 'g200', score: 200, name: 'Gloom Champion' }],
-  init: function (g) { hwSeed(); g.data = { holeNo: 0, strokes: 6, drag: null, msg: null, charge: 0, kb: false, swing: 0 }; glHole(g); },
+  init: function (g) { hwSeed(); g.data = { holeNo: 0, strokes: 8, drag: null, msg: null, charge: 0, kb: false, swing: 0 }; glHole(g); },
   down: function (g) { var D = g.data; if (g.tapX === undefined) { D.kb = true; D.charge = 0.001; return; } D.kb = false; D.drag = { x0: g.tapX, y0: g.tapY, x: g.tapX, y: g.tapY }; },
   up: function (g) { var D = g.data; if (D.charge > 0) { var p = D.charge; D.charge = 0; glShoot(g, Math.cos(D.aim) * p * 170, Math.sin(D.aim) * p * 170); return; }
     if (D.drag) { glShoot(g, D.drag.x0 - D.drag.x, D.drag.y0 - D.drag.y); D.drag = null; } },
-  update: function (g, dt) { var D = g.data, b = D.ball, B = glBot(g);
+  update: function (g, dt) { var D = g.data, b = D.ball, B = glBot(g); glRescale(D, B);
     if (D.charge > 0) { D.chT = (D.chT || 0) + dt; D.charge = 0.05 + 0.95 * (0.5 - 0.5 * Math.cos(D.chT * 2.6)); } else D.chT = 0;
     if (hwKeys.ArrowLeft) D.aim -= dt * 2.2; if (hwKeys.ArrowRight) D.aim += dt * 2.2; if (D.swing > 0) D.swing -= dt;
     var sp = Math.hypot(b.vx, b.vy);
