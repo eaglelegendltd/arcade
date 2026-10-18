@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#10141f">
+<meta name="description" content="Eagle Legend Arcade: 20 touch games you can play offline.">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data: blob:; media-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self'; frame-src 'self'; object-src 'none'; base-uri 'self'">
+<title>Eagle Legend Arcade</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<header><img src="icons/icon-192.png" alt=""><h1>Eagle Legend Arcade</h1></header>
+<button id="dl" type="button">Download all for offline</button>
+<p id="note" aria-live="polite"></p>
+<main id="grid" aria-label="Games"></main>
+<div id="player" role="dialog" aria-label="Game">
+  <button id="back" type="button" aria-label="Back to games">&#8592;</button>
+</div>
+<script src="config.js"></script>
+<script src="precache-manifest.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
