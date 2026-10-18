@@ -1,7 +1,7 @@
 // Treatdrop Bucket: drag (or hold a side / arrow keys) to slide the bucket; catch falling treats, dodge dangling spiders. 3 lives.
 var CC_Y = 540, CC_W = 70;
 EagleGame.run({ id: 'treatdrop-bucket', title: HW_NAMES['treatdrop-bucket'], howto: 'Drag, hold the left/right side, or use the arrow keys to slide your bucket. Catch the treats (5 in a row = combo bonus). Spiders cost a life; so does every 5th treat you drop.',
-  art: ['bucket_move_sheet', 'bucket_catch_sheet', 'candy_sheet', 'spider_sheet'], reskinKeys: ['bg', 'bucket_move_sheet', 'candy_sheet'], fill: { top: '#221b44', bottom: '#593a3a' }, levelEvery: 12, likeScore: 25,
+  art: ['bucket_move_sheet', 'bucket_catch_sheet', 'candy_sheet', 'spider_sheet'], reskinKeys: ['bg', 'bucket_move_sheet', 'candy_sheet'], fill: { top: '#221b44', bottom: { tile: 'band_bottom', size: 180, originY: 640, color: '#593a3a' } }, levelEvery: 12, likeScore: 25,
   achievements: [{ id: 'c20', score: 20, name: 'Sweet Tooth' }, { id: 'c80', score: 80, name: 'Candy Hoarder' }],
   init: function (g) { hwSeed(); g.data = { x: 180, lives: 3, flash: 0, items: [], next: 0.8, combo: 0, drops: 0, pops: [] }; },
   down: function (g) { g.data.drag = null; },
@@ -12,7 +12,7 @@ EagleGame.run({ id: 'treatdrop-bucket', title: HW_NAMES['treatdrop-bucket'], how
     D.x = Math.max(CC_W / 2, Math.min(360 - CC_W / 2, D.x));
     var fall = Math.min(420, 150 + g.level * 18); D.next -= dt;
     if (D.next <= 0) { var r = hwRand(), k = r < Math.min(0.38, 0.14 + g.level * 0.025) ? 'spider' : r > 0.95 ? 'gold' : 'corn';
-      D.items.push({ x: 24 + hwRand() * 312, y: -20, k: k, v: fall * (0.85 + hwRand() * 0.3), sw: k === 'spider' && g.level >= 4 ? (hwRand() - 0.5) * 2 : 0, ph: hwRand() * 6, v2: Math.floor(hwRand() * 4) }); D.next = Math.max(0.32, 0.85 - g.level * 0.04); }
+      D.items.push({ x: 24 + hwRand() * 312, y: k === 'spider' ? 200 : 150, k: k, v: fall * (0.85 + hwRand() * 0.3), sw: k === 'spider' && g.level >= 4 ? (hwRand() - 0.5) * 2 : 0, ph: hwRand() * 6, v2: Math.floor(hwRand() * 4) }); D.next = Math.max(0.32, 0.85 - g.level * 0.04); }
     for (var i = D.items.length - 1; i >= 0; i--) { var o = D.items[i]; o.y += o.v * dt; if (o.sw) o.x = Math.max(20, Math.min(340, o.x + Math.sin(g.t * 3 + o.ph) * 60 * dt * o.sw));
       if (o.y > CC_Y - 14 && o.y < CC_Y + 14 && Math.abs(o.x - D.x) < CC_W / 2 + 6) { D.items.splice(i, 1);
         if (o.k === 'spider') { D.combo = 0; egLoseLife(g, 'caught a spider'); if (g.state !== 'play') return; }
@@ -22,9 +22,10 @@ EagleGame.run({ id: 'treatdrop-bucket', title: HW_NAMES['treatdrop-bucket'], how
   },
   draw: function (g, c) {
     var D = g.data, th = g.theme; if (!g.bg()) { hwSky(c, '#24123a', '#4a2448'); c.fillStyle = '#2a1830'; c.fillRect(0, CC_Y + 30, 360, 120); }
-    D.items.forEach(function (o) { if (o.k === 'spider') { if (hwFrame(g, 'spider_sheet', (g.t * 6 + o.ph) % 4, 4, 1, o.x, o.y - 22, 40, 64)) return; g.sprite('spider', o.x, o.y, 44, 44, function (c, x, y) { hwSpider(c, x, y, 12); }); }
+    D.items.forEach(function (o) { c.globalAlpha = Math.min(1, (o.y - 150) / 40 + 0.15); if (o.k === 'spider') { if (hwFrame(g, 'spider_sheet', (g.t * 6 + o.ph) % 4, 4, 1, o.x, o.y - 22, 40, 64)) return; g.sprite('spider', o.x, o.y, 44, 44, function (c, x, y) { hwSpider(c, x, y, 12); }); }
       else if (!hwFrame(g, 'candy_sheet', o.k === 'gold' ? 4 : o.v2, 5, 1, o.x, o.y, 36, 36)) g.sprite(o.k === 'gold' ? 'goldcorn' : 'corn', o.x, o.y, 36, 36, function (c, x, y) { var cols = o.k === 'gold' ? ['#fff3a0', '#ffd700', '#e6a800'] : ['#fff6e0', '#ffb300', '#ff6a1f'];
         for (var b = 0; b < 3; b++) { c.fillStyle = cols[b]; c.beginPath(); var t0 = b / 3, t1 = (b + 1) / 3; c.moveTo(x - 11 * t0, y - 14 + 28 * t0); c.lineTo(x + 11 * t0, y - 14 + 28 * t0); c.lineTo(x + 11 * t1, y - 14 + 28 * t1); c.lineTo(x - 11 * t1, y - 14 + 28 * t1); c.fill(); } }); });
+    c.globalAlpha = 1;
     if (!(D.catchT > 0 ? hwFrame(g, 'bucket_catch_sheet', Math.min(2, (0.3 - D.catchT) * 10), 3, 1, D.x, CC_Y - 4, 96, 96) : hwFrame(g, 'bucket_move_sheet', (g.t * 8) % 4, 4, 1, D.x, CC_Y - 4, 96, 96))) g.sprite('bucket', D.x, CC_Y + (g.art.bucket ? 0 : 8), g.art.bucket ? 92 : CC_W + 10, g.art.bucket ? 92 : 54, function (c, x, y) { hwPumpkin(c, x, y + 4, 30); c.fillStyle = '#1b0f22'; c.beginPath(); c.ellipse(x, y - 18, 28, 7, 0, 0, 7); c.fill(); });
     D.pops.forEach(function (p) { c.globalAlpha = Math.min(1, p.t * 2); c.fillStyle = th.accent; c.font = 'bold 18px system-ui'; c.textAlign = 'center'; c.fillText(p.s, p.x, p.y); c.globalAlpha = 1; });
     egLives(g, c); egFlash(g, c);

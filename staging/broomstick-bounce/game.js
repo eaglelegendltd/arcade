@@ -8,7 +8,7 @@ function bbChimney(g, c, x, y0, y1, top) { // y0..y1 vertical extent; top=true h
   else { for (y = y0 + 32; y < y1; y += 64) c.drawImage(body, x - 32, y, 64, 64); c.drawImage(cap, x - 32, y0, 64, 32); }
   c.restore(); }
 EagleGame.run({ id: 'broomstick-bounce', title: HW_NAMES['broomstick-bounce'], howto: 'Hold (or hold Space / Enter) to fly up, let go to drop. Weave between the chimneys and dodge the bats. Each gap scores; grab moon sweets for +2.',
-  art: ['sweet', 'witch_sheet', 'bat_sheet', 'chimney_body_tile', 'chimney_cap_top', 'chimney_cap_bottom'], reskinKeys: ['bg', 'witch_sheet', 'sweet'], fill: { top: '#201a3f', bottom: '#1c1529' }, levelEvery: 8, likeScore: 15,
+  art: ['sweet', 'witch_sheet', 'bat_sheet', 'chimney_body_tile', 'chimney_cap_top', 'chimney_cap_bottom'], reskinKeys: ['bg', 'witch_sheet', 'sweet'], fill: { top: '#201a3f', bottom: { tile: 'band_bottom', size: 180, originY: 640, color: '#1c1529' } }, levelEvery: 8, likeScore: 15,
   achievements: [{ id: 'g10', score: 10, name: 'Night Flyer' }, { id: 'g40', score: 40, name: 'Broom Ace' }],
   init: function (g) { hwSeed(); g.data = { y: 300, vy: 0, cols: [], bats: [], sweets: [], next: 0.6, grace: true, gt: 0, puff: [] }; },
   down: function (g) { g.data.grace = false; g.sfx('flap', null, 'jump'); },
@@ -36,6 +36,7 @@ EagleGame.run({ id: 'broomstick-bounce', title: HW_NAMES['broomstick-bounce'], h
     D.bats.forEach(function (b) { hwFrame(g, 'bat_sheet', (g.t * 10 + b.ph) % 4, 4, 1, b.x, b.y, 40, 40) || (c.fillStyle = '#3b2457', c.beginPath(), c.arc(b.x, b.y, 12, 0, 7), c.fill()); });
     D.sweets.forEach(function (s) { g.sprite('sweet', s.x, s.y, 26, 26, function (c, x, y) { c.fillStyle = '#ffd34d'; c.beginPath(); c.arc(x, y, 9, 0, 7); c.fill(); c.fillStyle = '#ff6fb1'; c.fillRect(x - 15, y - 3, 6, 6); c.fillRect(x + 9, y - 3, 6, 6); }); });
     D.puff.forEach(function (p) { c.fillStyle = 'rgba(200,180,255,' + p.t + ')'; c.beginPath(); c.arc(p.x, p.y, 5, 0, 7); c.fill(); });
+    if (g.state === 'title') return; // no witch behind the title card
     var tilt = Math.max(-0.4, Math.min(0.4, D.vy / 700));
     if (!hwFrame(g, 'witch_sheet', g.held ? (g.t * 12) % 4 : 2, 4, 1, BB_X, D.y, 60, 60, tilt)) { c.fillStyle = '#7b5cd6'; c.beginPath(); c.arc(BB_X, D.y, 14, 0, 7); c.fill(); }
     c.fillStyle = th.dim; c.font = '13px system-ui'; c.textAlign = 'center'; c.fillText(D.grace ? 'hold to rise · let go to fall' : 'level ' + g.level, 180, g.safeY(600));
