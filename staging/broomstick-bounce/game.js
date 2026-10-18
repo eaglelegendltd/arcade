@@ -16,16 +16,16 @@ EagleGame.run({ id: 'broomstick-bounce', title: HW_NAMES['broomstick-bounce'], h
     var D = g.data; if (D.grace) { D.gt += dt; D.y = 300 + Math.sin(D.gt * 3) * 10; if (D.gt < 2.5) return; D.grace = false; }
     var sp = Math.min(260, 140 + g.level * 12), gap = Math.max(130, 210 - g.level * 8);
     D.vy += (g.held ? -900 : 700) * dt; D.vy = Math.max(-320, Math.min(380, D.vy)); D.y += D.vy * dt;
-    if (D.y < BB_TOP + 14 || D.y > BB_BOT - 14) { g.gameOver(D.y < BB_TOP + 14 ? 'flew into the clouds' : 'crashed onto the rooftops'); return; }
+    if (D.y < BB_TOP + 18 || D.y > BB_BOT - 18) { g.gameOver(D.y < BB_TOP + 18 ? 'flew into the clouds' : 'crashed onto the rooftops'); return; }
     D.next -= dt; if (D.next <= 0) { var c = BB_TOP + gap / 2 + 20 + hwRand() * (BB_BOT - BB_TOP - gap - 40); D.cols.push({ x: 400, c: c, gap: gap, done: false });
       var r = hwRand(); if (g.level >= 2 && r < Math.min(0.55, 0.2 + g.level * 0.05)) D.bats.push({ x: 400 + 120, y0: BB_TOP + 60 + hwRand() * (BB_BOT - BB_TOP - 120), ph: hwRand() * 6, amp: 20 + hwRand() * 30 });
       else if (r > 0.55) D.sweets.push({ x: 400 + 120, y: c + (hwRand() - 0.5) * gap * 0.5 }); D.next = Math.max(1.05, 1.7 - g.level * 0.05); }
     for (var i = D.cols.length - 1; i >= 0; i--) { var o = D.cols[i]; o.x -= sp * dt;
       if (!o.done && o.x + BB_HW < BB_X) { o.done = true; g.addScore(1); g.sfx('score', null, 'coin'); }
-      if (Math.abs(o.x - BB_X) < BB_HW + 12 && (D.y - 12 < o.c - o.gap / 2 || D.y + 12 > o.c + o.gap / 2)) { g.sfx('chimneyBonk', null, 'hit'); g.gameOver('bonked a chimney'); return; }
+      if (Math.abs(o.x - BB_X) < BB_HW + 14 && (D.y - 15 < o.c - o.gap / 2 || D.y + 15 > o.c + o.gap / 2)) { g.sfx('chimneyBonk', null, 'hit'); g.gameOver('bonked a chimney'); return; }
       if (o.x < -50) D.cols.splice(i, 1); }
     for (i = D.bats.length - 1; i >= 0; i--) { var b = D.bats[i]; b.x -= (sp + 30) * dt; b.y = b.y0 + Math.sin(g.t * 2.5 + b.ph) * b.amp;
-      if (Math.hypot(b.x - BB_X, b.y - D.y) < 26) { g.gameOver('bumped into a bat'); return; } if (b.x < -30) D.bats.splice(i, 1); }
+      if (Math.hypot(b.x - BB_X, b.y - D.y) < 29) { g.gameOver('bumped into a bat'); return; } if (b.x < -30) D.bats.splice(i, 1); }
     for (i = D.sweets.length - 1; i >= 0; i--) { var s = D.sweets[i]; s.x -= sp * dt;
       if (Math.hypot(s.x - BB_X, s.y - D.y) < 24) { D.sweets.splice(i, 1); g.addScore(2); g.sfx('bonus', null, 'powerUp'); continue; } if (s.x < -20) D.sweets.splice(i, 1); }
     if (g.held && Math.random() < 0.5) D.puff.push({ x: BB_X - 26, y: D.y + 10, t: 0.5 }); D.puff.forEach(function (p) { p.t -= dt; p.x -= 80 * dt; }); D.puff = D.puff.filter(function (p) { return p.t > 0; });
@@ -33,12 +33,12 @@ EagleGame.run({ id: 'broomstick-bounce', title: HW_NAMES['broomstick-bounce'], h
   draw: function (g, c) {
     var D = g.data, th = g.theme; if (!g.bg()) { hwSky(c); c.fillStyle = '#1a0f2a'; c.fillRect(0, BB_BOT, 360, 80); }
     D.cols.forEach(function (o) { bbChimney(g, c, o.x, BB_TOP - 80, o.c - o.gap / 2, true); bbChimney(g, c, o.x, o.c + o.gap / 2, BB_BOT + 80, false); });
-    D.bats.forEach(function (b) { hwFrame(g, 'bat_sheet', (g.t * 10 + b.ph) % 4, 4, 1, b.x, b.y, 40, 40) || (c.fillStyle = '#3b2457', c.beginPath(), c.arc(b.x, b.y, 12, 0, 7), c.fill()); });
+    D.bats.forEach(function (b) { var gl = c.createRadialGradient(b.x, b.y, 4, b.x, b.y, 30); gl.addColorStop(0, 'rgba(230,210,255,.55)'); gl.addColorStop(1, 'rgba(230,210,255,0)'); c.fillStyle = gl; c.beginPath(); c.arc(b.x, b.y, 30, 0, 7); c.fill(); hwFrame(g, 'bat_sheet', (g.t * 10 + b.ph) % 4, 4, 1, b.x, b.y, 48, 48) || (c.fillStyle = '#3b2457', c.beginPath(), c.arc(b.x, b.y, 12, 0, 7), c.fill()); });
     D.sweets.forEach(function (s) { g.sprite('sweet', s.x, s.y, 26, 26, function (c, x, y) { c.fillStyle = '#ffd34d'; c.beginPath(); c.arc(x, y, 9, 0, 7); c.fill(); c.fillStyle = '#ff6fb1'; c.fillRect(x - 15, y - 3, 6, 6); c.fillRect(x + 9, y - 3, 6, 6); }); });
     D.puff.forEach(function (p) { c.fillStyle = 'rgba(200,180,255,' + p.t + ')'; c.beginPath(); c.arc(p.x, p.y, 5, 0, 7); c.fill(); });
     if (g.state === 'title') return; // no witch behind the title card
     var tilt = Math.max(-0.4, Math.min(0.4, D.vy / 700));
-    if (!hwFrame(g, 'witch_sheet', g.held ? (g.t * 12) % 4 : 2, 4, 1, BB_X, D.y, 60, 60, tilt)) { c.fillStyle = '#7b5cd6'; c.beginPath(); c.arc(BB_X, D.y, 14, 0, 7); c.fill(); }
+    if (!hwFrame(g, 'witch_sheet', g.held ? (g.t * 12) % 4 : 2, 4, 1, BB_X, D.y, 84, 84, tilt)) { c.fillStyle = '#7b5cd6'; c.beginPath(); c.arc(BB_X, D.y, 14, 0, 7); c.fill(); }
     c.fillStyle = th.dim; c.font = '13px system-ui'; c.textAlign = 'center'; c.fillText(D.grace ? 'hold to rise · let go to fall' : 'level ' + g.level, 180, g.safeY(600));
   }
 });

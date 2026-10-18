@@ -42,6 +42,6 @@ EagleGame.run({ id: 'glowgourd-dash', title: HW_NAMES['glowgourd-dash'], howto: 
     if (jy > 0) { c.fillStyle = 'rgba(0,0,0,.25)'; c.beginPath(); c.ellipse(D.px, LL_Y + 28, 22 - jy / 6, 6, 0, 0, 7); c.fill(); }
     var drawn = D.jump > 0 ? hwFrame(g, 'runner_jump_sheet', Math.min(2, (1 - D.jump / LL_JUMP) * 3), 3, 1, D.px, LL_Y - 6 - jy, 76, 76) : hwFrame(g, 'runner_run_sheet', (t * 12) % 6, 6, 1, D.px, LL_Y - 6, 76, 76);
     if (!drawn) hwGhost(c, D.px, LL_Y - 4 - jy, 20);
-    c.fillStyle = th.dim; c.font = '13px system-ui'; c.textAlign = 'center'; c.fillText(g.score < 2 ? 'sides hop lanes · middle jumps' : 'level ' + g.level, 180, g.safeY(600));
+    var hy = g.safeY(600); c.font = '13px system-ui'; c.textAlign = 'center'; c.fillStyle = 'rgba(20,12,36,.6)'; c.fillRect(60, hy - 15, 240, 22); c.fillStyle = '#fff'; c.fillText(g.score < 2 ? 'sides hop lanes · middle jumps' : 'level ' + g.level, 180, hy);
   }
 });

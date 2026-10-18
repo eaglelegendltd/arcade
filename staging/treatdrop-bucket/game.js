@@ -29,7 +29,7 @@ EagleGame.run({ id: 'treatdrop-bucket', title: HW_NAMES['treatdrop-bucket'], how
     if (!(D.catchT > 0 ? hwFrame(g, 'bucket_catch_sheet', Math.min(2, (0.3 - D.catchT) * 10), 3, 1, D.x, CC_Y - 4, 96, 96) : hwFrame(g, 'bucket_move_sheet', (g.t * 8) % 4, 4, 1, D.x, CC_Y - 4, 96, 96))) g.sprite('bucket', D.x, CC_Y + (g.art.bucket ? 0 : 8), g.art.bucket ? 92 : CC_W + 10, g.art.bucket ? 92 : 54, function (c, x, y) { hwPumpkin(c, x, y + 4, 30); c.fillStyle = '#1b0f22'; c.beginPath(); c.ellipse(x, y - 18, 28, 7, 0, 0, 7); c.fill(); });
     D.pops.forEach(function (p) { c.globalAlpha = Math.min(1, p.t * 2); c.fillStyle = th.accent; c.font = 'bold 18px system-ui'; c.textAlign = 'center'; c.fillText(p.s, p.x, p.y); c.globalAlpha = 1; });
     egLives(g, c); egFlash(g, c);
-    c.fillStyle = th.dim; c.font = '13px system-ui'; c.textAlign = 'center'; c.fillText(D.combo >= 2 ? 'combo ' + D.combo : 'drag to move · avoid spiders', 180, g.safeY(615));
+    var hy = g.safeY(615); c.font = '13px system-ui'; c.textAlign = 'center'; c.fillStyle = 'rgba(20,12,36,.6)'; c.fillRect(60, hy - 15, 240, 22); c.fillStyle = '#fff'; c.fillText(D.combo >= 2 ? 'combo ' + D.combo : 'drag to move · avoid spiders', 180, hy);
   }
 });
 // drag support: the bridge only reports down/up, so track movement in CSS px and convert to play-area units
