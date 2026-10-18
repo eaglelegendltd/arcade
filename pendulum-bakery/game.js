@@ -23,8 +23,10 @@ EagleGame.run({ id: 'pendulum-bakery', title: 'Pendulum Bakery', howto: 'Tap to 
     g.sprite('baker', 300, 590, 72, 72);
     var a = swingAngle(g);
     // arm drawn in code from the pivot, claw sprite hangs from its own top-centre pivot
-    c.save(); c.translate(PX, PY); c.rotate(a); c.strokeStyle = th.dim; c.lineWidth = 4; c.beginPath(); c.moveTo(0, 0); c.lineTo(0, LEN - 60); c.stroke();
-    if (g.art.pendulum) c.drawImage(g.art.pendulum, -20, LEN - 120, 40, 120); c.restore();
+    c.save(); c.translate(PX, PY); c.rotate(a); c.strokeStyle = th.dim; c.lineWidth = 4; c.beginPath(); // hook fix: pendulum.png (120x360) only has art in its top 162 rows, so drawing it as a 40x120 box ending at LEN left the claw tip
+    // ~54 px above the dough. Place the claw so its visible tip (CLAW_H) meets the dough top (LEN - 12), and run the rope to the claw top.
+    var CLAW_H = 120 * 162 / 360, clawY = LEN - 12 - CLAW_H; c.moveTo(0, 0); c.lineTo(0, clawY + 4); c.stroke();
+    if (g.art.pendulum) c.drawImage(g.art.pendulum, -20, clawY, 40, 120); c.restore();
     c.fillStyle = th.fg; c.beginPath(); c.arc(PX, PY, 6, 0, 7); c.fill();
     var p = D.drop || bob(g); if (D.wait <= 0 || D.drop) g.sprite('dough', p.x, p.y, 40, 40, function (c, x, y) { c.fillStyle = '#f3dcb0'; c.beginPath(); c.arc(x, y, 16, 0, 7); c.fill(); });
     var tx = trayX(g);

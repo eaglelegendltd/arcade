@@ -19,17 +19,22 @@ EagleGame.run({ id: 'kiteknot', title: 'Kiteknot', howto: 'Hold to reel in, rele
   draw: function (g, c) {
     var D = g.data, th = g.theme; g.bg();
     D.clouds.forEach(function (cl) { g.sprite('cloud', cl[0], cl[1], 100, 60); });
-    if (D.miss) { c.fillStyle = th.bad; c.font = 'bold 13px system-ui'; c.textAlign = 'center'; c.fillText('missed ring: one more costs a life', 190, 160); }
+    // wind streaks: 3 short tapered pale-blue swooshes that drift with the wind and fade (strength = D.wind)
+    c.save(); c.lineCap = 'round'; for (var wi = 0; wi < 3; wi++) { var wp = (g.t * (0.25 + D.wind * 0.5) + wi / 3) % 1, wx = -40 + wp * 460, wy = 170 + wi * 70 + Math.sin(g.t * 1.3 + wi) * 6;
+      c.globalAlpha = Math.sin(wp * Math.PI) * (0.25 + D.wind * 0.4); c.strokeStyle = '#cfe6ff';
+      for (var ws = 0; ws < 3; ws++) { c.lineWidth = 3 - ws; c.beginPath(); c.moveTo(wx - ws * 12, wy); c.quadraticCurveTo(wx + 20 - ws * 8, wy - 6, wx + 44 - ws * 14, wy - 2); c.stroke(); } }
+    c.restore();
     var r = D.ring; if (r) { c.globalAlpha = Math.min(1, r.t); g.sprite('ring', r.x, r.y, 60, 60, function (c, x, y) { c.strokeStyle = th.accent; c.lineWidth = 5; c.beginPath(); c.arc(x, y, 24, 0, 7); c.stroke(); }); c.globalAlpha = 1; }
     var k = kite(D), shake = D.T > 0.85 ? (Math.random() - 0.5) * 6 * D.T : 0;
-    c.strokeStyle = D.T > 1 ? th.bad : D.T > 0.8 ? th.accent : th.fg; c.lineWidth = 1.5; c.beginPath(); c.moveTo(SX, SY - 20);
+    c.strokeStyle = D.T > 1 ? th.bad : D.T > 0.8 ? th.accent : '#3a2e24'; /* dark ink string: th.fg is #f2f4f8 in dark theme -> stray white curve */ c.lineWidth = 1.5; c.beginPath(); c.moveTo(SX, SY - 20);
     c.quadraticCurveTo((SX + k.x) / 2 + shake, (SY + k.y) / 2 + 30 * (1 - Math.min(1, D.T)) + shake, k.x, k.y); c.stroke();
     g.sprite('stake', SX, SY, 30, 50, function (c, x, y) { c.fillStyle = '#7a5a3a'; c.fillRect(x - 4, y - 20, 8, 40); });
     g.sprite('kite', k.x, k.y, 70, 70, function (c, x, y) { c.fillStyle = th.bad; c.beginPath(); c.moveTo(x, y - 30); c.lineTo(x + 22, y); c.lineTo(x, y + 30); c.lineTo(x - 22, y); c.fill(); }, Math.sin(g.t * 3) * 0.15 + shake * 0.02);
     if (D.snapFx) g.frame('snap_sheet', Math.min(3, D.snapFx.t * 8 | 0), 0, 4, 1, D.snapFx.x, D.snapFx.y, 64, 64);
     c.fillStyle = th.dim; c.fillRect(30, 140, 10, 300); c.fillStyle = D.T > 1 ? th.bad : D.T > 0.8 ? th.accent : th.good; var h = Math.min(1.2, D.T) / 1.2 * 300; c.fillRect(30, 440 - h, 10, h);
     c.fillStyle = th.fg; c.fillRect(26, 440 - 250, 18, 2);
-    c.fillStyle = th.dim; c.font = '13px system-ui'; c.textAlign = 'center'; c.fillText('hold: reel in · release: let out · wind ' + Math.round(D.wind * 10), 190, g.safeY(625));
+    c.font = '13px system-ui'; c.textAlign = 'center'; var ht = 'hold: reel in · release: let out · wind ' + Math.round(D.wind * 10), hw = c.measureText(ht).width + 20, hy = g.safeY(625); /* cream pill + dark ink: grey on grass was unreadable */ c.fillStyle = 'rgba(251,243,223,0.9)'; c.strokeStyle = 'rgba(42,32,24,0.5)'; c.lineWidth = 1; c.beginPath(); if (c.roundRect) c.roundRect(190 - hw / 2, hy - 15, hw, 21, 10.5); else c.rect(190 - hw / 2, hy - 15, hw, 21); c.fill(); c.stroke(); c.fillStyle = '#2a2018'; c.fillText(ht, 190, hy);
+    if (D.miss) { c.font = 'bold 13px system-ui'; c.textAlign = 'center'; var mw = c.measureText('missed ring: one more costs a life').width + 20; /* readable backing pill over clouds/rings */ c.fillStyle = '#fbf3df'; c.strokeStyle = '#2a2018'; c.lineWidth = 2; c.beginPath(); if (c.roundRect) c.roundRect(190 - mw / 2, 145, mw, 22, 11); else c.rect(190 - mw / 2, 145, mw, 22); c.fill(); c.stroke(); /* paper pill, ink outline */ c.fillStyle = '#9b1426'; /* ~7.9:1 on #fbf3df */ c.fillText('missed ring: one more costs a life', 190, 160); }
     egLives(g, c); egFlash(g, c);
   }
 });

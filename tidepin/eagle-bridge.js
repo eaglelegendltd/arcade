@@ -1,4 +1,4 @@
-/* Eagle Legend game bridge + tiny one-touch runtime. No deps, no network.
+/* Game bridge + tiny one-touch runtime. No deps, no network.
    Protocol: see PROTOCOL.md. Usage: EagleGame.run({ id, title, init, update, draw, down, up, music }) */
 (function (W) {
   'use strict';
@@ -30,7 +30,8 @@
     // compat: the site theme listens only for { type:'el-score', value:<number> } (theme_with_consent.xml ~4945)
     if (event === 'score' || event === 'gameover' || event === 'start') {
       var el = { type: 'el-score', value: g.score | 0, game: this.game, event: event };
-      W.__eagleLog.push(el); if (W.parent && W.parent !== W) W.parent.postMessage(el, '*');
+      // logged only in __elLog, so __eagleLog stays native-only (tests count events like 'gameover' there)
+      (W.__elLog = W.__elLog || []).push(el); if (W.parent && W.parent !== W) W.parent.postMessage(el, '*');
     }
   };
 
@@ -43,8 +44,8 @@
       '#eg-wrap{position:fixed;left:0;top:0;width:100vw;height:100vh;height:100dvh;overflow:hidden}' +
       '#eg-wrap canvas{position:absolute;display:block}' +
       '#eg-area{position:absolute;pointer-events:none}#eg-area>*{pointer-events:auto}#eg-area>#eg-ov.hide{pointer-events:none}' +
-      '.eg-btn{position:absolute;top:8px;right:8px;width:40px;height:40px;border-radius:20px;border:0;font-size:20px;cursor:pointer;z-index:5;background:rgba(0,0,0,.35);color:#fff}' +
-      '#eg-pause{right:54px}' +
+      '.eg-btn{position:absolute;top:8px;right:8px;width:44px;height:44px;border-radius:22px;border:0;font-size:20px;cursor:pointer;z-index:5;background:rgba(0,0,0,.35);color:#fff}' +
+      '#eg-pause{right:58px}' /* 44px touch minimum (Skye QA) */ +
       '#eg-ov{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;z-index:4;padding:24px;box-sizing:border-box}' +
       '#eg-ov h1{margin:0 0 8px;font-size:34px}#eg-ov p{margin:4px 0;font-size:16px;opacity:.85}#eg-ov .big{font-size:22px;margin-top:18px;font-weight:700}' +
       '#eg-ov.hide{display:none}';
@@ -164,12 +165,14 @@
       e.preventDefault(); if (AK) AK.unlock && getAudio();
       if (g.state !== 'play') { if (g.state === 'over' && performance.now() - (g.overAt || 0) < 600) return; start(); return; }
       if (isPaused()) { g.paused = false; g.hostPaused = false; resume(); return; }
-      g.held = true; downAt = performance.now(); def.down && def.down(g);
+      tapXY(e); g.held = true; downAt = performance.now(); def.down && def.down(g);
     }
     W.addEventListener('pointerup', function () { if (g.held) { g.held = false; def.up && def.up(g, performance.now() - downAt); } });
     W.addEventListener('pointercancel', function () { g.held = false; });
     W.addEventListener('keydown', function (e) { if (e.code === 'Space' && !e.repeat) handleDown(e); });
     W.addEventListener('keyup', function (e) { if (e.code === 'Space' && g.held) { g.held = false; def.up && def.up(g, performance.now() - downAt); } });
+    // tap position in logical play-area coords (undefined for keyboard): lets a game read which side was tapped
+    function tapXY(e) { var c = view.css; if (e && typeof e.clientX === 'number' && c.w) { g.tapX = (e.clientX - c.x) / c.w * VW; g.tapY = (e.clientY - c.y) / c.h * VH; } else { g.tapX = g.tapY = undefined; } }
     function getAudio() { try { AK.getContext(); } catch (e) {} }
     mute.addEventListener('pointerdown', function (e) { e.stopPropagation(); setMute(!g.muted); });
     pbtn.addEventListener('pointerdown', function (e) { e.stopPropagation(); if (g.state === 'play') isPaused() ? (g.hostPaused = false, resume()) : pause(); });
@@ -206,6 +209,8 @@
     var view = g.view = { k: 1, ox: 0, oy: 0, css: { x: 0, y: 0, w: VW, h: VH } };
     function resize() {
       var vw = W.innerWidth || document.documentElement.clientWidth, vh = W.innerHeight || document.documentElement.clientHeight; // layout viewport: tracks Chrome's dynamic toolbar
+      // a hidden/collapsing iframe (theme overlay or FULL toggle mid-transition) can report 0x0: keep the last good size instead of a 0-px canvas (black), re-measure shortly
+      if (!(vw >= 2 && vh >= 2)) { setTimeout(onResize, 250); return; }
       edgeTick = 0; wrap.style.height = Math.round(vh) + 'px'; wrap.style.width = Math.round(vw) + 'px';
       var dpr = Math.min(W.devicePixelRatio || 1, 2), kc = Math.min(vw / VW, vh / VH), aw = VW * kc, ah = VH * kc, ax = Math.round((vw - aw) / 2), ay = Math.round((vh - ah) / 2);
       // the canvas covers only the 9:16 play area (cheap); the leftover viewport is filled by CSS bands (see fillEdges)
@@ -263,8 +268,27 @@
         ctx.fillStyle = th.dim; ctx.font = '11px system-ui,sans-serif'; ctx.fillText('Lv ' + g.player.level + ' · ' + g.player.xp + ' XP', 12, 40); }
       if (g.toast && g.toast.t > 0) { ctx.textAlign = 'center'; ctx.fillStyle = th.accent; ctx.font = 'bold 18px system-ui,sans-serif'; ctx.fillText(g.toast.text, VW / 2, 130); }
     }
+    // render-loop robustness (mobile blank-canvas fix): the next frame is always scheduled first, so an exception in a game's
+    // update/draw can't stop the redraw for good; dt is finite and >= 0 (rAF stamps can precede a resume()'s performance.now()).
+    var loopErr = 0;
     function frame(now) {
-      var dt = Math.min(0.05, (now - last) / 1000); last = now;
+      requestAnimationFrame(frame);
+      try { frameBody(now); loopErr = 0; } catch (err) { if (loopErr++ < 3 && W.console) console.warn('[eagle] frame error', err && err.message); try { ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.globalAlpha = 1; } catch (e2) {} }
+      checkCtx(now);
+    }
+    // 2D context loss (iOS WebKit drops canvas backing stores under memory pressure / after backgrounding): ask for a restore,
+    // re-size on restore, and if the context stays lost >1.5 s swap in a fresh canvas element.
+    var lostAt = 0;
+    cv.addEventListener('contextlost', function (e) { e.preventDefault(); lostAt = performance.now(); g.ctxLost = (g.ctxLost || 0) + 1; });
+    cv.addEventListener('contextrestored', function () { lostAt = 0; onResize(); });
+    function checkCtx(now) {
+      var lost = ctx.isContextLost ? ctx.isContextLost() : false; if (!lost) { lostAt = 0; return; }
+      if (!lostAt) lostAt = now; if (now - lostAt < 1500) return;
+      var n = document.createElement('canvas'); n.setAttribute('role', 'img'); n.setAttribute('aria-label', cv.getAttribute('aria-label'));
+      n.addEventListener('pointerdown', handleDown); cv.parentNode.replaceChild(n, cv); cv = n; ctx = cv.getContext('2d'); lostAt = 0; g.ctxRebuilt = (g.ctxRebuilt || 0) + 1; onResize();
+    }
+    function frameBody(now) {
+      var dt = (now - last) / 1000; dt = dt > 0 && dt < 1e6 ? Math.min(0.05, dt) : 0; last = now;
       if (g.state === 'play' && !isPaused()) { g.t += dt; def.update(g, dt); if (g.toast) g.toast.t -= dt; }
       var s = view.k, sx = 0, sy = 0;
       if (g.shakeAmt > 0.2 && !g.reducedMotion && !isPaused()) { sx = (Math.random() - 0.5) * g.shakeAmt; sy = (Math.random() - 0.5) * g.shakeAmt; }
@@ -272,7 +296,6 @@
       ctx.setTransform(s, 0, 0, s, view.ox + Math.round(sx * s), view.oy + Math.round(sy * s)); /* integer device px keeps the bg blit cheap */
       ctx.fillStyle = g.theme.bg; ctx.fillRect(-10, -10, VW + 20, VH + 20);
       def.draw(g, ctx); ctx.setTransform(s, 0, 0, s, view.ox, view.oy); if (def.drawOver) def.drawOver(g, ctx); hud(); fillEdges();
-      requestAnimationFrame(frame);
     }
     resize(); applyInsets(); setTheme('dark'); setMute(false); def.init(g); overlay();
     requestAnimationFrame(frame);
