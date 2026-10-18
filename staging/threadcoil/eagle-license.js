@@ -51,9 +51,16 @@
   if (C.tier === 'STANDARD') C.clientTitle = '';
   if (C.tier !== 'ENTERPRISE_RESKIN') C.sprites = {};
 
+  // Licensee (non-house) build: build.sh writes licensee-build.js -> window.EAGLE_BUILD = { licensee:true, dev:bool }.
+  // Then NONE of our defaults grant play (no eaglelegendltd.github.io/github.io, no '' = file://, no localhost,
+  // and eaglelegend.com stays in the config only as an ownership marker). Only the licensee's allowedDomains /
+  // allowedAppIds count; localhost/127.0.0.1 only with dev (build.sh --dev or licensee.js dev:true).
+  var B = W.EAGLE_BUILD || {}, LB = B.licensee === true || C.licenseeBuild === true, DEV = B.dev === true || C.dev === true;
+  C.licenseeBuild = LB;
   function hostAllowed(host) {
     host = String(host || '').toLowerCase().replace(/\.$/, '');
-    var list = (C.defaultDomains || []).concat(C.allowedDomains || []);
+    var list = LB ? (C.allowedDomains || []).filter(function (d) { d = String(d).toLowerCase(); return ['', 'localhost', '127.0.0.1', 'github.io', '*.github.io', 'eaglelegendltd.github.io', 'eaglelegend.com', '*.eaglelegend.com'].indexOf(d) < 0; })
+      .concat(DEV ? ['localhost', '127.0.0.1'] : []) : (C.defaultDomains || []).concat(C.allowedDomains || []);
     for (var i = 0; i < list.length; i++) { var d = String(list[i]).toLowerCase();
       if (d.slice(0, 2) === '*.') { d = d.slice(2); if (d && host.slice(-(d.length + 1)) === '.' + d) return true; continue; }
       if (d === '' ? (host === '' && L.protocol === 'file:') : (host === d || host.slice(-(d.length + 1)) === '.' + d)) return true; }
