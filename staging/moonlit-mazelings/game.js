@@ -13,15 +13,15 @@ function mzBuild(g) { var D = g.data, n = D.maze, C = Math.min(8, 5 + Math.floor
   D.gate = { x: far[0], y: far[1] }; D.lead = { x: 0, y: R - 1, fx: 0, fy: R - 1, d: -1, q: -1, prog: 0 }; D.trail = []; for (k = 0; k < 40; k++) D.trail.push([0, R - 1]);
   D.pets = Math.min(6, 2 + Math.floor(n / 2)); D.coins = []; var nc = 3 + Math.min(5, n);
   for (k = 0; k < 60 && D.coins.length < nc; k++) { x = Math.floor(hwRand() * C); y = Math.floor(hwRand() * R); if ((x || y !== R - 1) && !(x === far[0] && y === far[1]) && !D.coins.some(function (c) { return c.x === x && c.y === y; })) D.coins.push({ x: x, y: y }); }
-  D.lan = []; var nl = Math.min(4, 1 + Math.floor(n / 2)); for (k = 0; k < 80 && D.lan.length < nl; k++) { x = Math.floor(hwRand() * C); y = Math.floor(hwRand() * R); if (dist[x][y] >= 5) D.lan.push({ x: x, y: y, fx: x, fy: y, d: -1, prog: 1 }); }
-  D.safe = 1.2; D.done = 0; }
+  D.lan = []; var nl = Math.min(4, Math.floor((n + 1) / 2)); for (k = 0; k < 80 && D.lan.length < nl; k++) { x = Math.floor(hwRand() * C); y = Math.floor(hwRand() * R); if (dist[x][y] >= 5) D.lan.push({ x: x, y: y, fx: x, fy: y, d: -1, prog: 1 }); }
+  D.safe = 2; D.done = 0; }
 function mzDist(D, sx, sy) { var dist = [], x, y; for (x = 0; x < D.C; x++) { dist[x] = []; for (y = 0; y < D.R; y++) dist[x][y] = 1e9; } dist[sx][sy] = 0; var q = [[sx, sy]];
   while (q.length) { var p = q.shift(); for (var d = 0; d < 4; d++) { if (D.W[p[0]][p[1]] & MZ_DIRS[d][2]) continue; var nx = p[0] + MZ_DIRS[d][0], ny = p[1] + MZ_DIRS[d][1]; if (dist[nx][ny] > dist[p[0]][p[1]] + 1) { dist[nx][ny] = dist[p[0]][p[1]] + 1; q.push([nx, ny]); } } } return dist; }
 function mzOpen(D, x, y, d) { return d >= 0 && !(D.W[x][y] & MZ_DIRS[d][2]); }
 function mzSteer(g, d) { var D = g.data; if (!D.lead || D.done) return; D.lead.q = d; if (D.lead.d < 0 || D.lead.d === MZ_OPP[d]) { if (D.lead.d === MZ_OPP[d] && D.lead.prog < 1) { var L = D.lead; L.x = L.fx; L.y = L.fy; L.prog = 1 - L.prog; } } }
 function mzCell(D, x, y) { return [D.ox + (x + 0.5) * D.S, D.oy + (y + 0.5) * D.S]; }
 EagleGame.run({ id: 'moonlit-mazelings', title: HW_NAMES['moonlit-mazelings'], howto: 'Swipe up, down, left or right to lead your line of ghost pets through the maze; the leader keeps gliding until a wall or your next swipe. Reach the moon gate to clear the maze, grab moon coins for points and keep away from the wandering lanterns. A lantern touching your leader costs a life; 3 lives. Keys: arrow keys.',
-  art: ['maze_floor_128', 'maze_wall_128', 'mazeling_walk_down_sheet', 'mazeling_walk_left_sheet', 'mazeling_walk_right_sheet', 'mazeling_walk_up_sheet', 'moon_coin_sheet', 'moon_gate_sheet', 'lantern'], levelEvery: 40, likeScore: 50,
+  art: ['maze_floor_128', 'maze_wall_128', 'mazeling_walk_down_sheet', 'mazeling_walk_left_sheet', 'mazeling_walk_right_sheet', 'mazeling_walk_up_sheet', 'moon_coin_sheet', 'moon_gate_sheet', 'lantern'], levelEvery: 40, likeScore: 50, fill: { top: '#161131', bottom: { tile: 'band_bottom', size: 180, originY: 640, color: '#1f183f' } },
   achievements: [{ id: 'm3', score: 30, name: 'Moonlit Guide' }, { id: 'm150', score: 150, name: 'Maze Shepherd' }],
   init: function (g) { hwSeed(); g.data = { maze: 0, lives: 3, flash: 0, msg: null, swipe: null }; mzBuild(g); },
   down: function (g) { var D = g.data; if (g.tapX === undefined) return; D.swipe = { x: g.tapX, y: g.tapY, used: false }; },
@@ -37,7 +37,7 @@ EagleGame.run({ id: 'moonlit-mazelings', title: HW_NAMES['moonlit-mazelings'], h
     var cx = L.fx + (L.x - L.fx) * L.prog, cy = L.fy + (L.y - L.fy) * L.prog, rx = Math.round(cx), ry = Math.round(cy);
     D.coins = D.coins.filter(function (c) { if (c.x === rx && c.y === ry) { g.addScore(2); g.sfx('moonbeam', null, 'coin'); return false; } return true; });
     if (rx === D.gate.x && ry === D.gate.y) { D.done = 1; g.addScore(10 + D.pets * 2); g.sfx('mazelingFound', null, 'win'); D.msg = { text: 'Through the moon gate! +' + (10 + D.pets * 2), t: 1 }; return; }
-    var ls = Math.min(3, 1 + D.maze * 0.12);
+    var ls = Math.min(2.6, 0.7 + D.maze * 0.1);
     D.lan.forEach(function (o) { if (o.prog >= 1) { o.fx = o.x; o.fy = o.y; var opts = []; for (var d = 0; d < 4; d++) if (mzOpen(D, o.x, o.y, d) && d !== MZ_OPP[o.d]) opts.push(d);
         if (!opts.length) for (d = 0; d < 4; d++) if (mzOpen(D, o.x, o.y, d)) opts.push(d); o.d = hwPick(opts); o.x += MZ_DIRS[o.d][0]; o.y += MZ_DIRS[o.d][1]; o.prog = 0; }
       o.prog = Math.min(1, o.prog + dt * ls); o.cx = o.fx + (o.x - o.fx) * o.prog; o.cy = o.fy + (o.y - o.fy) * o.prog;

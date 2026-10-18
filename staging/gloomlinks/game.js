@@ -1,6 +1,6 @@
 // Gloomlinks: top-down one-shot mini golf in a moonlit graveyard. Drag back from anywhere and let go to putt.
 // Endless procedural holes dotted with tombstones; one shared stroke budget, topped up each time you sink a ball.
-var GL_L = 24, GL_R = 336, GL_T = 186, GL_DEC = 230, GL_MAXV = 720, GL_BR = 8, GL_HR = 13, GL_TR = 21;
+var GL_L = 24, GL_R = 336, GL_T = 186, GL_DEC = 230, GL_MAXV = 720, GL_BR = 11, GL_HR = 16, GL_TR = 21;
 function glBot(g) { return Math.min(560, g.safeBottom - 24); }
 function glHole(g) { var D = g.data, B = glBot(g), n = Math.min(7, 2 + Math.floor(D.holeNo / 2)), tries = 0;
   D.ball = { x: 100 + hwRand() * 160, y: B - 40, vx: 0, vy: 0, f: 0 }; D.hole = { x: 60 + hwRand() * 240, y: GL_T + 30 + hwRand() * 70 }; D.stones = [];
@@ -10,7 +10,7 @@ function glHole(g) { var D = g.data, B = glBot(g), n = Math.min(7, 2 + Math.floo
 function glShoot(g, dx, dy) { var D = g.data, b = D.ball; if (D.sunk || Math.hypot(b.vx, b.vy) > 0 || D.strokes <= 0) return; var len = Math.hypot(dx, dy); if (len < 12) return;
   var v = Math.min(GL_MAXV, len * 4.2); b.vx = dx / len * v; b.vy = dy / len * v; D.strokes--; D.taken++; g.sfx('link', v / GL_MAXV, 'hit'); D.swing = 0.25; }
 EagleGame.run({ id: 'gloomlinks', title: HW_NAMES['gloomlinks'], howto: 'Drag back from anywhere on the screen and let go to putt the ball; the further you pull, the harder the shot. Bounce off tombstones and walls to reach the flag. You share one stroke budget across endless holes: sinking a ball tops it up, more for beating par. Run out of strokes and the round ends. Keys: Left / Right arrows aim, hold Space / Enter to charge and release to putt.',
-  art: ['golf_ball_roll_sheet', 'golf_club', 'hole_flag_sheet', 'putting_green_tile_256', 'tombstone_sheet'], levelEvery: 60, likeScore: 60,
+  art: ['golf_ball_roll_sheet', 'golf_club', 'hole_flag_sheet', 'putting_green_tile_256', 'tombstone_sheet'], levelEvery: 60, likeScore: 60, fill: { top: '#1b1b3c', bottom: { tile: 'band_bottom', size: 180, originY: 640, color: '#2c4639' } },
   achievements: [{ id: 'g50', score: 50, name: 'Tombstone Putter' }, { id: 'g200', score: 200, name: 'Gloom Champion' }],
   init: function (g) { hwSeed(); g.data = { holeNo: 0, strokes: 6, drag: null, msg: null, charge: 0, kb: false, swing: 0 }; glHole(g); },
   down: function (g) { var D = g.data; if (g.tapX === undefined) { D.kb = true; D.charge = 0.001; return; } D.kb = false; D.drag = { x0: g.tapX, y0: g.tapY, x: g.tapX, y: g.tapY }; },
@@ -46,7 +46,7 @@ EagleGame.run({ id: 'gloomlinks', title: HW_NAMES['gloomlinks'], howto: 'Drag ba
     if (ready && (D.drag || D.charge > 0 || D.kb)) { var dx, dy; if (D.drag) { dx = D.drag.x0 - D.drag.x; dy = D.drag.y0 - D.drag.y; } else { var p = D.charge || 0.25; dx = Math.cos(D.aim) * p * 170; dy = Math.sin(D.aim) * p * 170; }
       var len = Math.hypot(dx, dy); if (len > 4) { var pw = Math.min(1, len * 4.2 / GL_MAXV); c.strokeStyle = pw > 0.85 ? th.bad : '#fff3b0'; c.lineWidth = 3; c.setLineDash([5, 6]); c.beginPath(); c.moveTo(b.x, b.y); c.lineTo(b.x + dx / len * (30 + pw * 110), b.y + dy / len * (30 + pw * 110)); c.stroke(); c.setLineDash([]);
         if (g.art.golf_club) g.sprite('golf_club', b.x - dx / len * 22, b.y - dy / len * 22, 46, 46, null, Math.atan2(dy, dx) + Math.PI / 2); } }
-    if (D.sunk) { c.globalAlpha = Math.max(0, D.sunk - 0.6) * 2; } if (!hwFrame(g, 'golf_ball_roll_sheet', b.f % 4, 4, 1, b.x, b.y, 20, 20)) { c.fillStyle = '#fff'; c.beginPath(); c.arc(b.x, b.y, GL_BR, 0, 7); c.fill(); } c.globalAlpha = 1;
+    if (D.sunk) { c.globalAlpha = Math.max(0, D.sunk - 0.6) * 2; } if (!hwFrame(g, 'golf_ball_roll_sheet', b.f % 4, 4, 1, b.x, b.y, 36, 36)) { c.fillStyle = '#fff'; c.beginPath(); c.arc(b.x, b.y, GL_BR, 0, 7); c.fill(); } c.globalAlpha = 1;
     c.textAlign = 'center'; c.font = 'bold 15px system-ui'; c.fillStyle = D.strokes <= 2 ? th.bad : '#fff3b0'; c.fillText('Hole ' + (D.holeNo + 1) + ' · par ' + D.par + ' · strokes left ' + D.strokes, 180, 170);
     if (D.msg) { c.globalAlpha = Math.min(1, D.msg.t * 2); c.fillStyle = th.accent; c.font = 'bold 22px system-ui'; c.fillText(D.msg.text, 180, 300); c.globalAlpha = 1; }
     c.fillStyle = th.dim; c.font = '12px system-ui'; c.fillText('drag back and let go to putt', 180, g.safeY(B + 18)); }

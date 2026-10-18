@@ -7,14 +7,14 @@ function enSpawn(g) { var D = g.data, a = hwRand() * Math.PI * 2, R = 260, k = M
   D.crit.push({ k: k, x: x, y: y, t: hwRand(), run: 0 }); }
 function enShoo(g, cr) { cr.run = 1; var D = g.data; D.combo++; g.addScore(1 + (D.combo >= 8 ? 1 : 0)); g.sfx('chirp', null, 'coin'); D.puffs.push({ x: cr.x, y: cr.y, t: 0.35 }); }
 EagleGame.run({ id: 'eggshade-nursery', title: HW_NAMES['eggshade-nursery'], howto: 'Beetles, mice and spiders creep toward your nest of 5 eggs. Tap a critter to shoo it away before it reaches the nest. Each critter that gets there carries off an egg; lose all 5 and the night is over. Every 20 points a lost egg comes back. Keys: Space / Enter shoos the closest critter.',
-  art: ['eggs_sheet', 'egg_cracked', 'critter_beetle_walk_sheet', 'critter_mouse_walk_sheet', 'critter_spider_walk_sheet', 'hatchlings_sheet'], levelEvery: 20, likeScore: 40,
+  art: ['eggs_sheet', 'egg_cracked', 'critter_beetle_walk_sheet', 'critter_mouse_walk_sheet', 'critter_spider_walk_sheet', 'hatchlings_sheet'], levelEvery: 20, likeScore: 40, fill: { top: '#533b5e', bottom: { tile: 'band_bottom', size: 180, originY: 640, color: '#765848' } },
   achievements: [{ id: 'e25', score: 25, name: 'Night Nanny' }, { id: 'e100', score: 100, name: 'Nest Guardian' }],
-  init: function (g) { hwSeed(); g.data = { eggs: [1, 1, 1, 1, 1], crit: [], puffs: [], spawn: 1.2, combo: 0, lost: [], msg: null, nextBack: 20 }; },
+  init: function (g) { hwSeed(); g.data = { eggs: [1, 1, 1, 1, 1], crit: [], puffs: [], spawn: 1.8, combo: 0, lost: [], msg: null, nextBack: 20 }; },
   down: function (g) { var D = g.data, best = null, bd = 1e9;
     D.crit.forEach(function (cr) { if (cr.run) return; var d = g.tapX === undefined ? Math.hypot(cr.x - EN_NX, cr.y - EN_NY) : Math.hypot(cr.x - g.tapX, cr.y - g.tapY); if (d < bd) { bd = d; best = cr; } });
-    if (best && (g.tapX === undefined || bd < 46)) enShoo(g, best); else { D.combo = 0; g.sfx('eggChill', null, 'hit'); } },
-  update: function (g, dt) { var D = g.data, sp = Math.min(95, 34 + g.level * 5 + g.t * 0.25);
-    D.spawn -= dt; if (D.spawn <= 0) { enSpawn(g); D.spawn = Math.max(0.42, 1.6 - g.level * 0.1 - g.t * 0.004) * (0.7 + hwRand() * 0.6); }
+    if (best && (g.tapX === undefined || bd < 52)) enShoo(g, best); else { D.combo = 0; g.sfx('eggChill', null, 'hit'); } },
+  update: function (g, dt) { var D = g.data, sp = Math.min(95, 24 + g.level * 5 + g.t * 0.2);
+    D.spawn -= dt; if (D.spawn <= 0) { enSpawn(g); D.spawn = Math.max(0.42, 2.1 - g.level * 0.12 - g.t * 0.004) * (0.7 + hwRand() * 0.6); }
     D.crit.forEach(function (cr) { cr.t += dt; var dx = EN_NX - cr.x, dy = EN_NY - cr.y, d = Math.hypot(dx, dy) || 1;
       if (cr.run) { cr.x -= dx / d * 260 * dt; cr.y -= dy / d * 260 * dt; cr.flip = dx > 0; return; }
       cr.x += dx / d * sp * EN_SPD[cr.k] * dt + Math.sin(cr.t * 5) * 12 * dt; cr.y += dy / d * sp * EN_SPD[cr.k] * dt; cr.flip = dx < 0;

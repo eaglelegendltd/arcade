@@ -13,7 +13,7 @@ function ssSend(g, side) { var D = g.data, s = D.sock; if (!s || s.fly) return; 
     D.glow[side] = 0.35; }
   else { D.combo = 0; s.bad = true; g.sfx('sockWrong', null, 'hit'); g.shake && g.shake(4); egLoseLife(g, 'a ' + SS_NAMES[s.k] + ' sock went in the wrong basket', true); } }
 EagleGame.run({ id: 'spellsock-sorting', title: HW_NAMES['spellsock-sorting'], howto: 'A spell sock drops from the top. Tap the left or right side to send it into the basket that takes its colour (the coloured dots under each basket). Wrong basket or a dropped sock costs a life; 3 lives. New colours join and socks fall faster as you level up. Keys: Left / Right arrows.',
-  art: ['socks_sheet', 'baskets_sheet'], levelEvery: 15, likeScore: 40,
+  art: ['socks_sheet', 'baskets_sheet'], levelEvery: 15, likeScore: 40, fill: { top: '#3a253e', bottom: { tile: 'band_bottom', size: 180, originY: 640, color: '#664839' } },
   achievements: [{ id: 's25', score: 25, name: 'Sock Sorter' }, { id: 's100', score: 100, name: 'Laundry Wizard' }],
   init: function (g) { hwSeed(); g.data = { lives: 3, flash: 0, combo: 0, glow: [0, 0], msg: null, lastLevel: 1, lastK: -1 }; ssSpawn(g); },
   down: function (g) { if (g.tapX === undefined) return; ssSend(g, g.tapX < 180 ? 0 : 1); },
