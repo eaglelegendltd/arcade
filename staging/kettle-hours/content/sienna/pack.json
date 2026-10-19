@@ -2043,7 +2043,7 @@
        },
        "after": {
         "ref": "obs_van_after",
-        "alt": "Tom's van now: dirty, sign peeling, a stack of red-topped letters and empty cans on the dashboard.",
+        "alt": "Tom's van now: sign peeling, a stack of red-topped letters and empty cans on the dashboard.",
         "placeholder": {
          "kind": "portrait",
          "character": "tom"
@@ -2087,10 +2087,10 @@
         {
          "id": "sign",
          "label": "The sign",
-         "x": 20,
-         "y": 60,
-         "w": 60,
-         "h": 20,
+         "x": 41,
+         "y": 59,
+         "w": 42,
+         "h": 21,
          "changed": true,
          "found": "The sign's half peeled off and nobody's fixed it.",
          "effects": [
