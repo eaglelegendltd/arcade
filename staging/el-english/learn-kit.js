@@ -126,7 +126,7 @@
     else {
       var fr = this.frontier();
       if (!fr.length) { var me = this; fr = this.ids.slice().sort(function (a, b) { return me.rec(a).p - me.rec(b).p; }); }
-      var two = fr.slice(0, 2); id = two[this.count % two.length];
+      var lowB = skills[fr[0]].band, two = fr.filter(function (x) { return skills[x].band <= lowB + 1; }).slice(0, 2); id = two[this.count % two.length]; // P1: never jump more than one band past the lowest open topic
       if (this.preHintSkill && two.indexOf(this.preHintSkill) >= 0) id = this.preHintSkill;
     }
     d = this.targetD(id) + (this.dNudge[id] || 0);
@@ -174,7 +174,8 @@
   };
   P.skip = function (item) { return this.answer(item, null, 'skip'); };
   P.unlockedSet = function () { var o = {}, self = this; this.ids.forEach(function (id) { if (self.isUnlocked(id)) o[id] = 1; }); return o; };
-  P.weakestPrereq = function (id, masteredOk) { var self = this, ps = (skills[id].prereqs || []).filter(function (p) { return skills[p]; });
+  P.weakestPrereq = function (id, masteredOk) { var self = this, fl = this.floor && this.count <= this.floor.until ? this.floor.band : -99,
+      ps = (skills[id].prereqs || []).filter(function (p) { return skills[p] && skills[p].band >= fl; });
     if (!ps.length) return null; ps.sort(function (a, b) { return self.rec(a).p - self.rec(b).p; }); return ps[masteredOk ? ps.length - 1 : 0]; };
   P.progress = function () { var self = this;
     return { skills: this.ids.map(function (id) { return { id: id, title: skills[id].title, band: skills[id].band, state: self.isMastered(id) ? 'mastered' : self.isUnlocked(id) ? 'open' : 'locked' }; }), due: this.dueList().length }; };
@@ -185,7 +186,13 @@
   P.bandRange = function () { var b = this.ids.map(function (id) { return skills[id].band; }); return [Math.min.apply(null, b), Math.max.apply(null, b)]; };
   P.startPlacement = function (startBand) { var rg = this.bandRange(), sb = startBand || (this.subject === 'coding' ? 2 : 4);
     this.placement = { band: clamp(sb, rg[0], rg[1]), step: 4, asked: 0, pair: [], done: false }; return this.placementItem(); };
-  P.placementItem = function () { var pl = this.placement; var it = this.make(this.bandSkill(pl.band), 0, { placement: true }); return it; };
+  // P2 (Skye QA 19 Oct): each band is probed with two different skills where it has them, rotating on revisits,
+  // so one weak topic can't move the result on its own
+  P.bandSkills = function (band) { var self = this, near = skills[this.bandSkill(band)].band;
+    return this.ids.filter(function (id) { return skills[id].band === near; }).sort(function (a, b) { return order.indexOf(a) - order.indexOf(b); }); };
+  P.placementItem = function () { var pl = this.placement, list = this.bandSkills(pl.band); pl.seen = pl.seen || {};
+    var v = pl.seen[pl.band] || 0, id = list[(v * 2 + pl.pair.length) % list.length]; if (pl.pair.length === 1) pl.seen[pl.band] = v + 1;
+    return this.make(id, 0, { placement: true }); };
   P.placementAnswer = function (item, resp) {
     var pl = this.placement; if (!pl || pl.done) return null;
     pl.pair.push(this.check(item, resp) && (item.hintLevel || 0) === 0 ? 1 : 0); pl.asked++;
@@ -194,12 +201,20 @@
       var clamped = clamp(pl.band, rg[0], rg[1]); if (clamped !== pl.band) hold = hold || st === 1; pl.band = clamped;
       pl.pair = []; if (st === 1 && hold) pl.done = true; pl.step = Math.max(1, st / 2); }
     if (pl.asked >= 12) pl.done = true;
-    if (pl.done) { this.seed(pl.band); this.data.placement = { band: pl.band, at: now() }; this.dirty(); return null; }
+    if (pl.done) { pl.band = this.seed(pl.band); this.data.placement = { band: pl.band, at: now() }; this.dirty(); return null; }
     return this.placementItem();
   };
   P.placementBand = function () { return this.placement ? this.placement.band : null; };
-  P.seed = function (B) { var self = this; this.data.skills = {}; this.data.offset = 0; this.started = true;
-    this.ids.forEach(function (id) { var bd = skills[id].band; self.data.skills[id] = cleanSkill({ p: bd < B ? 0.85 : bd === B ? 0.40 : 0.10, th: 0 }); }); };
+  // bands can have gaps (e.g. no maths skill at 9-10): snap to the nearest band that has skills, ties going lower
+  P.snapBand = function (B) { var bs = this.ids.map(function (id) { return skills[id].band; }), best = bs[0];
+    bs.forEach(function (b) { if (Math.abs(b - B) < Math.abs(best - B) || (Math.abs(b - B) === Math.abs(best - B) && b < best)) best = b; }); return best; };
+  P.seed = function (B) { var self = this; B = this.snapBand(B); this.data.skills = {}; this.data.offset = 0; this.started = true;
+    this.floor = { band: B - 1, until: this.count + 10 }; // P1: for the first round, struggle step-backs stay within one band of B
+    this.ids.forEach(function (id) { var bd = skills[id].band; self.data.skills[id] = bd < B
+      // P1 (Skye QA 19 Oct): skills below the placed/picked band are placed out, i.e. provisionally mastered (not frontier),
+      // in Leitner box 1 so spaced review re-checks them from tomorrow; a miss there drops them back (box 1, p <= 0.70)
+      ? cleanSkill({ p: 0.95, th: 0.5, n: 5, streak3: [1, 1, 1], box: 1, last: now() })
+      : cleanSkill({ p: bd === B ? 0.40 : 0.10, th: 0 }); }); return B; };
   // curriculum pickers: only when LEARN_CURRICULUM_PICKER is on, and only frameworks whose per-picker flag
   // (built from curriculum-map.json <subject>Verified.pickerEnabled) is exactly true (ENGINE.md §9)
   function pickers() { var C = W.LEARN_CURRICULA; if (W.LEARN_CURRICULUM_PICKER !== true || !C || !C.frameworks) return [];
@@ -207,9 +222,9 @@
   P.pickLevel = function (framework, level) {
     var fw = null, lv = null; pickers().forEach(function (f) { if (f.id === framework) fw = f; });
     (fw && fw.levels || []).forEach(function (l) { if (l.id === level) lv = l; });
-    if (!lv) return false; this.seed(lv.band || 1); this.data.curriculum = { framework: framework, level: level }; this.data.placement = null; this.dirty(); return lv.band;
+    if (!lv) return false; var rg = this.bandRange(), b = this.seed(clamp(lv.band || 1, rg[0], rg[1])); this.data.curriculum = { framework: framework, level: level }; this.data.placement = null; this.dirty(); return b;
   };
-  P.pickBand = function (band) { var rg = this.bandRange(), b = clamp(band | 0, rg[0], rg[1]); this.seed(b); this.data.curriculum = { framework: 'level', level: String(b) }; this.data.placement = null; this.dirty(); return b; };
+  P.pickBand = function (band) { var rg = this.bandRange(), b = this.seed(clamp(band | 0, rg[0], rg[1])); this.data.curriculum = { framework: 'level', level: String(b) }; this.data.placement = null; this.dirty(); return b; };
   P.startAtBeginning = function () { this.seed(1); this.dirty(); };
 
   // persistence (debounced 1 s, flushed on visibilitychange)
@@ -222,7 +237,7 @@
   function reset(subject) { sdel(PREFIX + subject); sdel(BAK + subject); var s = sessions[subject];
     if (s) { if (s.timer) clearTimeout(s.timer); s.timer = null; s.data = blank(subject); s.acc = []; s.recent = {}; s.wrongRun = {}; s.back = null; s.placement = null; s.lowerNext = null; s.preHintSkill = null; s.readOnly = false; } return true; }
   function resetAll() { var ks = []; try { for (var i = 0; i < W.localStorage.length; i++) ks.push(W.localStorage.key(i)); } catch (e) {}
-    ks.concat(Object.keys(mem)).forEach(function (k) { if (k && k.indexOf('eagle.learn.') === 0) sdel(k); }); for (var s in sessions) reset(s); return true; }
+    ks.concat(Object.keys(mem)).forEach(function (k) { if (k && (k.indexOf('eagle.learn.') === 0 || k.indexOf('eagle-best-el-') === 0 || k === 'learnSpeakEnabled')) sdel(k);  }); /* L1: personal bests + read-aloud too */ for (var s in sessions) reset(s); return true; }
 
   // §8.3 export / import (local file only, no upload)
   function exportData(subject) { var s = sessions[subject]; if (s) s.save(); var d = sget(PREFIX + subject) || (s && s.data) || blank(subject); return { format: 'eagle-learn-export', schema: SCHEMA, data: sanitise(d, subject) }; }

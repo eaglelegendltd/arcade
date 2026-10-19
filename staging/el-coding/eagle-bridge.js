@@ -266,7 +266,7 @@
       var th = g.theme; ctx.fillStyle = th.fg; ctx.textAlign = 'center'; var pz = g.reducedMotion ? 0 : (g.scorePulse || 0); g.scorePulse = Math.max(0, (g.scorePulse || 0) - 0.08);
       ctx.font = 'bold ' + Math.round(44 * (1 + pz * 0.25)) + 'px system-ui,sans-serif';
       if (g.state !== 'title') ctx.fillText(g.score, VW / 2, 70);
-      ctx.font = '13px system-ui,sans-serif'; ctx.fillStyle = th.dim; ctx.fillText('BEST ' + g.best + ' · LV ' + g.level, VW / 2, 92);
+      ctx.font = '13px system-ui,sans-serif'; ctx.fillStyle = th.dim; ctx.fillText(W.EAGLE_LEARN === true ? 'BEST ' + g.best : 'BEST ' + g.best + ' · LV ' + g.level, VW / 2, 92); // learning games: no LV (it could read as the learner's level)
       if (g.player) { ctx.textAlign = 'left'; ctx.fillStyle = th.fg; ctx.font = 'bold 13px system-ui,sans-serif'; ctx.fillText(g.player.name, 12, 24);
         ctx.fillStyle = th.dim; ctx.font = '11px system-ui,sans-serif'; ctx.fillText('Lv ' + g.player.level + ' · ' + g.player.xp + ' XP', 12, 40); }
       if (g.toast && g.toast.t > 0) { ctx.textAlign = 'center'; ctx.fillStyle = th.accent; ctx.font = 'bold 18px system-ui,sans-serif'; ctx.fillText(g.toast.text, VW / 2, 130); }

@@ -35,7 +35,7 @@
       ['Say the word and listen for the sound in the gap.', e[1].indexOf('-e') > 0 ? 'This one is a split digraph: the e at the end changes the vowel sound.' : 'The missing sound is made by two letters together.', e[0] + ' is spelt with "' + e[1] + '": ' + e[0] + '.'],
       { art: card(e[0]), speakFallback: 'No voice is available on this device, so use the picture as your clue.', speak: e[0] + '. Which letters complete the word ' + e[0] + '?' }); };
   var TRICKY = [['said', 'sed', 'sayd', 'siad'], ['because', 'becos', 'becuase', 'beacuse'], ['friend', 'frend', 'freind', 'frient'], ['people', 'peple', 'poeple', 'peeple'], ['could', 'cood', 'culd', 'coud'],
-    ['school', 'skool', 'scool', 'schol'], ['once', 'wunce', 'onse', 'wons'], ['they', 'thay', 'thei', 'tey'], ['were', 'wer', 'whir', 'wur'], ['laugh', 'laff', 'larf', 'lauf'], ['busy', 'bizzy', 'bisy', 'buzy'],
+    ['school', 'skool', 'scool', 'schol'], ['once', 'wunce', 'onse', 'wons'], ['they', 'thay', 'thei', 'tey'], ['were', 'wer', 'werr', 'wur'], ['laugh', 'laff', 'larf', 'lauf'], ['busy', 'bizzy', 'bisy', 'buzy'],
     ['answer', 'anser', 'arnser', 'ansur'], ['beautiful', 'beutiful', 'butiful', 'beautifull'], ['separate', 'seperate', 'seprate', 'separete'], ['necessary', 'neccessary', 'necesary', 'neccesary'], ['definitely', 'definately', 'defenitely', 'definitly']];
   G['english.phonics.tricky'] = function (p, d, rng) { var L = lv(d, 3), t = pick(rng, TRICKY.slice(L * 4, L * 4 + (L === 2 ? 8 : 6)));
     return choice(rng, 'tr:' + t[0], 'Which spelling is correct?', t[0], t.slice(1).map(function (x) { return [x, 'sounds-out']; }),

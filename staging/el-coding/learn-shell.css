@@ -104,3 +104,13 @@ body.rm .lm-notice { transition: none; }
 .lm-screen.play .lm-row .lm-btn { padding: 8px 10px; }
 #lm-spoken { font-size: .82em; margin-top: 2px; }
 .lm-btn.lm-level { text-align: left; font-weight: 500; margin-top: 6px; }
+/* landscape (L2/L3): two columns, question left and answers/build right; header row kept clear for the score */
+body.lm-land .lm-screen, body.lm-land .lm-screen.play { top: 64px; padding-left: calc(14px + env(safe-area-inset-left)); padding-right: calc(14px + env(safe-area-inset-right)); }
+body.lm-land .lm-screen:not(.two) > * { width: 100%; max-width: 460px; margin-left: auto; margin-right: auto; box-sizing: border-box; }
+body.lm-land .lm-screen.two { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); grid-template-rows: auto 1fr; column-gap: 14px; row-gap: 8px; align-content: start; }
+body.lm-land .lm-screen.two > * { grid-column: 2; }
+body.lm-land .lm-screen.two > #lm-qcard { grid-column: 1; grid-row: 1; }
+body.lm-land .lm-screen.two > .lm-tools { grid-column: 1; grid-row: 2; align-self: start; }
+body.lm-land .lm-screen.two > #lm-answers { grid-row: 1 / span 2; margin-top: 0; align-self: start; }
+body.lm-land .lm-screen.two > .lm-card:not(#lm-qcard) { grid-row: 1; }
+body.lm-land .lm-screen.two > .lm-row { grid-row: 2; align-self: start; }

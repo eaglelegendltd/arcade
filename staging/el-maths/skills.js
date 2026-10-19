@@ -9,6 +9,8 @@
   function gcd(a, b) { a = Math.abs(a); b = Math.abs(b); while (b) { var t = b; b = a % b; a = t; } return a || 1; }
   function frac(n, d) { var g = gcd(n, d); n /= g; d /= g; return d === 1 ? String(n) : n + '/' + d; }
   function dec(x) { return String(Math.round(x * 1000) / 1000); }
+  function an(w) { return (/^[aeiou]/i.test(w) ? 'an ' : 'a ') + w; } // C1: 'an octagon'
+  function cap(w) { return w.charAt(0).toUpperCase() + w.slice(1); }
   function num(n) { return n < 0 ? '\u2212' + Math.abs(n) : String(n); } // proper minus sign for display
   function item(rng, key, text, ans, cands, hints, opt) {
     opt = opt || {}; var seen = {}, ch = [ans], tags = {}; seen[String(ans)] = 1;
@@ -36,10 +38,10 @@
       ['The short hand shows the hour. The long hand shows the minutes.', 'Each number on the clock face is 5 minutes for the long hand.', 'The short hand is at ' + h + (mm ? ' (just past)' : '') + ' and the long hand shows ' + mm + ' minutes: ' + ans + '.'], { art: { type: 'clock', h: h, m: mm } }); };
   var SH = [['triangle', 3], ['square', 4], ['pentagon', 5], ['hexagon', 6], ['octagon', 8]], S3 = [['cube', 6, 'faces'], ['cuboid', 12, 'edges'], ['cube', 8, 'vertices (corners)'], ['triangular prism', 5, 'faces'], ['square-based pyramid', 5, 'faces'], ['triangular prism', 6, 'vertices (corners)']];
   G['maths.geometry.shapes'] = function (p, d, rng) { var L = lv(d, 2);
-    if (!L) { var s = pick(rng, SH); return item(rng, 'sh:' + s[0], 'How many sides does a ' + s[0] + ' have?', s[1], [[s[1] + 1, 'near'], [s[1] - 1, 'near'], [s[1] + 2, 'near']],
-      ['Picture the shape and count its straight edges.', 'The name helps: ' + (s[1] > 4 ? 'pent = 5, hex = 6, oct = 8' : 'tri means 3') + '.', 'A ' + s[0] + ' has ' + s[1] + ' sides.']); }
+    if (!L) { var s = pick(rng, SH); return item(rng, 'sh:' + s[0], 'How many sides does ' + an(s[0]) + ' have?', s[1], [[s[1] + 1, 'near'], [s[1] - 1, 'near'], [s[1] + 2, 'near']],
+      ['Picture the shape and count its straight edges.', 'The name helps: ' + (s[1] > 4 ? 'pent = 5, hex = 6, oct = 8' : 'tri means 3') + '.', cap(an(s[0])) + ' has ' + s[1] + ' sides.']); }
     var t = pick(rng, S3); return item(rng, 's3:' + t[0] + t[2], 'How many ' + t[2] + ' does a ' + t[0] + ' have?', t[1], [[t[1] + 2, 'near'], [t[1] - 2, 'near'], [t[1] + 1, 'near']],
-      ['Picture the shape and count one side at a time.', 'Count the top, the bottom, then the sides.', 'A ' + t[0] + ' has ' + t[1] + ' ' + t[2] + '.']); };
+      ['Picture the shape and count one side at a time.', 'Count the top, the bottom, then the sides.', cap(an(t[0])) + ' has ' + t[1] + ' ' + t[2] + '.']); };
   G['maths.number.placevalue.twodigit'] = function (p, d, rng) { var L = lv(d, 3), n = L < 2 ? R(rng, 11, 99) : R(rng, 101, 999), s = String(n), pos = R(rng, 0, s.length - 2), dg = +s[pos];
     if (!dg) { pos = 0; dg = +s[0]; } var val = dg * Math.pow(10, s.length - 1 - pos), name = ['ones', 'tens', 'hundreds'][s.length - 1 - pos];
     return item(rng, 'pv:' + n + ':' + pos, 'In ' + n + ', what is the ' + dg + ' worth?', val, [[dg, 'digit-only'], [val * 10, 'place-shift'], [val / 10 >= 1 ? val / 10 : dg + 1, 'place-shift']],
@@ -117,8 +119,8 @@
       ['List the multiples of each number.', 'Multiples of ' + Math.max(a, b) + ': ' + [1, 2, 3, 4].map(function (i) { return Math.max(a, b) * i; }).join(', ') + '\u2026', l + ' is the first number in both lists.']); };
   function pt(x, y) { return '(' + num(x) + ', ' + num(y) + ')'; }
   G['maths.geometry.transformations'] = function (p, d, rng) { var L = lv(d, 3), x = R(rng, 1, 7), y = R(rng, 1, 7);
-    if (L === 2) { var dx = R(rng, -5, 5) || 2, dy = R(rng, -5, 5) || -3; return item(rng, 'tr:' + x + y + dx + dy, 'Translate ' + pt(x, y) + ' by ' + dx + ' across and ' + dy + ' up. Where does it land?', pt(x + dx, y + dy), [[pt(x + dy, y + dx), 'swapped'], [pt(x - dx, y - dy), 'wrong-direction'], [pt(x + dx, y - dy), 'one-sign'], [pt(x - dx, y + dy), 'one-sign'], [pt(x + dx + 1, y + dy), 'near'], [pt(x + dx, y + dy + 1), 'near']],
-      ['Move across first (x), then up or down (y).', 'x: ' + x + ' + ' + num(dx) + ' = ' + (x + dx) + '.', 'It lands on ' + pt(x + dx, y + dy) + '.']); }
+    if (L === 2) { var dx = R(rng, -5, 5) || 2, dy = R(rng, -5, 5) || -3; return item(rng, 'tr:' + x + y + dx + dy, 'Translate ' + pt(x, y) + ' by ' + num(dx) + ' across and ' + num(dy) + ' up. Where does it land?', pt(x + dx, y + dy), [[pt(x + dy, y + dx), 'swapped'], [pt(x - dx, y - dy), 'wrong-direction'], [pt(x + dx, y - dy), 'one-sign'], [pt(x - dx, y + dy), 'one-sign'], [pt(x + dx + 1, y + dy), 'near'], [pt(x + dx, y + dy + 1), 'near']],
+      ['Move across first (x), then up or down (y).', 'x: ' + num(x) + ' + ' + num(dx) + ' = ' + num(x + dx) + '.', 'It lands on ' + pt(x + dx, y + dy) + '.']); }
     var ax = L === 0 ? 'y' : 'x', A = ax === 'y' ? pt(-x, y) : pt(x, -y);
     return item(rng, 'rf:' + ax + x + y, 'Reflect the point ' + pt(x, y) + ' in the ' + ax + '-axis. Where does it go?', A, [[ax === 'y' ? pt(x, -y) : pt(-x, y), 'wrong-axis'], [pt(-x, -y), 'both-flipped'], [pt(y, x), 'swapped'], [pt(-y, x), 'rotated'], [pt(x, y), 'unchanged'], [pt(-x - 1, -y), 'near']],
       ['A reflection keeps the same distance from the mirror line.', 'Reflecting in the ' + ax + '-axis changes the sign of the ' + (ax === 'y' ? 'x' : 'y') + ' coordinate only.', pt(x, y) + ' becomes ' + A + '.']); };
@@ -147,10 +149,10 @@
       ['Swap x for ' + x + '. A number next to x means multiply.', L === 1 ? a + ' \u00d7 ' + x + ' = ' + a * x + '.' : 'x\u00b2 = ' + x * x + ', then \u00d7 ' + a + ' = ' + a * x * x + '.', ex + ' = ' + A + ' when x = ' + x + '.'], { neg: true, speak: 'Work out ' + ex.replace('x\u00b2', 'x squared') + ' when x equals ' + x }); };
   G['maths.algebra.sequences'] = function (p, d, rng) { var L = lv(d, 3), a = R(rng, 1, 20), s = R(rng, 2, 9) * (L && rng() < 0.4 ? -1 : 1), seq = [0, 1, 2, 3].map(function (i) { return a + s * i; });
     if (L < 2) { var A = a + 4 * s; return item(rng, 'sq:' + a + ':' + s, 'What comes next? ' + seq.map(num).join(', ') + ', \u2026', A, [[A + s, 'skipped'], [seq[3] + 1, 'add-one'], [A - 1, 'near']],
-      ['Find the gap between neighbouring terms.', 'Each term ' + (s > 0 ? 'goes up' : 'goes down') + ' by ' + Math.abs(s) + '.', seq[3] + (s > 0 ? ' + ' : ' \u2212 ') + Math.abs(s) + ' = ' + num(A) + '.'], { neg: true }); }
+      ['Find the gap between neighbouring terms.', 'Each term ' + (s > 0 ? 'goes up' : 'goes down') + ' by ' + Math.abs(s) + '.', num(seq[3]) + (s > 0 ? ' + ' : ' \u2212 ') + Math.abs(s) + ' = ' + num(A) + '.'], { neg: true }); }
     var n = R(rng, 10, 30), An = a + s * (n - 1);
     return item(rng, 'nth:' + a + ':' + s + ':' + n, 'The sequence ' + seq.map(num).join(', ') + ', \u2026 What is term number ' + n + '?', An, [[s * n, 'no-constant'], [a + s * n, 'off-by-one-term'], [An + 1, 'near']],
-      ['Find the rule: nth term = ' + s + 'n + something.', 'nth term = ' + s + 'n ' + ((a - s) >= 0 ? '+ ' : '\u2212 ') + Math.abs(a - s) + '.', s + ' \u00d7 ' + n + ' ' + ((a - s) >= 0 ? '+ ' : '\u2212 ') + Math.abs(a - s) + ' = ' + num(An) + '.'], { neg: true }); };
+      ['Find the rule: nth term = ' + num(s) + 'n + something.', 'nth term = ' + num(s) + 'n ' + ((a - s) >= 0 ? '+ ' : '\u2212 ') + Math.abs(a - s) + '.', num(s) + ' \u00d7 ' + n + ' ' + ((a - s) >= 0 ? '+ ' : '\u2212 ') + Math.abs(a - s) + ' = ' + num(An) + '.'], { neg: true }); };
   G['maths.stats.averages'] = function (p, d, rng) { var L = lv(d, 3), k = L === 2 ? 5 : 4, v = [], i, s = 0; for (i = 0; i < k; i++) { v.push(R(rng, 1, 20)); s += v[i]; }
     var o = v.slice().sort(function (a, b) { return a - b; });
     if (L === 0) { var rg = o[k - 1] - o[0]; return item(rng, 'rg:' + v.join(','), 'What is the range of ' + v.join(', ') + '?', rg, [[o[k - 1], 'largest-only'], [Math.round(s / k), 'mean-not-range'], [rg + 1, 'near']],
@@ -169,9 +171,9 @@
   G['maths.stats.probability'] = function (p, d, rng) { var L = lv(d, 3), r = R(rng, 1, 9), b = R(rng, 1, 9), gr = L === 2 ? R(rng, 1, 6) : 0, t = r + b + gr, A = frac(r, t);
     return item(rng, 'pb:' + r + ':' + b + ':' + gr, 'A bag has ' + r + ' red, ' + b + ' blue' + (gr ? ' and ' + gr + ' green' : '') + ' counters. You pick one without looking. What is the probability it is red?', A, [[frac(r, Math.max(1, b + gr)) === A ? frac(b, t) : r + '/' + (b + gr), 'red-to-others'], [frac(b + gr, t), 'complement'], [frac(1, t) === A ? frac(r + 1, t + 1) : '1/' + t, 'one-counter'], [frac(r + 1, t), 'near'], [frac(r, t + 1), 'near'], [frac(r + 2, t + 2), 'near']],
       ['Probability = ways it can happen \u00f7 all the possible outcomes.', 'There are ' + r + ' red out of ' + t + ' counters altogether.', 'P(red) = ' + r + '/' + t + (A !== r + '/' + t ? ' = ' + A : '') + '.']); };
-  G['maths.algebra.linear'] = function (p, d, rng) { var L = lv(d, 3), m = R(rng, -4, 6) || 2, c = R(rng, -8, 9), x = R(rng, -3, 6), ln = 'y = ' + m + 'x ' + (c < 0 ? '\u2212 ' : '+ ') + Math.abs(c);
+  G['maths.algebra.linear'] = function (p, d, rng) { var L = lv(d, 3), m = R(rng, -4, 6) || 2, c = R(rng, -8, 9), x = R(rng, -3, 6), ln = 'y = ' + num(m) + 'x ' + (c < 0 ? '\u2212 ' : '+ ') + Math.abs(c);
     if (L === 0) return item(rng, 'gr:' + ln, 'What is the gradient of the line ' + ln + '?', m, [[c, 'intercept'], [-m, 'sign'], [m + 1, 'near']], ['In y = mx + c, m is the gradient.', 'The number multiplying x is the gradient.', 'The gradient is ' + num(m) + '.'], { neg: true });
-    if (L === 1) return item(rng, 'yv:' + ln + ':' + x, 'On the line ' + ln + ', what is y when x = ' + num(x) + '?', m * x + c, [[m + x + c, 'added'], [m * x - c, 'sign'], [m * x, 'forgot-c']], ['Put x = ' + num(x) + ' into the equation.', m + ' \u00d7 ' + num(x) + ' = ' + num(m * x) + '.', 'y = ' + num(m * x) + (c < 0 ? ' \u2212 ' : ' + ') + Math.abs(c) + ' = ' + num(m * x + c) + '.'], { neg: true });
+    if (L === 1) return item(rng, 'yv:' + ln + ':' + x, 'On the line ' + ln + ', what is y when x = ' + num(x) + '?', m * x + c, [[m + x + c, 'added'], [m * x - c, 'sign'], [m * x, 'forgot-c']], ['Put x = ' + num(x) + ' into the equation.', num(m) + ' \u00d7 ' + num(x) + ' = ' + num(m * x) + '.', 'y = ' + num(m * x) + (c < 0 ? ' \u2212 ' : ' + ') + Math.abs(c) + ' = ' + num(m * x + c) + '.'], { neg: true });
     var x1 = R(rng, -3, 3), x2 = x1 + R(rng, 1, 4), y1 = m * x1 + c, y2 = m * x2 + c;
     return item(rng, 'g2:' + x1 + y1 + x2 + y2, 'What is the gradient of the line through ' + pt(x1, y1) + ' and ' + pt(x2, y2) + '?', m, [[(x2 - x1) / (y2 - y1) === Math.round((x2 - x1) / (y2 - y1)) ? (x2 - x1) / (y2 - y1) : m + 2, 'flipped'], [y2 - y1, 'rise-only'], [-m, 'sign']],
       ['Gradient = change in y \u00f7 change in x.', 'Change in y: ' + num(y2 - y1) + '. Change in x: ' + (x2 - x1) + '.', num(y2 - y1) + ' \u00f7 ' + (x2 - x1) + ' = ' + num(m) + '.'], { neg: true }); };

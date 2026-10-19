@@ -34,9 +34,17 @@
     function show(html, cls) { scr.className = 'lm-screen' + (cls ? ' ' + cls : ''); scr.innerHTML = html; scr.scrollTop = 0; fit();
       var f = scr.querySelector('[data-focus]') || scr.querySelector('button'); if (f && D.activeElement !== D.body) try { f.focus({ preventScroll: true }); } catch (e) {} }
     // stretch the UI layer to the real bottom edge, then shrink the picture/grid until the play view needs no scrolling
+    // landscape (L2/L3): the UI layer spans the whole width, the question goes left and the answers right, and the
+    // bridge's pause/mute buttons move to the right-hand edge so they no longer sit on the score
     function stretch() { var lm = D.getElementById('lm'), area = lm && lm.parentNode; if (!area || !area.getBoundingClientRect) return;
-      var r = area.getBoundingClientRect(), vh = (W.visualViewport && W.visualViewport.height) || W.innerHeight; lm.style.bottom = -Math.max(0, Math.round(vh - r.bottom)) + 'px'; }
-    function fit() { stretch(); if (!/\bplay\b/.test(scr.className)) { scr.style.removeProperty('--art'); return; }
+      var r = area.getBoundingClientRect(), vw = (W.visualViewport && W.visualViewport.width) || W.innerWidth, vh = (W.visualViewport && W.visualViewport.height) || W.innerHeight,
+        land = vw > vh * 1.15, gl = land ? Math.max(0, Math.round(r.left)) : 0, gr = land ? Math.max(0, Math.round(vw - r.right)) : 0;
+      D.body.classList.toggle('lm-land', land); lm.style.bottom = -Math.max(0, Math.round(vh - r.bottom)) + 'px'; lm.style.left = -gl + 'px'; lm.style.right = -gr + 'px';
+      var mu = D.getElementById('eg-mute'), pa = D.getElementById('eg-pause');
+      if (mu && pa) { mu.style.setProperty('right', (8 - gr) + 'px', 'important'); pa.style.setProperty('right', (64 - gr) + 'px', 'important'); }
+      var lo = D.getElementById('eg-logo'); if (lo) { if (lo.__l0 == null) { lo.__l0 = lo.style.left; lo.__t0 = lo.style.top; }
+        lo.style.left = land ? (64 - gl) + 'px' : lo.__l0; lo.style.top = land ? '10px' : lo.__t0; } }
+    function fit() { stretch(); scr.classList.toggle('two', D.body.classList.contains('lm-land') && !!scr.querySelector('#lm-qcard')); if (!/\bplay\b/.test(scr.className)) { scr.style.removeProperty('--art'); return; }
       var a = 1; scr.style.setProperty('--art', a);
       var go = function () { while (scr.scrollHeight > scr.clientHeight + 1 && a > 0.36) { a = Math.round((a - 0.08) * 100) / 100; scr.style.setProperty('--art', a); } };
       go(); [].forEach.call(scr.querySelectorAll('img'), function (im) { if (!im.complete) im.addEventListener('load', go, { once: true }); }); }
@@ -58,7 +66,8 @@
     function picker(fw) {
       view = 'picker'; var cs = LK.pickers(), h = '<div class="lm-card"><h2>Pick your level</h2>';
       if (!fw) { h += '<p>This only sets where questions start. The game keeps adjusting as you play, and you can change it any time.</p>';
-        (cfg.levels || []).forEach(function (l, i) { h += btn('band', '<strong>Level ' + (i + 1) + '</strong> \u00b7 ' + esc(l.label), 'lm-level', ' data-v="' + l.band + '"'); });
+        var have = {}; LK.skillIds(SUBJ).forEach(function (id) { have[LK.skill(id).band] = 1; });
+        (cfg.levels || []).filter(function (l) { return have[l.band]; }).forEach(function (l, i) { h += btn('band', '<strong>Level ' + (i + 1) + '</strong> \u00b7 ' + esc(l.label), 'lm-level', ' data-v="' + l.band + '"'); });
         if (cs.length) h += btn('fws', 'Choose by school year or course'); h += btn('choice', 'Back'); }
       else if (fw === '*') { cs.forEach(function (f) { h += btn('fw', esc(f.name), '', ' data-v="' + esc(f.id) + '"'); }); h += btn('picker', 'Back'); }
       else { var f = cs.filter(function (x) { return x.id === fw; })[0]; if (!f) return picker(); h += '<p>' + esc(f.name) + '</p>';
@@ -190,8 +199,10 @@
     function notice(text, ms) { [].forEach.call(D.querySelectorAll('.lm-notice'), function (o) { o.remove(); }); clearTimeout(noticeT);
       var n = el('div', 'lm-notice'), c = el('div', 'lm-card'); c.setAttribute('role', 'status'); c.textContent = text; n.appendChild(c); ui.appendChild(n);
       noticeT = setTimeout(function () { n.classList.add('gone'); setTimeout(function () { n.remove(); }, 450); }, ms || 3000); }
-    function doReset() { confirmBox('This clears your level and progress for ' + cfg.name + ' on this device. Your settings stay.', 'Reset my level', function () {
-      LK.reset(SUBJ); session = LK.open(SUBJ); if (g && g.state === 'play') g.state = 'title'; round = null; cur = null; placing = false; placementChoice(); announce('Your level has been reset.'); }); }
+    // L1: the bridge's personal-best key goes too (memory and storage)
+    function clearBest() { if (g) g.best = 0; try { W.localStorage.removeItem('eagle-best-' + cfg.slug); } catch (e) {} }
+    function doReset() { confirmBox('This clears your level, progress and personal best for ' + cfg.name + ' on this device. Your settings stay.', 'Reset my level', function () {
+      LK.reset(SUBJ); clearBest(); session = LK.open(SUBJ); if (g && g.state === 'play') g.state = 'title'; round = null; cur = null; placing = false; placementChoice(); announce('Your level has been reset.'); }); }
     function doImport(file) { LK.importFile(file, SUBJ).then(function (r) { if (!r.ok) return notice(r.reason);
       confirmBox('Load this progress file? It has ' + r.skills + ' topics and replaces your current ' + cfg.name + ' progress on this device.', 'Load it', function () { r.apply(); session = LK.open(SUBJ); notice('Progress loaded.'); title(); }); }); }
 
@@ -219,7 +230,7 @@
         case 'reset': doReset(); break;
         case 'export': try { LK.exportFile(SUBJ); notice('Your progress file has been saved to your downloads.'); } catch (er) { notice('Couldn\u2019t save a file on this browser.'); } break;
         case 'import': var f = D.getElementById('lm-file'); f.value = ''; f.onchange = function () { if (f.files[0]) doImport(f.files[0]); }; f.click(); break;
-        case 'clearall': confirmBox('This removes all Eagle Legend learning progress and settings on this device.', 'Clear everything', function () { LK.resetAll(); session = LK.open(SUBJ); applySettings(); title(); }); break;
+        case 'clearall': confirmBox('This removes all Eagle Legend learning progress, personal bests and settings on this device.', 'Clear everything', function () { LK.resetAll(); clearBest(); if (W.LearnSpeak && W.LearnSpeak.setEnabled) try { W.LearnSpeak.setEnabled(false); W.localStorage.removeItem('learnSpeakEnabled'); } catch (e) {} session = LK.open(SUBJ); applySettings(); title(); }); break;
         case 'menu': session.save(); if (g.state === 'play') g.state = 'title'; placing = false; title(); break;
       }
     }

@@ -1,6 +1,6 @@
 self.PRECACHE = {
- "version": "3daf572bcf35",
- "bytes": 136594803,
+ "version": "4ee122c1e598",
+ "bytes": 136610348,
  "games": {
   "tidepin": {
    "title": "Tidepin",
