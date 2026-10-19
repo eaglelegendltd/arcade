@@ -1,9 +1,9 @@
 // Batwing Bridges: hold to stretch a bat-wing plank upward, release to tip it across the gap.
-// Land the tip on the next pillar to cross; too short or too long and the batfox tumbles. Endless pillars, narrower and wider apart as you go.
+// Land the tip on the next pillar to cross; too short or too long and the bat-winged fox tumbles. Endless pillars, narrower and wider apart as you go.
 var BW_TOP = 420, BW_HERO = 70; // pillar top (logical y) and on-screen x of the current pillar's right edge
 function bwPillar(g, x) { var lv = g.level, w = Math.max(22, 74 - lv * 4 - hwRand() * 26), gap = 40 + hwRand() * Math.min(190, 90 + lv * 12); return { x: x + gap, w: w }; }
 function bwUp(g) { var D = g.data; if (D.st === 'grow') { D.st = 'tip'; D.ang = 0; g.sfx('batSwoop', null, 'hit'); } }
-EagleGame.run({ id: 'batwing-bridges', title: HW_NAMES['batwing-bridges'], howto: 'Hold to stretch a bat-wing plank upward, then let go to drop it across the gap. If the plank tip lands on the next pillar the batfox crosses; too short or too long and it tumbles into the dark. Hit the glowing centre for a perfect bonus. Keys: hold Space / Enter.',
+EagleGame.run({ id: 'batwing-bridges', title: HW_NAMES['batwing-bridges'], howto: 'Hold to stretch a bat-wing plank upward, then let go to drop it across the gap. If the plank tip lands on the next pillar the bat-winged fox crosses; too short or too long and it tumbles into the dark. Hit the glowing centre for a perfect bonus. Keys: hold Space / Enter.',
   art: ['bat_plank_tile_128x96', 'batfox_runner_sheet', 'pillar_top', 'gap_pit_tile_128'], levelEvery: 8, likeScore: 15, fill: { top: '#3b2c68', bottom: { tile: 'band_bottom', size: 180, originY: 640, color: '#231b3a' } },
   achievements: [{ id: 'b10', score: 10, name: 'Plank Rookie' }, { id: 'b40', score: 40, name: 'Batwing Architect' }],
   init: function (g) { hwSeed(); var p0 = { x: BW_HERO - 70, w: 70 }; g.data = { P: [p0, bwPillar(g, BW_HERO)], i: 0, cam: 0, len: 0, ang: 0, st: 'idle', hx: BW_HERO - 14, hy: BW_TOP, vy: 0, msg: null, creak: 0, perfects: 0 }; },
