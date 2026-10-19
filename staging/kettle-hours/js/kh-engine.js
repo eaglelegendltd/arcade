@@ -116,9 +116,9 @@
     var b = s.bg || {}, ref = (typeof b === 'string' ? b : b.ref) || '', ph = (b && b.placeholder) || {}, time = ph.time || 'morning';
     if (/rain/.test(ref) || time === 'rain' || ph.weather === 'rain') return 'cafe_rain'; // rain bed for rainy scenes only
     if (/office/.test(ref)) return 'office_quiet';
-    if (/park/.test(ref)) return 'outdoor_park'; // before the street rule: park placeholders are kind 'street'
-    if (/street|doorstep/.test(ref) || ph.kind === 'street') return 'outdoor_street';
-    if (/flat/.test(ref)) return 'home_quiet';
+    if (/park/.test(ref)) return 'outdoor_park';                       // before street: park placeholders use kind 'street'
+    if (/doorstep|flat/.test(ref)) return 'home_quiet';
+    if (/street/.test(ref) || ph.kind === 'street') return 'outdoor_street';
     if (/evening|after_hours|party|closed/.test(ref) || time === 'evening' || time === 'night' || time === 'afternoon') return 'cafe_evening';
     return 'cafe_morning';
   }
