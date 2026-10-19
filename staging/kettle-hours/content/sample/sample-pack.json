@@ -1,0 +1,145 @@
+{
+  "schemaVersion": 1,
+  "id": "sample",
+  "title": "Kettle Hours (SAMPLE content)",
+  "sample": true,
+  "author": "Ivy (engine placeholder; replace with Sienna's content)",
+  "notes": "SAMPLE ONLY. Written to exercise the engine before the real script lands. Not reviewed by a clinician. Do not ship.",
+  "contentWarning": "SAMPLE build. This game touches on stress and low mood. You can pause, skip heavier chapters, or open 'Need help now?' at any time.",
+  "vars": ["trust", "rapport"],
+  "characters": {
+    "theo": {
+      "name": "Theo", "pronouns": "he/him", "blurb": "SAMPLE regular. Second-year student, always revising.",
+      "color": "#5b8fb9", "portrait": "theo", "expressions": ["neutral", "smile", "tired", "worried"],
+      "favourite": { "cup": "mug", "base": "cocoa", "extra": "honey" },
+      "start": { "trust": 1, "rapport": 1 }
+    },
+    "mara": {
+      "name": "Mara", "pronouns": "she/her", "blurb": "SAMPLE regular. Drives the number 12 bus, early shifts.",
+      "color": "#c0674a", "portrait": "mara", "expressions": ["neutral", "smile", "tired", "sad", "surprised"],
+      "favourite": { "cup": "teacup", "base": "tea", "extra": "milk" },
+      "start": { "trust": 1, "rapport": 2 }
+    }
+  },
+  "chapters": [
+    {
+      "id": "sample-day-1", "title": "SAMPLE · Day 1: First Pot", "day": 1, "sample": true,
+      "summary": "SAMPLE chapter. Two regulars, one ordinary morning.",
+      "scenes": [
+        { "id": "open", "phase": "open", "title": "Opening up",
+          "bg": { "alt": "A small corner café in the morning. Steam rises from a kettle on the counter.", "ref": "bg_cafe_morning", "placeholder": { "kind": "cafe", "time": "morning" } },
+          "audio": { "ambience": "cafe_morning", "cue": "kettle" },
+          "steps": [
+            { "type": "narrate", "text": "SAMPLE. You flip the sign to OPEN. The kettle ticks as it warms, and the street outside is still blue with early light." },
+            { "type": "narrate", "text": "Two regulars usually come by before nine. You set out the mugs." }
+          ] },
+        { "id": "theo-arrives", "phase": "arrive", "title": "Theo",
+          "bg": { "alt": "The café counter.", "ref": "bg_cafe_morning", "placeholder": { "kind": "cafe", "time": "morning" } },
+          "audio": { "cue": "door_bell" }, "present": ["theo"],
+          "steps": [
+            { "type": "say", "speaker": "theo", "expression": "smile", "text": "Morning! Usual, please. I've got a mock exam at ten, so I need all the help I can get." },
+            { "type": "drink", "for": "theo", "prompt": "Make Theo something warm. There's no rush.", "matchText": "Theo wraps both hands round the mug. \"You remembered the honey.\"", "otherText": "Theo takes a sip. \"Ooh, something different. Thanks.\"", "matchEffects": [{ "var": "theo.rapport", "add": 1 }] },
+            { "type": "say", "speaker": "theo", "expression": "tired", "text": "Honestly I was up till three. Everyone else seems so sorted." },
+            { "type": "choice", "prompt": "How do you respond?", "options": [
+              { "id": "open-q", "text": "\"That sounds like a lot. How are you finding it?\"", "effects": [{ "var": "theo.trust", "add": 1 }, { "flag": "theo_opened" }],
+                "reply": [ { "type": "say", "speaker": "theo", "expression": "neutral", "text": "Kind of... heavy? I keep thinking if I stop, I'll fall behind for good." },
+                           { "type": "journal", "about": "theo", "tag": "said", "text": "Asked Theo an open question. He said he feels he can't stop or he'll fall behind." } ] },
+              { "id": "fix", "text": "\"You should just get an early night tonight.\"",
+                "reply": [ { "type": "say", "speaker": "theo", "expression": "neutral", "text": "Yeah. Probably. Anyway, better go." },
+                           { "type": "journal", "about": "theo", "tag": "said", "text": "Gave Theo advice straight away. He changed the subject." } ] }
+            ] },
+            { "type": "say", "if": { "flag": "theo_opened" }, "speaker": "theo", "expression": "smile", "text": "Thanks for asking, though. Nobody really does." },
+            { "type": "say", "speaker": "theo", "expression": "neutral", "text": "See you tomorrow." }
+          ] },
+        { "id": "mara-arrives", "phase": "arrive", "title": "Mara",
+          "bg": { "alt": "The café counter, a little later.", "ref": "bg_cafe_morning", "placeholder": { "kind": "cafe", "time": "morning" } },
+          "audio": { "cue": "door_bell" }, "present": ["mara"],
+          "steps": [
+            { "type": "narrate", "text": "Mara comes in after the morning rush, later than usual. Something feels a little different today." },
+            { "type": "observe", "mode": "compare", "prompt": "What's different from last week? Tap anything that's changed. Take your time.",
+              "before": { "alt": "Mara last week: smiling, in her bright uniform jacket, with a packed lunch box.", "ref": "mara_lastweek", "placeholder": { "kind": "portrait", "character": "mara", "expression": "smile", "props": ["jacket", "lunchbox"] } },
+              "after": { "alt": "Mara today: no jacket, tired eyes, and her lunch box is missing.", "ref": "mara_today", "placeholder": { "kind": "portrait", "character": "mara", "expression": "tired", "props": ["phone"] } },
+              "beforeLabel": "Last week", "afterLabel": "Today", "minFind": 1, "doneText": "You've noticed enough to start a gentle conversation.",
+              "hotspots": [
+                { "id": "eyes", "label": "Her face", "x": 30, "y": 14, "w": 40, "h": 26, "changed": true, "found": "She looks like she hasn't slept much.", "effects": [{ "flag": "noticed_tired" }] },
+                { "id": "jacket", "label": "Her jacket", "x": 18, "y": 48, "w": 64, "h": 30, "changed": true, "found": "No uniform jacket. Is she not working today?", "effects": [{ "flag": "noticed_jacket" }] },
+                { "id": "hands", "label": "Her hands", "x": 60, "y": 78, "w": 30, "h": 20, "changed": true, "found": "No lunch box. She's holding her phone face down instead.", "effects": [{ "flag": "noticed_lunch" }] },
+                { "id": "hair", "label": "Her hair", "x": 25, "y": 0, "w": 50, "h": 14, "changed": false, "found": "Same as always." }
+              ] },
+            { "type": "say", "speaker": "mara", "expression": "neutral", "text": "Just a tea, love. Whatever's easiest." },
+            { "type": "drink", "for": "mara", "prompt": "Make Mara a drink.", "matchText": "\"Milk, no sugar. You never forget.\" A small smile.", "otherText": "\"That'll do nicely.\"", "matchEffects": [{ "var": "mara.rapport", "add": 1 }, { "expression": "mara.smile" }] }
+          ] },
+        { "id": "mara-talk", "phase": "talk", "title": "A quiet word", "present": ["mara"],
+          "bg": { "alt": "A corner table by the window.", "ref": "bg_cafe_morning", "placeholder": { "kind": "cafe", "time": "morning" } },
+          "steps": [
+            { "type": "choice", "prompt": "Mara sits by the window. What do you say?", "options": [
+              { "text": "\"No jacket today? Day off?\"", "if": { "flag": "noticed_jacket" }, "effects": [{ "var": "mara.trust", "add": 1 }, { "flag": "asked_jacket" }],
+                "reply": [ { "type": "say", "speaker": "mara", "expression": "sad", "text": "Signed off for a week. Couldn't face the early starts any more. Felt like I was driving on autopilot." } ] },
+              { "text": "\"You look shattered. Rough night?\"", "if": { "flag": "noticed_tired" }, "effects": [{ "var": "mara.trust", "add": 1 }],
+                "reply": [ { "type": "say", "speaker": "mara", "expression": "tired", "text": "Rough few weeks. I'm off work for a bit. Not sleeping." } ] },
+              { "text": "\"How are things?\"",
+                "reply": [ { "type": "say", "speaker": "mara", "expression": "neutral", "text": "Oh, you know. Fine. Busy." } ] },
+              { "text": "Say nothing for now. Let her settle.", "effects": [{ "flag": "gave_space" }],
+                "reply": [ { "type": "narrate", "text": "You wipe the counter. After a minute, Mara glances up." },
+                           { "type": "say", "speaker": "mara", "expression": "tired", "text": "I'm off work this week, actually. Bit of a wobble." } ] }
+            ] },
+            { "type": "choice", "prompt": "She stirs her tea without drinking it.", "options": [
+              { "text": "\"That sounds hard. Do you want to tell me about it?\"", "effects": [{ "var": "mara.trust", "add": 1 }],
+                "reply": [ { "type": "say", "speaker": "mara", "expression": "sad", "text": "It's just... everything's grey. I used to love the route. Now I dread it." } ] },
+              { "text": "\"Everyone gets like that. You'll be back to normal soon.\"", "effects": [{ "var": "mara.trust", "add": -1 }],
+                "reply": [ { "type": "say", "speaker": "mara", "expression": "neutral", "text": "Mm. Maybe." } ] }
+            ] },
+            { "type": "journal", "about": "mara", "tag": "noticed", "if": { "flag": "noticed_lunch" }, "text": "Mara wasn't eating, and kept her phone face down." }
+          ] },
+        { "id": "mara-next", "phase": "talk", "title": "What next?", "present": ["mara"],
+          "bg": { "alt": "A corner table by the window.", "ref": "bg_cafe_morning", "placeholder": { "kind": "cafe", "time": "morning" } },
+          "steps": [
+            { "type": "nextstep", "prompt": "Before Mara leaves, what feels like the right next step?", "options": [
+              { "id": "gp", "text": "Gently suggest she talks to her GP about the sleep and the low mood.", "if": { "var": "mara.trust", "gte": 2 }, "showLocked": true,
+                "effects": [{ "var": "mara.trust", "add": 1 }, { "flag": "mara_gp" }],
+                "outcome": "Mara nods slowly. \"I've been putting it off. Maybe I'll ring tomorrow.\"",
+                "reply": [ { "type": "journal", "about": "mara", "tag": "next-step", "text": "Suggested Mara speaks to her GP. She said she might ring tomorrow." } ] },
+              { "id": "checkin", "text": "Offer to save her the window seat tomorrow, if she fancies a chat.",
+                "effects": [{ "var": "mara.rapport", "add": 1 }, { "flag": "mara_checkin" }],
+                "outcome": "\"I'd like that.\" She finishes her tea this time.",
+                "reply": [ { "type": "journal", "about": "mara", "tag": "next-step", "text": "Offered Mara a check-in tomorrow." } ] },
+              { "id": "fixit", "text": "Tell her exactly what she needs to do to feel better.",
+                "effects": [{ "var": "mara.trust", "add": -1 }],
+                "outcome": "Mara listens politely, then picks up her bag a little faster than before.",
+                "reply": [ { "type": "journal", "about": "mara", "tag": "next-step", "text": "Gave Mara a list of fixes. She left quickly." } ] }
+            ] },
+            { "type": "say", "speaker": "mara", "expression": "smile", "if": { "var": "mara.trust", "gte": 3 }, "text": "Thanks for noticing. Really." }
+          ] },
+        { "id": "close", "phase": "close", "title": "Closing up", "endsDay": true, "endsChapter": true,
+          "bg": { "alt": "The café at dusk, chairs up on tables.", "ref": "bg_cafe_evening", "placeholder": { "kind": "cafe", "time": "evening" } },
+          "audio": { "ambience": "cafe_evening", "cue": "chime_soft" },
+          "steps": [
+            { "type": "narrate", "text": "SAMPLE. You turn the sign round and stack the chairs. Time to write a few lines in the journal." },
+            { "type": "journal", "tag": "reflection", "text": "Noticing small changes gave me a way in. Listening first seemed to help more than fixing." }
+          ] }
+      ]
+    },
+    {
+      "id": "sample-day-2", "title": "SAMPLE · Day 2: A Heavier Afternoon", "day": 2, "sample": true,
+      "contentWarnings": ["Low mood", "Talk of feeling hopeless (no detail)"],
+      "skippable": true,
+      "skipSummary": "SAMPLE. Mara came back to the window seat. She shared that she's been feeling low for a while. You listened, and she agreed to book a GP appointment. She left with a little more hope than she arrived with.",
+      "skipEffects": [{ "var": "mara.trust", "add": 1 }],
+      "scenes": [
+        { "id": "return", "phase": "arrive", "present": ["mara"], "afterHeavy": true,
+          "bg": { "alt": "The café in the afternoon, rain on the window.", "ref": "bg_cafe_afternoon", "placeholder": { "kind": "cafe", "time": "afternoon" } },
+          "audio": { "ambience": "cafe_rain", "cue": "door_bell" },
+          "steps": [
+            { "type": "say", "speaker": "mara", "expression": "sad", "if": { "flag": "mara_checkin" }, "text": "You saved the seat. Thank you." },
+            { "type": "say", "speaker": "mara", "expression": "sad", "text": "SAMPLE. Some days it feels like nothing will change." },
+            { "type": "choice", "options": [
+              { "text": "\"I'm really glad you came in. I'm here to listen.\"", "effects": [{ "var": "mara.trust", "add": 1 }] },
+              { "text": "Sit with her quietly for a moment.", "effects": [{ "var": "mara.rapport", "add": 1 }] }
+            ] },
+            { "type": "signpost", "text": "If you ever feel like this, you don't have to wait. Samaritans are free on 116 123, any time." },
+            { "type": "journal", "about": "mara", "tag": "reflection", "text": "Mara opened up about feeling low. Listening, and knowing where to point her, mattered." }
+          ], "endsDay": true, "endsChapter": true }
+      ]
+    }
+  ]
+}

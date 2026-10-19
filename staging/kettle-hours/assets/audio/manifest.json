@@ -1,0 +1,29 @@
+{
+ "files": [
+  "breathe_in.mp3",
+  "breathe_in.ogg",
+  "breathe_out.mp3",
+  "breathe_out.ogg",
+  "cafe_evening.ogg",
+  "cafe_morning.ogg",
+  "cafe_rain.ogg",
+  "chime_soft.mp3",
+  "chime_soft.ogg",
+  "door_bell.mp3",
+  "door_bell.ogg",
+  "kettle.mp3",
+  "kettle.ogg",
+  "notice.mp3",
+  "notice.ogg",
+  "page.mp3",
+  "page.ogg",
+  "pour.mp3",
+  "pour.ogg",
+  "sting.mp3",
+  "sting.ogg"
+ ],
+ "volume": {
+  "ambience": 0.9,
+  "cue": 0.7
+ }
+}

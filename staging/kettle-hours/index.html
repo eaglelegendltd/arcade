@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'self'; img-src 'self' data:; media-src 'self'; style-src 'self'; script-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta name="referrer" content="no-referrer">
+<meta name="theme-color" content="#3b2a20">
+<title>Kettle Hours</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="css/kh.css">
+</head>
+<body>
+<a class="skip-link" href="#screen">Skip to the story</a>
+<div id="app" class="app">
+  <header class="topbar" role="banner">
+    <button id="btn-help" class="help-btn" type="button" aria-haspopup="dialog" aria-controls="help-panel">Need help now?</button>
+    <div class="topbar-right">
+      <button id="btn-breathe" class="icon-btn" type="button" aria-haspopup="dialog" aria-label="Pause and breathe" title="Pause and breathe"><span aria-hidden="true">🍃</span></button>
+      <button id="btn-journal" class="icon-btn" type="button" aria-label="Journal" title="Journal"><span aria-hidden="true">📓</span></button>
+      <button id="btn-menu" class="icon-btn" type="button" aria-haspopup="dialog" aria-label="Settings and menu" title="Settings and menu"><span aria-hidden="true">☰</span></button>
+    </div>
+  </header>
+  <main id="screen" class="screen" tabindex="-1" aria-live="off"><p class="loading">Putting the kettle on…</p></main>
+</div>
+
+<div id="help-panel" class="dialog help-panel" role="dialog" aria-modal="true" aria-labelledby="help-title" hidden>
+  <div class="dialog-card">
+    <h2 id="help-title">Need help now?</h2>
+    <p>If you're struggling, you don't have to wait. These are free to call from the UK. In an emergency, call 999 (or your country's emergency number) straight away.</p>
+    <ul class="help-list">
+      <li><a class="tel" href="tel:116123"><strong>Samaritans: 116 123</strong><span>Free, 24 hours a day, 7 days a week. Someone to talk to about anything.</span></a></li>
+      <li><a class="tel" href="tel:111"><strong>NHS 111</strong><span>When you need urgent medical or mental health help but it isn't an emergency.</span></a></li>
+      <li><a class="tel" href="tel:08001111"><strong>Childline: 0800 1111</strong><span>Free and confidential for anyone under 19.</span></a></li>
+      <li><a class="tel tel-999" href="tel:999"><strong>999 in an emergency</strong><span>If you or someone else is in danger or might act on thoughts of ending their life.</span></a></li>
+    </ul>
+    <p class="small">Kettle Hours is a demonstration game. It isn't medical advice, a diagnosis or certified training. The information was correct when we published it<span class="kh-published-wrap" hidden> (<span class="kh-published"></span>)</span> and may have changed since, and it may not apply in your country. Always ask a GP or another medical or health professional for guidance on helping someone. Never try to diagnose anyone yourself: it can do more harm than good. Getting advice should never delay urgent help.</p>
+    <button type="button" class="btn primary" data-close>Back to the café</button>
+  </div>
+</div>
+
+<div id="breathe-panel" class="dialog breathe-panel" role="dialog" aria-modal="true" aria-labelledby="breathe-title" hidden>
+  <div class="dialog-card">
+    <h2 id="breathe-title">Take a breath</h2>
+    <p class="small">The game is paused. Nothing is waiting for you.</p>
+    <div class="breathe-circle" aria-hidden="true"></div>
+    <p id="breathe-text" class="breathe-text" aria-live="polite">Breathe in slowly…</p>
+    <button type="button" class="btn primary" data-close>I'm ready to go back</button>
+  </div>
+</div>
+
+<div id="pause-panel" class="dialog" role="dialog" aria-modal="true" aria-labelledby="pause-title" hidden>
+  <div class="dialog-card"><h2 id="pause-title">Paused</h2><p>Kettle Hours is paused.</p></div>
+</div>
+
+<div id="settings-panel" class="dialog" role="dialog" aria-modal="true" aria-labelledby="settings-title" hidden>
+  <div class="dialog-card">
+    <h2 id="settings-title">Settings</h2>
+    <fieldset><legend>Text size</legend>
+      <div class="seg" role="radiogroup" aria-label="Text size">
+        <label><input type="radio" name="textsize" value="s"> Small</label>
+        <label><input type="radio" name="textsize" value="m"> Medium</label>
+        <label><input type="radio" name="textsize" value="l"> Large</label>
+        <label><input type="radio" name="textsize" value="xl"> Extra large</label>
+      </div>
+    </fieldset>
+    <label class="toggle"><input type="checkbox" id="set-contrast"> High contrast</label>
+    <label class="toggle"><input type="checkbox" id="set-motion"> Reduce motion</label>
+    <label class="toggle"><input type="checkbox" id="set-readable"> Extra-readable text (wider spacing)</label>
+    <label class="toggle"><input type="checkbox" id="set-sound"> Sound</label>
+    <div class="row">
+      <button type="button" class="btn" id="btn-title">Back to title</button>
+      <button type="button" class="btn danger" id="btn-delete">Delete my progress</button>
+    </div>
+    <p class="small">Your progress is saved only on this device (in this browser). Nothing is sent anywhere.</p>
+    <div id="settings-cta"></div>
+    <button type="button" class="btn primary" data-close>Done</button>
+  </div>
+</div>
+
+<div id="confirm-panel" class="dialog" role="alertdialog" aria-modal="true" aria-labelledby="confirm-title" aria-describedby="confirm-text" hidden>
+  <div class="dialog-card">
+    <h2 id="confirm-title">Are you sure?</h2>
+    <p id="confirm-text"></p>
+    <div class="row"><button type="button" class="btn" id="confirm-no">Cancel</button><button type="button" class="btn danger" id="confirm-yes">Yes</button></div>
+  </div>
+</div>
+
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+<script src="eagle-bridge.js"></script>
+<script src="js/kh-validate.js"></script>
+<script src="js/kh-bridge.js"></script>
+<script src="js/kh-art.js"></script>
+<script src="js/kh-audio.js"></script>
+<script src="js/kh-engine.js"></script>
+</body>
+</html>

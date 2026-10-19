@@ -1,0 +1,7 @@
+{
+  "comment": "Packs are tried in order; the first one that passes validation is used. tools/sync-content.js adds sienna/pack.json when Sienna's content validates.",
+  "packs": [
+    "sienna/pack.json",
+    "sample/sample-pack.json"
+  ]
+}

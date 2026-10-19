@@ -1,0 +1,1037 @@
+{
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "$id": "kettle-hours.schema.json",
+ "title": "Kettle Hours content pack",
+ "type": "object",
+ "required": [
+  "schemaVersion",
+  "id",
+  "title",
+  "characters",
+  "chapters"
+ ],
+ "additionalProperties": false,
+ "properties": {
+  "schemaVersion": {
+   "const": 1
+  },
+  "id": {
+   "$ref": "#/$defs/id"
+  },
+  "title": {
+   "type": "string",
+   "minLength": 1
+  },
+  "sample": {
+   "type": "boolean"
+  },
+  "author": {
+   "type": "string"
+  },
+  "notes": {
+   "type": "string"
+  },
+  "contentWarning": {
+   "type": "string",
+   "description": "Shown once on first launch, before the title screen."
+  },
+  "characters": {
+   "type": "object",
+   "minProperties": 1,
+   "additionalProperties": {
+    "$ref": "#/$defs/character"
+   }
+  },
+  "vars": {
+   "type": "array",
+   "items": {
+    "$ref": "#/$defs/id"
+   },
+   "description": "Per-character variable names, e.g. trust, rapport. Every character gets every var."
+  },
+  "chapters": {
+   "type": "array",
+   "minItems": 1,
+   "items": {
+    "$ref": "#/$defs/chapter"
+   }
+  },
+  "playerVars": {
+   "type": "object",
+   "additionalProperties": {
+    "type": "number"
+   },
+   "description": "Player-wide variables and start values, e.g. {\"energy\": 7}. Referenced as player.<name>."
+  },
+  "varRanges": {
+   "type": "object",
+   "additionalProperties": {
+    "type": "array",
+    "items": {
+     "type": "number"
+    },
+    "minItems": 2
+   },
+   "description": "Clamp ranges, e.g. {\"trust\": [0,10], \"energy\": [0,10]}."
+  },
+  "skills": {
+   "type": "array",
+   "items": {
+    "type": "object",
+    "required": [
+     "id",
+     "name"
+    ],
+    "additionalProperties": false,
+    "properties": {
+     "id": {
+      "$ref": "#/$defs/id"
+     },
+     "name": {
+      "type": "string"
+     },
+     "description": {
+      "type": "string"
+     },
+     "category": {
+      "type": "string"
+     },
+     "icon": {
+      "type": "string"
+     },
+     "card": {
+      "type": "string"
+     },
+     "unlockedIn": {
+      "type": "string"
+     }
+    }
+   }
+  },
+  "moodWeather": {
+   "type": "object",
+   "description": "Mood -> weather art labels (never shown as text)."
+  },
+  "meta": {
+   "type": "object",
+   "description": "Free-form; ignored by the engine."
+  },
+  "guides": {
+   "type": "array",
+   "items": {
+    "type": "object",
+    "required": [
+     "id",
+     "title",
+     "body"
+    ],
+    "additionalProperties": false,
+    "properties": {
+     "id": {
+      "type": "string"
+     },
+     "title": {
+      "type": "string"
+     },
+     "body": {
+      "type": "string"
+     },
+     "review": {
+      "type": "string"
+     },
+     "art": {
+      "type": "string"
+     }
+    }
+   }
+  },
+  "locations": {
+   "type": "object",
+   "additionalProperties": {
+    "type": "string"
+   },
+   "description": "Location key -> art key (default bg_<location>)."
+  },
+  "selfCare": {
+   "type": "object",
+   "additionalProperties": false,
+   "description": "Override the engine's low-energy self-care prompt (shown once when player.energy <= 2).",
+   "properties": {
+    "speaker": {
+     "type": "string"
+    },
+    "text": {
+     "type": "string"
+    },
+    "rest": {
+     "type": "string"
+    },
+    "restText": {
+     "type": "string"
+    },
+    "skip": {
+     "type": "string"
+    },
+    "restEnergy": {
+     "type": "number"
+    }
+   }
+  }
+ },
+ "$defs": {
+  "id": {
+   "type": "string",
+   "pattern": "^[a-z0-9][a-z0-9_-]{0,47}$"
+  },
+  "art": {
+   "description": "Art reference: a file key in assets/art (no extension), or an object with a placeholder description.",
+   "oneOf": [
+    {
+     "type": "string",
+     "minLength": 1
+    },
+    {
+     "type": "object",
+     "additionalProperties": false,
+     "required": [
+      "alt"
+     ],
+     "properties": {
+      "ref": {
+       "type": "string"
+      },
+      "alt": {
+       "type": "string",
+       "minLength": 1
+      },
+      "placeholder": {
+       "type": "object",
+       "additionalProperties": false,
+       "properties": {
+        "kind": {
+         "enum": [
+          "cafe",
+          "street",
+          "portrait",
+          "object",
+          "blank"
+         ]
+        },
+        "character": {
+         "type": "string"
+        },
+        "expression": {
+         "type": "string"
+        },
+        "props": {
+         "type": "array",
+         "items": {
+          "type": "string"
+         }
+        },
+        "time": {
+         "enum": [
+          "morning",
+          "afternoon",
+          "evening",
+          "night"
+         ]
+        },
+        "color": {
+         "type": "string"
+        },
+        "label": {
+         "type": "string"
+        }
+       }
+      }
+     }
+    }
+   ]
+  },
+  "audio": {
+   "type": "object",
+   "additionalProperties": false,
+   "properties": {
+    "ambience": {
+     "type": "string",
+     "description": "Looping bed key, e.g. cafe_morning. 'none' stops it."
+    },
+    "cue": {
+     "type": "string",
+     "description": "One-shot key, e.g. door_bell, kettle, chime_soft."
+    },
+    "music": {
+     "type": "string"
+    }
+   }
+  },
+  "character": {
+   "type": "object",
+   "required": [
+    "name",
+    "expressions"
+   ],
+   "additionalProperties": false,
+   "properties": {
+    "name": {
+     "type": "string",
+     "minLength": 1
+    },
+    "pronouns": {
+     "type": "string"
+    },
+    "blurb": {
+     "type": "string"
+    },
+    "color": {
+     "type": "string",
+     "pattern": "^#[0-9a-fA-F]{6}$"
+    },
+    "portrait": {
+     "type": "string",
+     "description": "Art key prefix; expression files are <portrait>_<expression>."
+    },
+    "expressions": {
+     "type": "array",
+     "minItems": 1,
+     "items": {
+      "$ref": "#/$defs/id"
+     }
+    },
+    "favourite": {
+     "$ref": "#/$defs/drinkOrder"
+    },
+    "start": {
+     "type": "object",
+     "additionalProperties": {
+      "type": "number"
+     }
+    }
+   }
+  },
+  "drinkOrder": {
+   "type": "object",
+   "additionalProperties": false,
+   "properties": {
+    "cup": {
+     "enum": [
+      "mug",
+      "teacup",
+      "glass"
+     ]
+    },
+    "base": {
+     "enum": [
+      "tea",
+      "coffee",
+      "cocoa",
+      "herbal",
+      "water"
+     ]
+    },
+    "extra": {
+     "enum": [
+      "none",
+      "milk",
+      "honey",
+      "lemon",
+      "oat"
+     ]
+    }
+   }
+  },
+  "chapter": {
+   "type": "object",
+   "required": [
+    "id",
+    "title",
+    "scenes"
+   ],
+   "additionalProperties": false,
+   "properties": {
+    "id": {
+     "$ref": "#/$defs/id"
+    },
+    "title": {
+     "type": "string",
+     "minLength": 1
+    },
+    "day": {
+     "type": "integer",
+     "minimum": 1
+    },
+    "sample": {
+     "type": "boolean"
+    },
+    "summary": {
+     "type": "string"
+    },
+    "contentWarnings": {
+     "type": "array",
+     "items": {
+      "type": "string",
+      "minLength": 1
+     }
+    },
+    "heavy": {
+     "type": "boolean",
+     "description": "True for chapters touching suicide or self-harm; must be skippable."
+    },
+    "skippable": {
+     "type": "boolean"
+    },
+    "skipSummary": {
+     "type": "string",
+     "description": "Gentle summary shown when the player skips this chapter."
+    },
+    "skipEffects": {
+     "$ref": "#/$defs/effects"
+    },
+    "startScene": {
+     "$ref": "#/$defs/id"
+    },
+    "scenes": {
+     "type": "array",
+     "minItems": 1,
+     "items": {
+      "$ref": "#/$defs/scene"
+     }
+    },
+    "meta": {
+     "type": "object"
+    }
+   }
+  },
+  "scene": {
+   "type": "object",
+   "required": [
+    "id",
+    "steps"
+   ],
+   "additionalProperties": false,
+   "properties": {
+    "id": {
+     "$ref": "#/$defs/id"
+    },
+    "title": {
+     "type": "string"
+    },
+    "phase": {
+     "enum": [
+      "open",
+      "arrive",
+      "serve",
+      "talk",
+      "close"
+     ]
+    },
+    "bg": {
+     "$ref": "#/$defs/art"
+    },
+    "audio": {
+     "$ref": "#/$defs/audio"
+    },
+    "present": {
+     "type": "array",
+     "items": {
+      "$ref": "#/$defs/id"
+     },
+     "description": "Characters on screen."
+    },
+    "if": {
+     "$ref": "#/$defs/cond"
+    },
+    "steps": {
+     "type": "array",
+     "minItems": 1,
+     "items": {
+      "$ref": "#/$defs/step"
+     }
+    },
+    "next": {
+     "$ref": "#/$defs/id",
+     "description": "Scene to go to after the last step; omit to follow array order."
+    },
+    "endsDay": {
+     "type": "boolean"
+    },
+    "endsChapter": {
+     "type": "boolean"
+    },
+    "afterHeavy": {
+     "type": "boolean",
+     "description": "Show the support panel card after this scene."
+    },
+    "contentWarnings": {
+     "type": "array",
+     "items": {
+      "type": "string",
+      "minLength": 1
+     },
+     "description": "Scene-level content note (shown before the scene)."
+    },
+    "cwText": {
+     "type": "string",
+     "description": "Optional extra wording on the scene's content-note screen."
+    },
+    "skippable": {
+     "type": "boolean"
+    },
+    "skipSummary": {
+     "type": "string"
+    },
+    "skipTo": {
+     "$ref": "#/$defs/id",
+     "description": "Scene to go to when the player skips this scene (a gentle summary scene)."
+    },
+    "ifFailNext": {
+     "$ref": "#/$defs/id",
+     "description": "Where to go when this scene's if fails (default: next scene in order)."
+    },
+    "meta": {
+     "type": "object"
+    }
+   }
+  },
+  "step": {
+   "type": "object",
+   "required": [
+    "type"
+   ],
+   "properties": {
+    "type": {
+     "enum": [
+      "say",
+      "narrate",
+      "observe",
+      "choice",
+      "nextstep",
+      "drink",
+      "journal",
+      "set",
+      "goto",
+      "audio",
+      "expression",
+      "signpost"
+     ]
+    },
+    "if": {
+     "$ref": "#/$defs/cond"
+    }
+   },
+   "allOf": [
+    {
+     "if": {
+      "properties": {
+       "type": {
+        "const": "say"
+       }
+      }
+     },
+     "then": {
+      "required": [
+       "speaker",
+       "text"
+      ],
+      "properties": {
+       "speaker": {
+        "$ref": "#/$defs/id"
+       },
+       "expression": {
+        "$ref": "#/$defs/id"
+       },
+       "text": {
+        "type": "string",
+        "minLength": 1
+       },
+       "audio": {
+        "$ref": "#/$defs/audio"
+       }
+      }
+     }
+    },
+    {
+     "if": {
+      "properties": {
+       "type": {
+        "const": "narrate"
+       }
+      }
+     },
+     "then": {
+      "required": [
+       "text"
+      ],
+      "properties": {
+       "text": {
+        "type": "string",
+        "minLength": 1
+       },
+       "audio": {
+        "$ref": "#/$defs/audio"
+       }
+      }
+     }
+    },
+    {
+     "if": {
+      "properties": {
+       "type": {
+        "const": "observe"
+       }
+      }
+     },
+     "then": {
+      "required": [
+       "mode",
+       "prompt",
+       "hotspots"
+      ],
+      "properties": {
+       "mode": {
+        "enum": [
+         "hotspots",
+         "compare"
+        ]
+       },
+       "prompt": {
+        "type": "string"
+       },
+       "art": {
+        "$ref": "#/$defs/art"
+       },
+       "before": {
+        "$ref": "#/$defs/art"
+       },
+       "after": {
+        "$ref": "#/$defs/art"
+       },
+       "beforeLabel": {
+        "type": "string"
+       },
+       "afterLabel": {
+        "type": "string"
+       },
+       "minFind": {
+        "type": "integer",
+        "minimum": 0
+       },
+       "doneText": {
+        "type": "string"
+       },
+       "hotspots": {
+        "type": "array",
+        "minItems": 1,
+        "items": {
+         "$ref": "#/$defs/hotspot"
+        }
+       }
+      }
+     }
+    },
+    {
+     "if": {
+      "properties": {
+       "type": {
+        "enum": [
+         "choice",
+         "nextstep"
+        ]
+       }
+      }
+     },
+     "then": {
+      "required": [
+       "options"
+      ],
+      "properties": {
+       "prompt": {
+        "type": "string"
+       },
+       "options": {
+        "type": "array",
+        "minItems": 1,
+        "items": {
+         "$ref": "#/$defs/option"
+        }
+       }
+      }
+     }
+    },
+    {
+     "if": {
+      "properties": {
+       "type": {
+        "const": "drink"
+       }
+      }
+     },
+     "then": {
+      "required": [
+       "for"
+      ],
+      "properties": {
+       "for": {
+        "$ref": "#/$defs/id"
+       },
+       "prompt": {
+        "type": "string"
+       },
+       "order": {
+        "$ref": "#/$defs/drinkOrder"
+       },
+       "matchEffects": {
+        "$ref": "#/$defs/effects"
+       },
+       "matchText": {
+        "type": "string"
+       },
+       "otherText": {
+        "type": "string"
+       }
+      }
+     }
+    },
+    {
+     "if": {
+      "properties": {
+       "type": {
+        "const": "journal"
+       }
+      }
+     },
+     "then": {
+      "required": [
+       "text"
+      ],
+      "properties": {
+       "id": {
+        "$ref": "#/$defs/id"
+       },
+       "text": {
+        "type": "string"
+       },
+       "about": {
+        "$ref": "#/$defs/id"
+       },
+       "tag": {
+        "enum": [
+         "noticed",
+         "said",
+         "next-step",
+         "reflection",
+         "skill"
+        ]
+       },
+       "silent": {
+        "type": "boolean"
+       }
+      }
+     }
+    },
+    {
+     "if": {
+      "properties": {
+       "type": {
+        "const": "set"
+       }
+      }
+     },
+     "then": {
+      "required": [
+       "effects"
+      ],
+      "properties": {
+       "effects": {
+        "$ref": "#/$defs/effects"
+       }
+      }
+     }
+    },
+    {
+     "if": {
+      "properties": {
+       "type": {
+        "const": "goto"
+       }
+      }
+     },
+     "then": {
+      "required": [
+       "scene"
+      ],
+      "properties": {
+       "scene": {
+        "$ref": "#/$defs/id"
+       }
+      }
+     }
+    },
+    {
+     "if": {
+      "properties": {
+       "type": {
+        "const": "audio"
+       }
+      }
+     },
+     "then": {
+      "required": [
+       "audio"
+      ],
+      "properties": {
+       "audio": {
+        "$ref": "#/$defs/audio"
+       }
+      }
+     }
+    },
+    {
+     "if": {
+      "properties": {
+       "type": {
+        "const": "expression"
+       }
+      }
+     },
+     "then": {
+      "required": [
+       "character",
+       "expression"
+      ],
+      "properties": {
+       "character": {
+        "$ref": "#/$defs/id"
+       },
+       "expression": {
+        "$ref": "#/$defs/id"
+       }
+      }
+     }
+    },
+    {
+     "if": {
+      "properties": {
+       "type": {
+        "const": "signpost"
+       }
+      }
+     },
+     "then": {
+      "properties": {
+       "text": {
+        "type": "string"
+       },
+       "level": {
+        "enum": [
+         "support",
+         "urgent"
+        ]
+       }
+      }
+     }
+    }
+   ]
+  },
+  "hotspot": {
+   "type": "object",
+   "required": [
+    "id",
+    "label",
+    "x",
+    "y",
+    "w",
+    "h"
+   ],
+   "additionalProperties": false,
+   "properties": {
+    "id": {
+     "$ref": "#/$defs/id"
+    },
+    "label": {
+     "type": "string",
+     "minLength": 1,
+     "description": "Screen-reader label and button text, e.g. 'Her lunch'."
+    },
+    "x": {
+     "type": "number",
+     "minimum": 0,
+     "maximum": 100
+    },
+    "y": {
+     "type": "number",
+     "minimum": 0,
+     "maximum": 100
+    },
+    "w": {
+     "type": "number",
+     "minimum": 1,
+     "maximum": 100
+    },
+    "h": {
+     "type": "number",
+     "minimum": 1,
+     "maximum": 100
+    },
+    "changed": {
+     "type": "boolean",
+     "description": "True if this is a real change (counts towards minFind)."
+    },
+    "found": {
+     "type": "string",
+     "description": "What the player notices when they tap it."
+    },
+    "effects": {
+     "$ref": "#/$defs/effects"
+    }
+   }
+  },
+  "option": {
+   "type": "object",
+   "required": [
+    "text"
+   ],
+   "additionalProperties": false,
+   "properties": {
+    "id": {
+     "$ref": "#/$defs/id"
+    },
+    "text": {
+     "type": "string",
+     "minLength": 1
+    },
+    "if": {
+     "$ref": "#/$defs/cond"
+    },
+    "showLocked": {
+     "type": "boolean",
+     "description": "Show greyed out when the condition fails (e.g. a skill not yet unlocked)."
+    },
+    "effects": {
+     "$ref": "#/$defs/effects"
+    },
+    "reply": {
+     "type": "array",
+     "items": {
+      "$ref": "#/$defs/step"
+     }
+    },
+    "outcome": {
+     "type": "string",
+     "description": "nextstep only: what happens as a result."
+    },
+    "goto": {
+     "$ref": "#/$defs/id"
+    },
+    "quality": {
+     "enum": [
+      "good",
+      "ok",
+      "poor"
+     ],
+     "description": "Gentle colour cue after choosing; never a score."
+    },
+    "feedback": {
+     "type": "string",
+     "description": "Reflection line added to the day's journal."
+    }
+   }
+  },
+  "effects": {
+   "type": "array",
+   "items": {
+    "$ref": "#/$defs/effect"
+   }
+  },
+  "effect": {
+   "type": "object",
+   "additionalProperties": false,
+   "minProperties": 1,
+   "properties": {
+    "flag": {
+     "type": "string"
+    },
+    "unflag": {
+     "type": "string"
+    },
+    "var": {
+     "type": "string",
+     "pattern": "^[a-z0-9_-]+\\.[a-z0-9_-]+$"
+    },
+    "add": {
+     "type": "number"
+    },
+    "set": {
+     "type": "number"
+    },
+    "expression": {
+     "type": "string",
+     "description": "character.expression shortcut, e.g. mara.smile"
+    },
+    "skill": {
+     "type": "string",
+     "description": "Unlock a skill card (also sets flag skill_<id>)."
+    },
+    "street": {
+     "type": "string",
+     "description": "Street upgrade (sets flag street_<id>)."
+    },
+    "guide": {
+     "type": "string",
+     "description": "Unlock a guide card (sets flag guide_<id>)."
+    }
+   }
+  },
+  "cond": {
+   "type": "object",
+   "additionalProperties": false,
+   "minProperties": 1,
+   "properties": {
+    "all": {
+     "type": "array",
+     "items": {
+      "$ref": "#/$defs/cond"
+     }
+    },
+    "any": {
+     "type": "array",
+     "items": {
+      "$ref": "#/$defs/cond"
+     }
+    },
+    "not": {
+     "$ref": "#/$defs/cond"
+    },
+    "flag": {
+     "type": "string"
+    },
+    "noflag": {
+     "type": "string"
+    },
+    "var": {
+     "type": "string",
+     "pattern": "^[a-z0-9_-]+\\.[a-z0-9_-]+$"
+    },
+    "gte": {
+     "type": "number"
+    },
+    "lte": {
+     "type": "number"
+    },
+    "gt": {
+     "type": "number"
+    },
+    "lt": {
+     "type": "number"
+    },
+    "eq": {
+     "type": "number"
+    },
+    "chapterDone": {
+     "type": "string"
+    }
+   }
+  }
+ }
+}
