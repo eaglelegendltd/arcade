@@ -7514,9 +7514,9 @@
          "id": "boxes",
          "label": "The table",
          "x": 30,
-         "y": 60,
+         "y": 50,
          "w": 40,
-         "h": 25,
+         "h": 22,
          "changed": true,
          "found": "Three takeaway boxes. You haven't cooked in a week.",
          "effects": [
