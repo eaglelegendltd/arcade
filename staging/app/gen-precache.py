@@ -1,12 +1,15 @@
 #!/usr/bin/env python3
-"""Generate precache-manifest.js: every file of the 20 live games + thumbnails, as paths relative to the arcade root.
+"""Generate precache-manifest.js: every file of the 20 live games and the staging-only learning games + thumbnails, as paths relative to the arcade root.
 Skips *.md and any .svg not referenced by that game's html/js (the games load the .png builds). Run from anywhere."""
 import os, json, hashlib, re
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
 SLUGS = "tidepin threadcoil gravel-choir foldlight-gale doorkeep-hollow wickmoth-relay pendulum-bakery kiteknot echo-quarry cliffsprout broomstick-bounce glowgourd-dash treatdrop-bucket gourdburst spellsock-sorting eggshade-nursery batwing-bridges cauldron-stir gloomlinks moonlit-mazelings".split()
+# learning games that so far exist only on staging: served from staging/<slug>/ (the app reads 'dir'), thumbnail from their own icon
+STAGING_ONLY = "el-maths el-english el-coding".split()
 games, h, total = {}, hashlib.sha1(), 0
-for s in SLUGS:
-    d = os.path.join(ROOT, s); code = ''
+for s in SLUGS + STAGING_ONLY:
+    rel_dir = 'staging/' + s if s in STAGING_ONLY else s
+    d = os.path.join(ROOT, rel_dir); code = ''
     for f in os.listdir(d):
         if f.endswith(('.js', '.html')): code += open(os.path.join(d, f), encoding='utf8', errors='ignore').read()
     files = []
@@ -19,8 +22,10 @@ for s in SLUGS:
     files.sort(key=lambda r: (r != 'index.html', r))
     m = re.search(r'<title>([^<]*)</title>', open(os.path.join(d, 'index.html'), encoding='utf8').read())
     title = (m.group(1) if m else s).split(' \u00b7 ')[0].split(' · ')[0].strip()
-    games[s] = {'title': title, 'files': files, 'thumb': 'assets/thumbs/%s.png' % s}
-    for t in ('assets/thumbs/%s.png' % s,):
+    thumb = rel_dir + '/assets/icon_512.png' if s in STAGING_ONLY else 'assets/thumbs/%s.png' % s
+    games[s] = {'title': title, 'files': files, 'thumb': thumb}
+    if s in STAGING_ONLY: games[s]['dir'] = rel_dir
+    for t in (thumb,):
         h.update(open(os.path.join(ROOT, t), 'rb').read())
 out = {'version': h.hexdigest()[:12], 'bytes': total, 'games': games}
 open(os.path.join(os.path.dirname(__file__), 'precache-manifest.js'), 'w').write('self.PRECACHE = ' + json.dumps(out, indent=1) + ';\n')

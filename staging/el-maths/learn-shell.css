@@ -1,0 +1,105 @@
+/* Shared UI layer for the Eagle Legend learning games (sits over the bridge canvas inside #eg-area). Original.
+   WCAG 2.2 AA: 48px+ targets (64px for tiles and blocks), 4.5:1 text, state never shown by colour alone. */
+:root { --ts: 1; --ink: #172033; --ink2: #3b4760; --card: rgba(255,255,255,.95); --pri: #1d4a9e; --pri-ink: #fff; --edge: #1d4a9e; --ok: #1b6b3a; --warn: #8a4b00; --focus: #ffbf00; }
+body.hc { --ink: #000; --ink2: #000; --card: #fff; --pri: #000; --pri-ink: #fff; --edge: #000; --ok: #000; --warn: #000; }
+#eg-ov { display: none !important; }
+#lm-sky { position: absolute; inset: 0; background-size: cover; background-position: center bottom; }
+#eg-mute, #eg-pause { width: 48px !important; height: 48px !important; border-radius: 24px !important; background: rgba(23,32,51,.78) !important; }
+#eg-pause { right: 64px !important; }
+#lm { position: absolute; inset: 0; z-index: 3; color: var(--ink); font-size: calc(18px * var(--ts)); line-height: 1.35; display: flex; flex-direction: column; pointer-events: none; }
+#lm > * { pointer-events: auto; }
+body.dys #lm { font-family: Verdana, Tahoma, "Trebuchet MS", system-ui, sans-serif; letter-spacing: .06em; word-spacing: .16em; line-height: 1.6; }
+#lm button { font: inherit; color: inherit; min-height: 48px; min-width: 48px; border-radius: 14px; cursor: pointer; touch-action: manipulation; }
+#lm button:focus-visible { outline: 4px solid var(--focus); outline-offset: 2px; box-shadow: 0 0 0 7px var(--ink); }
+.lm-top { position: absolute; top: 8px; left: 8px; display: flex; gap: 8px; z-index: 4; }
+.lm-icon { width: 48px; height: 48px; border: 0; background: rgba(23,32,51,.78) !important; color: #fff !important; font-size: 22px !important; padding: 0; border-radius: 24px !important; }
+.lm-screen { position: absolute; left: 0; right: 0; top: 64px; bottom: 0; overflow-y: auto; touch-action: pan-y; padding: 12px 14px 18px; box-sizing: border-box; display: flex; flex-direction: column; gap: 10px; -webkit-user-select: text; user-select: text; }
+.lm-screen.play { top: 104px; }
+.lm-card { background: var(--card); border-radius: 18px; padding: 14px 16px; box-shadow: 0 2px 10px rgba(0,0,0,.18); border: 2px solid rgba(23,32,51,.12); }
+body.hc .lm-card { border: 3px solid #000; box-shadow: none; }
+.lm-card h1 { margin: 0 0 6px; font-size: 1.6em; line-height: 1.15; }
+.lm-card h2 { margin: 0 0 6px; font-size: 1.2em; }
+.lm-card p { margin: 6px 0; }
+.lm-muted { color: var(--ink2); font-size: .9em; }
+.lm-btn { display: block; width: 100%; padding: 10px 14px; margin: 8px 0 0; border: 2px solid var(--edge); background: #fff; text-align: center; font-weight: 600; }
+.lm-btn.pri { background: var(--pri); color: var(--pri-ink) !important; border-color: var(--pri); }
+.lm-btn.small { display: inline-block; width: auto; margin: 0; }
+.lm-btn:disabled { opacity: .55; cursor: default; }
+.lm-row { display: flex; gap: 8px; flex-wrap: wrap; }
+.lm-row > .lm-btn { flex: 1 1 40%; margin-top: 0; }
+.lm-title-art { width: 100%; max-height: 32vh; object-fit: contain; display: block; margin: 0 auto 4px; }
+.lm-prompt { font-size: 1.3em; font-weight: 700; margin: 2px 0 4px; white-space: pre-line; }
+.lm-passage { background: #f6f3ea; border-left: 4px solid var(--ink2); padding: 6px 10px; margin: 6px 0; border-radius: 6px; font-size: .95em; }
+.lm-code { font-family: ui-monospace, Menlo, Consolas, monospace; white-space: pre; background: #f1f3f7; border: 2px solid #c5cbd8; border-radius: 8px; padding: 6px 10px; font-size: .9em; overflow-x: auto; display: block; }
+.lm-meta { font-size: .85em; color: var(--ink2); display: flex; justify-content: space-between; gap: 8px; }
+.lm-art { display: flex; justify-content: center; align-items: center; margin: 6px 0; min-height: 0; }
+.lm-art img, .lm-art canvas { max-width: 100%; }
+.lm-counters { display: grid; grid-template-columns: repeat(5, 34px); gap: 6px; }
+.lm-counters img { width: 34px; height: 34px; }
+.lm-stack { position: relative; width: 120px; height: 120px; }
+.lm-stack img { position: absolute; inset: 0; width: 100%; height: 100%; }
+.lm-picture { width: calc(112px * var(--art, 1)); height: calc(112px * var(--art, 1)); }
+.lm-answers { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: auto; }
+.lm-answers.long { grid-template-columns: 1fr; }
+.lm-ans { min-height: 64px !important; padding: 8px; border: 3px solid var(--edge); background: #fff; font-size: 1.15em; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 8px; }
+.lm-answers.long .lm-ans { font-size: 1em; font-weight: 600; justify-content: flex-start; text-align: left; min-height: 56px !important; }
+.lm-ans .k { font-size: .65em; font-weight: 600; color: var(--ink2); border: 1.5px solid var(--ink2); border-radius: 6px; padding: 0 5px; flex: none; }
+.lm-ans.sel-ok { border-style: double; border-width: 6px; }
+.lm-ans.sel-no { border-style: dashed; opacity: .75; }
+.lm-tools { display: flex; gap: 10px; }
+.lm-tools .lm-btn { margin: 0; flex: 1; }
+.lm-hint { display: flex; gap: 10px; align-items: flex-start; background: #fff8e1; border: 2px solid #8a6d00; border-radius: 14px; padding: 8px 10px; }
+body.hc .lm-hint { background: #fff; border: 3px solid #000; }
+.lm-hint img { width: 40px; height: 40px; flex: none; }
+.lm-fb { display: flex; gap: 12px; align-items: center; }
+.lm-fb img { width: 56px; height: 56px; flex: none; }
+.lm-fb .lm-fbt { font-size: 1.15em; font-weight: 700; }
+.lm-fb.ok .lm-fbt { color: var(--ok); }
+.lm-fb.no .lm-fbt { color: var(--warn); }
+.lm-list { list-style: none; margin: 0; padding: 0; }
+.lm-list li { display: flex; gap: 10px; align-items: center; padding: 7px 0; border-bottom: 1px solid rgba(0,0,0,.1); }
+.lm-list .st { flex: none; min-width: 7.2em; font-size: .85em; font-weight: 700; }
+.lm-toggle { display: flex; justify-content: space-between; align-items: center; width: 100%; padding: 8px 12px; margin: 6px 0 0; border: 2px solid var(--edge); background: #fff; text-align: left; }
+.lm-toggle .v { font-weight: 700; border: 2px solid var(--ink); border-radius: 10px; padding: 2px 10px; min-width: 3.2em; text-align: center; }
+.lm-toggle[aria-pressed="true"] .v { background: var(--ink); color: #fff; }
+/* build area for tiles (spelling) and programs (coding): tap to add, tap to remove, drag also works */
+.lm-build { min-height: 72px; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; padding: 6px; border: 3px dashed var(--ink2); border-radius: 14px; background: rgba(255,255,255,.9); }
+.lm-build.over { border-style: solid; border-color: var(--edge); }
+.lm-build .ph { color: var(--ink2); font-size: .9em; padding: 0 6px; }
+.lm-palette { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+.lm-tile { width: 64px; height: 64px; min-width: 64px !important; min-height: 64px !important; padding: 0; border: 3px solid var(--edge); background: #fff; display: inline-flex; align-items: center; justify-content: center; touch-action: none; }
+.lm-tile img { width: 56px; height: 56px; pointer-events: none; }
+.lm-block { min-width: 64px !important; min-height: 64px !important; height: 64px; padding: 2px 8px 2px 2px; border: 3px solid var(--edge); background: #fff; display: inline-flex; align-items: center; gap: 4px; font-weight: 700; touch-action: none; }
+.lm-block img { height: 54px; width: auto; pointer-events: none; }
+.lm-block .lab { font-size: .8em; }
+.lm-build .lm-block, .lm-build .lm-tile { border-style: solid; }
+.lm-step { display: inline-flex; align-items: center; justify-content: center; min-width: 22px; height: 22px; border-radius: 11px; background: var(--ink); color: #fff; font-size: .7em; margin-right: 2px; }
+.lm-modal { position: absolute; inset: 0; z-index: 8; background: rgba(10,14,24,.6); display: flex; align-items: center; justify-content: center; padding: 18px; box-sizing: border-box; }
+.lm-modal .lm-card { max-width: 420px; width: 100%; }
+.lm-notice { position: absolute; left: 50%; bottom: calc(10px + env(safe-area-inset-bottom)); transform: translateX(-50%); z-index: 7; pointer-events: none !important; max-width: 86%; transition: opacity .4s; }
+.lm-notice.gone { opacity: 0; }
+body.rm .lm-notice { transition: none; }
+.lm-notice .lm-card { padding: 5px 12px; font-size: .8em; border-radius: 12px; background: rgba(23,32,51,.86); color: #fff; border: 0; box-shadow: none; }
+.lm-notice p { margin: 0; flex: 1; }
+.lm-ghost { position: fixed; z-index: 20; pointer-events: none; opacity: .85; transform: translate(-50%, -50%); }
+.sr { position: absolute !important; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+#eg-wrap .lm-art canvas, #eg-wrap .lm-card canvas { position: static; display: block; margin: 0 auto; width: calc(176px * var(--art, 1)); height: auto; }
+
+/* compact play layout: everything fits a 360x740 phone without scrolling (shell.fit() shrinks --art further if needed) */
+.eg-band { display: none !important; }
+.lm-screen { padding-bottom: calc(10px + env(safe-area-inset-bottom)); }
+.lm-screen.play { gap: 8px; padding-top: 6px; }
+.lm-screen.play .lm-card { padding: 8px 12px; }
+.lm-screen.play .lm-prompt { font-size: 1.15em; margin: 2px 0; }
+.lm-screen.play .lm-art { margin: 4px 0 0; }
+.lm-tools .lm-btn { padding: 4px 8px; font-size: .9em; min-height: 48px; }
+.lm-tools .lm-btn img { width: 22px; height: 22px; }
+.lm-howto { margin: 4px 0; font-size: .78em; }
+.lm-build { min-height: 70px; padding: 3px; gap: 4px; }
+.lm-palette { gap: 6px; }
+.lm-block { flex-direction: column; justify-content: center; width: 66px; height: auto !important; padding: 2px; gap: 0; }
+.lm-block img { height: 36px; max-width: 58px; object-fit: contain; }
+.lm-block .lab { font-size: 12px; line-height: 1.1; font-weight: 700; }
+.lm-build .lm-step { margin-right: -2px; }
+.lm-screen.play .lm-row .lm-btn { padding: 8px 10px; }
+#lm-spoken { font-size: .82em; margin-top: 2px; }

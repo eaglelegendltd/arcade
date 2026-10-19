@@ -7,7 +7,7 @@
  *   automatically when gen-precache.py sees different game files.
  * No external requests: only same-origin URLs are ever fetched or cached. */
 importScripts('config.js', 'precache-manifest.js');
-var SHELL_VERSION = '3';
+var SHELL_VERSION = '4';
 var SHELL = 'ela-shell-' + SHELL_VERSION, GAMES = 'ela-games-' + self.PRECACHE.version;
 var SCOPE = self.registration.scope;                       // e.g. https://host/arcade/staging/app/
 var BASE = new URL(self.ARCADE_BASE, SCOPE).href;          // e.g. https://host/arcade/
@@ -32,7 +32,7 @@ function realUrl(url) {                                    // play/<slug>/<rest>
   var rest = url.slice(PLAY.length).split('#')[0], q = rest.indexOf('?'); if (q >= 0) rest = rest.slice(0, q);
   var slug = rest.split('/')[0]; if (!self.PRECACHE.games[slug]) return null;
   var path = rest.slice(slug.length + 1); if (path === '' || path.slice(-1) === '/') path += 'index.html';
-  return { slug: slug, url: BASE + slug + '/' + path };
+  return { slug: slug, url: BASE + (self.PRECACHE.games[slug].dir || slug) + '/' + path };
 }
 function cacheFirst(cacheName, key) {
   return caches.open(cacheName).then(function (c) {
@@ -59,7 +59,7 @@ self.addEventListener('fetch', function (e) {
   }
 });
 
-function gameUrls(slug) { return self.PRECACHE.games[slug].files.map(function (f) { return BASE + slug + '/' + f; }); }
+function gameUrls(slug) { return self.PRECACHE.games[slug].files.map(function (f) { return BASE + (self.PRECACHE.games[slug].dir || slug) + '/' + f; }); }
 function cacheList(urls, report) {
   return caches.open(GAMES).then(function (c) {
     var i = 0, done = 0, failed = 0, N = urls.length;

@@ -15,7 +15,7 @@
     // a fresh iframe per game: changing an existing iframe's src would add joint-history entries and break Back
     var old = document.getElementById('frame'); if (old) old.remove();
     var frame = document.createElement('iframe'); frame.id = 'frame'; frame.title = G[slug].title; frame.allow = 'autoplay; fullscreen';
-    frame.src = sw() ? 'play/' + slug + '/' : BASE + slug + '/'; player.insertBefore(frame, player.firstChild);
+    frame.src = sw() ? 'play/' + slug + '/' : BASE + (G[slug].dir || slug) + '/'; player.insertBefore(frame, player.firstChild);
     player.classList.add('open'); document.body.style.overflow = 'hidden';
     if (sw()) sw().postMessage({ type: 'download-game', slug: slug });
     if (!noPush) history.pushState({ slug: slug }, '', '#' + slug);
@@ -43,7 +43,7 @@
       if (d.type === 'game-cached') askStatus();
       if (d.type === 'download-done') { setStatus(d.games); window.__downloadResult = d.result;
         if (d.result.failed) { dl.disabled = false; dl.textContent = 'Download all for offline'; note.textContent = d.result.failed + ' files could not be downloaded. Try again when online.'; }
-        else note.textContent = 'All 20 games are ready to play offline (' + Math.round(self.PRECACHE.bytes / 1e6) + ' MB).'; }
+        else note.textContent = 'All ' + Object.keys(G).length + ' games are ready to play offline (' + Math.round(self.PRECACHE.bytes / 1e6) + ' MB).'; }
     });
     navigator.serviceWorker.addEventListener('controllerchange', askStatus);
     navigator.serviceWorker.register('sw.js').then(function () { return navigator.serviceWorker.ready; }).then(askStatus).catch(function () {});
