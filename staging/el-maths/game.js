@@ -33,7 +33,7 @@
     c.strokeStyle = 'rgba(52,44,40,.8)'; c.lineWidth = 1.4; c.beginPath(); c.moveTo(bx, by); c.quadraticCurveTo(bx - 50, (by + 700) / 2 + 30, 214, 700); c.stroke();
     if (kite.complete && kite.naturalWidth) { var f = s.reduced ? 0 : Math.floor(s.t * 5) % 4; c.save(); c.translate(kx, y); c.rotate(tilt); c.drawImage(kite, f * 256, 0, 256, 256, -size / 2, -size / 2, size, size); c.restore(); }
   }
-  LearnShell.start({ subject: 'maths', slug: 'el-maths', name: 'Maths', title: 'Eagle Legend Maths', howto: 'Answer at your own pace. Hints are always there.',
-    tagline: 'Calm maths practice that adjusts to you, from counting up to GCSE Foundation. Any age welcome.', guide: 'characters/owlfox_celebrate.webp',
+  LearnShell.start({ levels: [{ band: 1, label: 'Counting' }, { band: 2, label: 'Number bonds and adding to 20' }, { band: 3, label: 'Place value, money and times tables' }, { band: 4, label: 'Column methods and equivalent fractions' }, { band: 5, label: 'Decimals, negatives and primes' }, { band: 6, label: 'Fractions, division and percentages' }, { band: 7, label: 'Ratio, sequences and algebra' }, { band: 8, label: 'Equations, powers and probability' }, { band: 9, label: 'Straight-line graphs' }, { band: 10, label: 'Standard form, Pythagoras and trigonometry' }, { band: 11, label: 'GCSE-style practice' }], subject: 'maths', slug: 'el-maths', name: 'Maths', title: 'Eagle Legend Maths', howto: 'Answer at your own pace. Hints are always there.',
+    tagline: 'Calm maths practice that adjusts to you, from counting to GCSE-style practice. Any age welcome.', guide: 'characters/owlfox_celebrate.webp',
     bgs: ['bg_number', 'bg_times', 'bg_fraction', 'bg_calc'], bgFor: strandOf, artHtml: artHtml, drawArt: drawArt, drawScene: drawScene });
 })(window, document);

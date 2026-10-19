@@ -200,11 +200,16 @@
   P.placementBand = function () { return this.placement ? this.placement.band : null; };
   P.seed = function (B) { var self = this; this.data.skills = {}; this.data.offset = 0; this.started = true;
     this.ids.forEach(function (id) { var bd = skills[id].band; self.data.skills[id] = cleanSkill({ p: bd < B ? 0.85 : bd === B ? 0.40 : 0.10, th: 0 }); }); };
+  // curriculum pickers: only when LEARN_CURRICULUM_PICKER is on, and only frameworks whose per-picker flag
+  // (built from curriculum-map.json <subject>Verified.pickerEnabled) is exactly true (ENGINE.md §9)
+  function pickers() { var C = W.LEARN_CURRICULA; if (W.LEARN_CURRICULUM_PICKER !== true || !C || !C.frameworks) return [];
+    return C.frameworks.filter(function (f) { return f && f.enabled === true && f.levels && f.levels.length; }); }
   P.pickLevel = function (framework, level) {
-    var C = W.LEARN_CURRICULA, fw = null, lv = null; (C && C.frameworks || []).forEach(function (f) { if (f.id === framework) fw = f; });
+    var fw = null, lv = null; pickers().forEach(function (f) { if (f.id === framework) fw = f; });
     (fw && fw.levels || []).forEach(function (l) { if (l.id === level) lv = l; });
     if (!lv) return false; this.seed(lv.band || 1); this.data.curriculum = { framework: framework, level: level }; this.data.placement = null; this.dirty(); return lv.band;
   };
+  P.pickBand = function (band) { var rg = this.bandRange(), b = clamp(band | 0, rg[0], rg[1]); this.seed(b); this.data.curriculum = { framework: 'level', level: String(b) }; this.data.placement = null; this.dirty(); return b; };
   P.startAtBeginning = function () { this.seed(1); this.dirty(); };
 
   // persistence (debounced 1 s, flushed on visibilitychange)
@@ -247,7 +252,7 @@
     open: function (subject, opts) { return new Session(subject, opts); },
     reset: reset, resetAll: resetAll, exportFile: exportFile, exportData: exportData, importFile: importFile, settings: settings, migrations: {},
     on: function (ev, fn) { (listeners[ev] = listeners[ev] || []).push(fn); },
-    storageOk: function () { return storageOk; }, skill: function (id) { return skills[id]; }, skillIds: subjectSkills,
+    storageOk: function () { return storageOk; }, pickers: pickers, skill: function (id) { return skills[id]; }, skillIds: subjectSkills,
     util: { mulberry32: mulberry32, bkt: bkt, expected: expected, kFactor: kFactor, clamp: clamp, ID_RE: ID_RE, BOX_DAYS: BOX_DAYS },
     _now: null, _clear: function () { skills = {}; order = []; gens = {}; banks = {}; sessions = {}; }
   };

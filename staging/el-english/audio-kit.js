@@ -11,6 +11,7 @@
       master = ctx.createGain();
       master.gain.value = muted ? 0 : volume;
       master.connect(ctx.destination);
+      if (paused || hiddenPause) ctx.suspend(); // created while paused or in a hidden tab: stay silent
     }
     if (ctx.state === 'suspended' && !paused && !hiddenPause) ctx.resume();
     return ctx;
@@ -145,6 +146,8 @@
     root.addEventListener('message', function (e) { handleCommand(e.data); });
   }
   if (typeof document !== 'undefined' && document.addEventListener) {
+    // Start paused if the page loads in a background tab (e.g. opened with middle-click).
+    hiddenPause = document.visibilityState === 'hidden';
     document.addEventListener('visibilitychange', function () {
       hiddenPause = document.visibilityState === 'hidden';
       applyPause();

@@ -42,8 +42,8 @@
   function drawScene(gg, c, s) { var size = 72, lo = s.free.y1 - size * 0.55, hi = s.free.y0 + size * 0.55; if (lo < hi || !newt.complete || !newt.naturalWidth) return;
     var target = lo; ny = ny == null ? target : ny + (target - ny) * 0.08; var f = s.reduced ? 0 : Math.floor(s.t * 3) % 4;
     c.drawImage(newt, f * 512, 0, 512, 512, 300 - size / 2, ny - size / 2, size, size); }
-  LearnShell.start({ subject: 'coding', slug: 'el-coding', name: 'Coding', title: 'Eagle Legend Coding', howto: 'Build programs at your own pace. Hints are always there.',
-    tagline: 'Calm coding practice that adjusts to you: sequences, loops and debugging, up to around KS3. Any age welcome.', guide: 'characters/robonewt_celebrate.webp',
+  LearnShell.start({ levels: [{ band: 2, label: 'Sequences and robot programs' }, { band: 3, label: 'Repeat loops and predicting' }, { band: 4, label: 'Events, if/else and debugging' }, { band: 6, label: 'Variables and conditional loops' }, { band: 8, label: 'Logic, data and computer systems' }, { band: 9, label: 'Nested code and functions' }, { band: 10, label: 'Searching and sorting' }], subject: 'coding', slug: 'el-coding', name: 'Coding', title: 'Eagle Legend Coding', howto: 'Build programs at your own pace. Hints are always there.',
+    tagline: 'Calm coding practice that adjusts to you: sequences, then loops, then debugging and beyond. Any age welcome.', guide: 'characters/robonewt_celebrate.webp',
     bgs: ['bg_sequence', 'bg_loops', 'bg_debug', 'bg_nested'], bgFor: bgFor, artHtml: artHtml, drawArt: drawArt, blockHtml: blockHtml, blockLabel: function (c) { return BL[c] ? BL[c][1] : c; },
     feedbackArt: feedbackArt, drawFeedback: drawFeedback, drawScene: drawScene });
 })(window, document);

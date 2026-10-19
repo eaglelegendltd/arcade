@@ -54,12 +54,15 @@
     function placementChoice() { view = 'choice';
       show('<div class="lm-card"><h2>Where would you like to start?</h2><p>Want a quick check to find your starting point? About 3 minutes, and you can skip it.</p>' +
         btn('quick', 'Quick check', 'pri', ' data-focus') + btn('picker', 'I\u2019ll pick my level') + btn('beginning', 'Start at the beginning') + btn('title', 'Back') + '</div>'); }
+    // plain Level list (cfg.levels: [{band, label}]); curriculum / exam-board / year-group options only when LEARN_CURRICULUM_PICKER is on
     function picker(fw) {
-      view = 'picker'; var cs = (W.LEARN_CURRICULA || { frameworks: [] }).frameworks, h = '<div class="lm-card"><h2>Pick your level</h2>';
-      if (!fw) { h += '<p>Choose a curriculum. This only sets where questions start; you can change it any time.</p>';
-        cs.forEach(function (f) { if (f.levels.length) h += btn('fw', esc(f.name), '', ' data-v="' + esc(f.id) + '"'); }); h += btn('choice', 'Back'); }
-      else { var f = cs.filter(function (x) { return x.id === fw; })[0]; h += '<p>' + esc(f.name) + '</p>';
-        f.levels.forEach(function (l) { h += btn('lvl', esc(l.label), '', ' data-fw="' + esc(fw) + '" data-v="' + esc(l.id) + '"'); }); h += btn('picker', 'Back'); }
+      view = 'picker'; var cs = LK.pickers(), h = '<div class="lm-card"><h2>Pick your level</h2>';
+      if (!fw) { h += '<p>This only sets where questions start. The game keeps adjusting as you play, and you can change it any time.</p>';
+        (cfg.levels || []).forEach(function (l, i) { h += btn('band', '<strong>Level ' + (i + 1) + '</strong> \u00b7 ' + esc(l.label), 'lm-level', ' data-v="' + l.band + '"'); });
+        if (cs.length) h += btn('fws', 'Choose by school year or course'); h += btn('choice', 'Back'); }
+      else if (fw === '*') { cs.forEach(function (f) { h += btn('fw', esc(f.name), '', ' data-v="' + esc(f.id) + '"'); }); h += btn('picker', 'Back'); }
+      else { var f = cs.filter(function (x) { return x.id === fw; })[0]; if (!f) return picker(); h += '<p>' + esc(f.name) + '</p>';
+        f.levels.forEach(function (l) { h += btn('lvl', esc(l.label), '', ' data-fw="' + esc(fw) + '" data-v="' + esc(l.id) + '"'); }); h += btn('fws', 'Back'); }
       show(h + '</div>');
     }
     function startHere(msg) { sfx('placementDone'); view = 'placed';
@@ -201,7 +204,8 @@
         case 'play': if (session.needsPlacement()) placementChoice(); else playRound(); break;
         case 'quick': placing = true; question(session.startPlacement()); break;
         case 'pskip': placing = false; session.startAtBeginning(); startHere('No problem. We\u2019ll start at the beginning and adjust as you play.'); break;
-        case 'picker': picker(); break; case 'fw': picker(b.getAttribute('data-v')); break;
+        case 'picker': picker(); break; case 'fws': picker('*'); break; case 'fw': picker(b.getAttribute('data-v')); break;
+        case 'band': session.pickBand(+b.getAttribute('data-v')); startHere('Thanks, we\u2019ll start you there and adjust as you play.'); break;
         case 'lvl': session.pickLevel(b.getAttribute('data-fw'), b.getAttribute('data-v')); startHere('Thanks, we\u2019ll start you there and adjust as you play.'); break;
         case 'beginning': session.startAtBeginning(); startHere('We\u2019ll start at the beginning and adjust as you play.'); break;
         case 'ans': submit(cur.choices[+b.getAttribute('data-i')], b); break; case 'hint': doHint(); break;
