@@ -114,8 +114,11 @@
   // a kettle at the start of a café day, and the door bell when someone new walks into the café.
   function ambienceFor(s) {
     var b = s.bg || {}, ref = (typeof b === 'string' ? b : b.ref) || '', ph = (b && b.placeholder) || {}, time = ph.time || 'morning';
-    if (/office/.test(ref)) return 'none';
-    if (/flat|street|park|doorstep/.test(ref) || ph.kind === 'street') return 'cafe_rain';
+    if (/rain/.test(ref) || time === 'rain' || ph.weather === 'rain') return 'cafe_rain'; // rain bed for rainy scenes only
+    if (/office/.test(ref)) return 'office_quiet';
+    if (/park/.test(ref)) return 'outdoor_park'; // before the street rule: park placeholders are kind 'street'
+    if (/street|doorstep/.test(ref) || ph.kind === 'street') return 'outdoor_street';
+    if (/flat/.test(ref)) return 'home_quiet';
     if (/evening|after_hours|party|closed/.test(ref) || time === 'evening' || time === 'night' || time === 'afternoon') return 'cafe_evening';
     return 'cafe_morning';
   }
