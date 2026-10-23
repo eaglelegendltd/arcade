@@ -1,7 +1,7 @@
 // Stockingstep (Luna's reading): stockings swing on ribbons from the garland, stepping up the chimney breast. The stoatlet rides in one;
 // tap to hop to the next as the two swing towards each other. Too far apart and she slips back (miss). Every stocking only holds her
 // for a few swings, so keep climbing. Some stockings hold a star coin.
-// Craft: the first hop has a long reach; the first miss is free; a dashed arc to the next stocking turns gold and NOW rings when a hop would land.
+// Craft: the first hop has a long reach; the first miss is free; a dashed arc to the next stocking turns gold and NOW rings when a hop would land (learning phase only: xmCue).
 // Placeholder: Luna's v1 sheet has green and gold both striped; until her redraw lands (XM_FIX.stockingGreenPattern) the green one is
 // recoloured plain green with white dots in code.
 var SS_DX = 56, SS_GAP = 128, SS_ROPE = 70, SS_BASE = 300, SS_HOP = 0.42, SS_SW = 82; // hooks alternate 180 -/+ 56
@@ -39,7 +39,7 @@ EagleGame.run({ id: 'stockingstep', title: XM_NAMES['stockingstep'],
       g.addScore(pts); xmFloat(g, h.b[0], h.b[1] + D.cam - 50, (perfect ? 'Perfect +' : '+') + pts, perfect ? '#ffe27a' : '#fff'); xmAnim(g, 'step_burst_sheet', h.b[0], h.b[1] + D.cam - 10, 76, 6, 0.45);
       g.sfx(perfect ? 'perfect' : 'good', D.combo - 1, 'coin'); g.vibrate(12); ssAdd(g); }
     else { D.combo = 0; D.fall = 0.5; xmFloat(g, h.b[0], h.b[1] + D.cam - 40, 'Too far to reach', '#ffb3b3'); if (xmMiss(g, 'missed the stocking')) return; } },
-  draw: function (g, c) { var D = g.data, i; if (!g.bg()) xmSky(c, '#2a1a14', '#5a3a28'); c.fillStyle = 'rgba(10,8,20,.34)'; c.fillRect(0, 0, 360, 640);
+  draw: function (g, c) { var D = g.data, i, CUE = xmCue(g, D.n); if (!g.bg()) xmSky(c, '#2a1a14', '#5a3a28'); c.fillStyle = 'rgba(10,8,20,.34)'; c.fillRect(0, 0, 360, 640);
     var src = ssStockingSrc(g);
     for (i = Math.max(0, D.on - 2); i < D.st.length; i++) { var hk = ssHook(i), hy = hk[1] + D.cam; if (hy < -120 || hy > 700) continue; var a = ssAng(g, i, g.t), m = ssMouth(g, i, g.t), my = m[1] + D.cam;
       // garland peg + ribbon
@@ -52,8 +52,8 @@ EagleGame.run({ id: 'stockingstep', title: XM_NAMES['stockingstep'],
       c.restore();
       if (S.coin) { c.fillStyle = '#f2c230'; c.beginPath(); c.arc(m[0], my + 30, 8, 0, 7); c.fill(); c.fillStyle = '#fff6c0'; c.font = 'bold 10px system-ui'; c.textAlign = 'center'; c.fillText('★', m[0], my + 34); } }
     // aim arc + NOW
-    if (g.state === 'play' && !D.hop && D.fall <= 0) { var A = ssMouth(g, D.on, g.t), B = ssMouth(g, D.on + 1, g.t + SS_HOP), on = ssGap(g, g.t) <= ssReach(g) - 4;
-      c.save(); c.setLineDash([4, 6]); c.strokeStyle = on ? '#ffe27a' : 'rgba(255,255,255,.28)'; c.lineWidth = on ? 2.5 : 1.5; c.beginPath(); c.moveTo(A[0], A[1] + D.cam - 20);
+    if (g.state === 'play' && !D.hop && D.fall <= 0) { var A = ssMouth(g, D.on, g.t), B = ssMouth(g, D.on + 1, g.t + SS_HOP), on = CUE > 0 && ssGap(g, g.t) <= ssReach(g) - 4;
+      c.save(); c.globalAlpha = 0.35 + 0.65 * CUE; c.setLineDash([4, 6]); c.strokeStyle = on ? '#ffe27a' : 'rgba(255,255,255,.28)'; c.lineWidth = on ? 2.5 : 1.5; c.beginPath(); c.moveTo(A[0], A[1] + D.cam - 20);
       c.quadraticCurveTo((A[0] + B[0]) / 2, Math.min(A[1], B[1]) + D.cam - 70, B[0], B[1] + D.cam - 10); c.stroke(); c.restore(); if (on) xmNow(g, c, B[0], B[1] + D.cam + 20, 26, 'NOW'); }
     // hop / slip animation
     if (D.hop) { var h = D.hop, p = Math.min(1, h.t / SS_HOP), x = h.a[0] + (h.b[0] - h.a[0]) * p, y = h.a[1] + (h.b[1] - h.a[1]) * p - Math.sin(p * Math.PI) * 60 + D.cam - 14;

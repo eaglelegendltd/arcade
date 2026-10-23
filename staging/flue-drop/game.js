@@ -1,9 +1,13 @@
 // Flue Drop (Luna's reading, kept): a parcel hangs on the wire above the rooftops while chimneys slide past. Tap to let it fall
 // straight down a chimney. Every chimney wants one parcel; letting one go by unfed costs a holly. Every 10th parcel is gold (x3).
 // From level 3 the parcel also glides along the wire, so the lead changes. Chimneys sit at different heights (different fall times).
-// Craft: the first chimney is slow with a wide catch; the first miss is free; a NOW ring shows when a drop would land in the flue.
+// Craft: the first chimney is slow with a wide catch; the first miss is free; a NOW ring shows when a drop would land in the flue (learning phase only: xmCue).
 var FD_PY = 150, FD_ROOF = 488, FD_G = 1500, FD_CW = 104, FD_CH = 156, FD_OPEN = 29; // chimney drawn 104x156 (Luna: 256x384, flue opening x 55-201, y 85-118)
-function fdTopY(ch) { return FD_ROOF - FD_CH + 40 - ch.h; }               // sprite top
+// every playable chimney rises out of its own gable roof (Richie, 23 Oct): the apex sits 35px left of the chimney, the right-hand
+// slope crosses the chimney 100px below its top, and the eaves rest on the front roof line, so the brick always runs into a roof
+var FD_SLOPE = 0.7, FD_AOFF = 35;
+function fdRoof(ch) { var W = 85 + ch.h, ax = ch.x - FD_AOFF; return { ax: ax, ay: FD_ROOF - W * FD_SLOPE, w: W }; }
+function fdTopY(ch) { var r = fdRoof(ch); return r.ay + FD_AOFF * FD_SLOPE - 100; }   // sprite top
 function fdMouthY(ch) { return fdTopY(ch) + 39; }                          // flue opening line
 function fdFallT(y0, y1) { return Math.sqrt(Math.max(0, 2 * (y1 - y0) / FD_G)); }
 function fdSpeed(g) { var D = g.data; return D.hits === 0 ? 48 : Math.min(205, 78 + D.hits * 3.2 + (g.level - 1) * 6); }
@@ -44,20 +48,29 @@ EagleGame.run({ id: 'flue-drop', title: XM_NAMES['flue-drop'],
             D.p = null; D.reload = 0.22; return; }
         if (Math.abs(dx) < FD_CW / 2 + 12) { // hit the pot rim / snowy cap
           xmAnim(g, 'miss_snow_puff_sheet', x, my - 4, 72, 6, 0.5); D.combo = 0; D.p = null; D.reload = 0.35; if (xmMiss(g, 'the parcel bounced off a chimney pot')) return; return; } }
+      var roofHit = D.ch.some(function (ch) { var R = fdRoof(ch), d = Math.abs(x - R.ax); return d < R.w && p.y > R.ay + d * FD_SLOPE + 4 && Math.abs(x - ch.x) > FD_CW / 2; });
+      if (roofHit) { xmAnim(g, 'miss_snow_puff_sheet', x, p.y, 72, 6, 0.5); D.combo = 0; D.p = null; D.reload = 0.35; xmFloat(g, x, p.y - 30, 'Bump! On the roof', '#ffb3b3'); if (xmMiss(g, 'the parcel landed on a roof')) return; return; }
       if (p.y > FD_ROOF + 6) { xmAnim(g, 'miss_snow_puff_sheet', x, FD_ROOF, 72, 6, 0.5); D.combo = 0; D.p = null; D.reload = 0.35; xmFloat(g, x, FD_ROOF - 30, 'Plop! In the snow', '#ffb3b3'); if (xmMiss(g, 'the parcel landed in the snow')) return; } } },
-  draw: function (g, c) { var D = g.data, i; if (!g.bg()) xmSky(c, '#141c45', '#3b4f8a'); xmSnow(g, c, 30);
+  draw: function (g, c) { var D = g.data, i, CUE = xmCue(g, D.hits); if (!g.bg()) xmSky(c, '#141c45', '#3b4f8a'); xmSnow(g, c, 30);
     // wire across the sky
     c.strokeStyle = 'rgba(30,24,30,.75)'; c.lineWidth = 2; c.beginPath(); c.moveTo(-5, FD_PY - 34); c.quadraticCurveTo(180, FD_PY - 20, 365, FD_PY - 34); c.stroke();
-    // chimneys (behind the roof strip)
-    D.ch.forEach(function (ch) { var lit = ch.fed; var k = lit && g.art.chimney_target_lit ? 'chimney_target_lit' : 'chimney_target', ty = fdTopY(ch);
-      c.globalAlpha = ch.gone ? 0.55 : 1; g.sprite(k, ch.x, ty + FD_CH / 2, FD_CW, FD_CH, function (c2, x) { c2.fillStyle = '#9b3b2e'; c2.fillRect(x - 30, ty + 30, 60, 100); c2.fillStyle = '#eef3fa'; c2.fillRect(x - 36, ty + 22, 72, 12); }); c.globalAlpha = 1; });
+    // chimneys, each followed by its gable roof (drawn over the chimney's lower brick), left to right
+    D.ch.forEach(function (ch) { var k = ch.fed && g.art.chimney_target_lit ? 'chimney_target_lit' : 'chimney_target', ty = fdTopY(ch), R = fdRoof(ch);
+      if (R.ax + R.w < -10 || R.ax - R.w > 370) return;
+      g.sprite(k, ch.x, ty + FD_CH / 2, FD_CW, FD_CH, function (c2, x) { c2.fillStyle = '#9b3b2e'; c2.fillRect(x - 30, ty + 30, 60, 100); c2.fillStyle = '#eef3fa'; c2.fillRect(x - 36, ty + 22, 72, 12); }); c.globalAlpha = 1;
+      c.save(); c.beginPath(); c.moveTo(R.ax - R.w, FD_ROOF + 4); c.lineTo(R.ax, R.ay); c.lineTo(R.ax + R.w, FD_ROOF + 4); c.closePath(); c.clip();
+      if (g.art.roof) { for (var tx = R.ax - R.w; tx < R.ax + R.w; tx += 64) for (var tyy = R.ay; tyy < FD_ROOF + 8; tyy += 64) g.sprite('roof', tx + 32, tyy + 32, 64, 64); } else { c.fillStyle = '#7a3e36'; c.fillRect(R.ax - R.w, R.ay, R.w * 2, FD_ROOF - R.ay + 8); }
+      c.fillStyle = 'rgba(14,18,40,.28)'; c.fillRect(R.ax - R.w, R.ay, R.w * 2, FD_ROOF - R.ay + 8);
+      c.fillStyle = 'rgba(0,0,0,.18)'; c.beginPath(); c.moveTo(R.ax, R.ay); c.lineTo(R.ax + R.w, FD_ROOF + 4); c.lineTo(R.ax, FD_ROOF + 4); c.fill(); c.restore(); // shaded right slope
+      c.save(); c.lineCap = c.lineJoin = 'round'; c.strokeStyle = '#eef3fa'; c.lineWidth = 7; c.beginPath(); c.moveTo(R.ax - R.w, FD_ROOF); c.lineTo(R.ax, R.ay); c.lineTo(R.ax + R.w, FD_ROOF); c.stroke();
+      c.restore(); });
     // roof strip: kit roof tile scrolling, snowy ridge on top
     var ry = FD_ROOF; if (g.art.roof) { c.save(); c.beginPath(); c.rect(0, ry, 360, 160); c.clip(); for (var x = -D.roofX; x < 360; x += 64) for (var y = ry; y < 660; y += 64) g.sprite('roof', x + 32, y + 32, 64, 64); c.restore(); }
     else { c.fillStyle = '#5a3a3a'; c.fillRect(0, ry, 360, 160); }
     c.fillStyle = 'rgba(14,18,40,.25)'; c.fillRect(0, ry, 360, 160); c.fillStyle = '#eef3fa'; xmRound(c, -10, ry - 8, 380, 16, 8); c.fill();
     if (g.art.stoat_idle_sheet) g.frame('stoat_idle_sheet', Math.floor(g.t * 4) % 4, 0, 4, 1, 312, ry - 30, 76, 76);
     // NOW cue: ring under the hanging parcel when a drop would land in the next flue
-    var aim = g.state === 'play' ? fdAim(g) : null, on = aim && Math.abs(aim.dx) <= fdTol(g) - 3;
+    var aim = g.state === 'play' ? fdAim(g) : null, on = CUE > 0 && aim && Math.abs(aim.dx) <= fdTol(g) - 3;
     if (aim) { var my = fdMouthY(aim.c); c.save(); c.setLineDash([4, 6]); c.strokeStyle = on ? '#ffe27a' : 'rgba(255,255,255,.35)'; c.lineWidth = on ? 2.5 : 1.5;
       c.beginPath(); c.moveTo(D.px, FD_PY + 26); c.lineTo(D.px, my - 6); c.stroke(); c.restore(); if (on) xmNow(g, c, D.px, FD_PY, 30, 'NOW'); }
     // parcel

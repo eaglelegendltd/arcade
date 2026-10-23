@@ -1,7 +1,7 @@
 // Wreathweave (slate design + Luna's art): a holly sprig circles the wreath. One gap glows; tap as the sprig lines up with it to tuck
 // the sprig in. Fill all 8 gaps to finish the wreath (bonus), then a fresh wreath starts, faster and circling the other way.
 // If the sprig goes round twice without a tuck it wilts (costs a holly), so waiting forever doesn't work.
-// Craft: the first tuck is slow with a wide window; the first miss is free; the glowing gap brightens and NOW shows inside the window.
+// Craft: the first tuck is slow with a wide window; the first miss is free; the glowing gap brightens and NOW shows inside the window (learning phase only: xmCue; the target glow itself stays).
 var WW_X = 180, WW_Y = 318, WW_S = 300, WW_R = 211 * 300 / 720, WW_ORBIT = WW_R + 46; // wreath_ring: 720px, ring radius 211px, gap k at k*45deg clockwise from 12
 function wwAng(k) { return k * Math.PI / 4; }                       // clockwise from 12 o'clock
 function wwPos(a, r) { return [WW_X + Math.sin(a) * r, WW_Y - Math.cos(a) * r]; }
@@ -33,16 +33,16 @@ EagleGame.run({ id: 'wreathweave', title: XM_NAMES['wreathweave'],
     var d = wwDiff(D.a, wwAng(D.target)) * D.dir;
     if (D.prevD != null && D.prevD < wwTol(g) && d >= wwTol(g)) { D.laps++; if (D.laps >= 2) { D.combo = 0; D.laps = 0; xmFloat(g, WW_X, WW_Y + WW_R + 64, 'The sprig wilted', '#ffb3b3'); if (xmMiss(g, 'the sprig wilted')) return; } }
     D.prevD = d; },
-  draw: function (g, c) { var D = g.data, i; if (!g.bg()) xmSky(c, '#2a1a14', '#5a3a28'); c.fillStyle = 'rgba(10,8,20,.30)'; c.fillRect(0, 0, 360, 640);
+  draw: function (g, c) { var D = g.data, i, CUE = xmCue(g, D.tucks); if (!g.bg()) xmSky(c, '#2a1a14', '#5a3a28'); c.fillStyle = 'rgba(10,8,20,.30)'; c.fillRect(0, 0, 360, 640);
     var gr = c.createRadialGradient(WW_X, WW_Y, 40, WW_X, WW_Y, 200); gr.addColorStop(0, 'rgba(8,6,16,.55)'); gr.addColorStop(1, 'rgba(8,6,16,0)'); c.fillStyle = gr; c.fillRect(0, 100, 360, 440);
     var full = D.done > 0, wob = D.shake && !g.reducedMotion ? Math.sin(g.t * 60) * 3 : 0;
     g.sprite(full && g.art.wreath_complete ? 'wreath_complete' : 'wreath_ring', WW_X + wob, WW_Y, WW_S, WW_S, function (c2) { c2.strokeStyle = '#2e6b34'; c2.lineWidth = 34; c2.beginPath(); c2.arc(WW_X, WW_Y, WW_R, 0, 7); c2.stroke(); });
     // filled gaps: a sprig tucked in each
     if (!full) for (i = 0; i < 8; i++) if (D.filled[i]) { var q = wwPos(wwAng(i), WW_R); g.sprite('sprig_orbit', q[0] + wob, q[1], 80, 80, function (c2, x, y) { xmBlob(c2, x, y, 10, '#2e8b3e'); }, wwAng(i) + Math.PI / 2); }
     // target gap glow ('now' cue): brightens as the sprig closes in, NOW inside the window
-    if (!full && g.state !== 'title') { var tp = wwPos(wwAng(D.target), WW_R), dd = Math.abs(wwDiff(D.a, wwAng(D.target))), on = dd <= wwTol(g);
-      c.globalAlpha = on ? 1 : 0.45 + 0.35 * Math.max(0, 1 - dd / 1.6); g.sprite('gap_glow', tp[0], tp[1], on ? 84 : 70, on ? 84 : 70, function (c2, x, y) { xmBlob(c2, x, y, 26, 'rgba(255,226,122,.6)'); }); c.globalAlpha = 1;
-      var tq = wwPos(wwAng(D.target), WW_ORBIT); c.save(); c.setLineDash([3, 5]); c.strokeStyle = on ? '#ffe27a' : 'rgba(255,240,200,.45)'; c.lineWidth = on ? 3 : 1.5; c.beginPath(); c.moveTo(tp[0], tp[1]); c.lineTo(tq[0], tq[1]); c.stroke(); c.restore();
+    if (!full && g.state !== 'title') { var tp = wwPos(wwAng(D.target), WW_R), dd = Math.abs(wwDiff(D.a, wwAng(D.target))), on = CUE > 0 && dd <= wwTol(g);
+      c.globalAlpha = on ? 1 : 0.45 + 0.35 * CUE * Math.max(0, 1 - dd / 1.6); g.sprite('gap_glow', tp[0], tp[1], on ? 84 : 70, on ? 84 : 70, function (c2, x, y) { xmBlob(c2, x, y, 26, 'rgba(255,226,122,.6)'); }); c.globalAlpha = 1;
+      var tq = wwPos(wwAng(D.target), WW_ORBIT); c.save(); c.globalAlpha = CUE; c.setLineDash([3, 5]); c.strokeStyle = on ? '#ffe27a' : 'rgba(255,240,200,.45)'; c.lineWidth = on ? 3 : 1.5; c.beginPath(); c.moveTo(tp[0], tp[1]); c.lineTo(tq[0], tq[1]); c.stroke(); c.restore();
       if (on) xmNow(g, c, tq[0], tq[1], 30, 'NOW'); }
     // the circling sprig, pointing in towards the wreath
     var sp = wwPos(D.a, WW_ORBIT); c.save(); c.strokeStyle = 'rgba(255,255,255,.12)'; c.lineWidth = 1; c.beginPath(); c.arc(WW_X, WW_Y, WW_ORBIT, 0, 7); c.stroke(); c.restore();

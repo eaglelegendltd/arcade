@@ -24,7 +24,7 @@ function tpMarks(c, ctx, x, y, h, ph) { // code-drawn pattern marks down a stran
 function tpIcon(g, c, ctx, x, y, s) { g.frame('tinsel_colours_sheet', c, 0, 5, 1, x, y, s, s, function (c2) { xmBlob(c2, x, y, s / 3, TP_HEX[c]); }); }
 function tpDwell(g) { var D = g.data; return D.plucks === 0 ? 0.9 : Math.max(0.26, 0.62 - D.plucks * 0.012 - (g.level - 1) * 0.02); }
 function tpCall(g) { var D = g.data, present = []; D.str.forEach(function (s) { if (s && present.indexOf(s.c) < 0) present.push(s.c); });
-  var opts = present.filter(function (c) { return c !== D.want; }); D.want = xmPick(opts.length ? opts : present); D.passes = 0; }
+  if (!present.length) return; var opts = present.filter(function (c) { return c !== D.want; }); D.want = xmPick(opts.length ? opts : present); D.passes = 0; }
 function tpHang(g, i) { var D = g.data;
   var c = Math.floor(xmRand() * 5); D.str[i] = { c: c, t: 0, ph: xmRand() * 6 }; }
 EagleGame.run({ id: 'tinselpluck', title: XM_NAMES['tinselpluck'],
@@ -44,10 +44,11 @@ EagleGame.run({ id: 'tinselpluck', title: XM_NAMES['tinselpluck'],
       setTimeout(function () { if (g.data === D) tpHang(g, i); }, 380); tpCall(g); if (D.combo % 8 === 0) D.toast = { text: D.combo + ' plucks in a row!', t: 1.3 }; }
     else { D.combo = 0; xmFloat(g, p[0], p[1] - 20, s ? 'Not that one!' : 'Empty hook', '#ffb3b3'); if (xmMiss(g, 'plucked the wrong tinsel')) return; } },
   update: function (g, dt) { var D = g.data; xmTick(g, dt); D.gt += dt; var dw = tpDwell(g);
-    if (D.gt >= dw) { D.gt -= dw; D.glint = (D.glint + 1) % 6; if (D.glint === 0 && D.str.some(function (s) { return s && s.c === D.want; })) { D.passes++;
+    if (D.gt >= dw) { D.gt = Math.min(D.gt - dw, dw * 0.5); D.glint = (D.glint + 1) % 6; /* exactly one hook per step; a long frame can't eat the next hook's turn */ if (D.glint === 0 && D.str.some(function (s) { return s && s.c === D.want; })) { D.passes++;
         if (D.passes >= 2) { D.combo = 0; D.passes = 0; xmFloat(g, TP_X, TP_Y + 190, 'The tinsel tangled', '#ffb3b3'); if (xmMiss(g, 'the tinsel tangled')) return; } } }
+    if (!D.str.some(function (s) { return s && s.c === D.want; })) tpCall(g); // the called colour must always be on the tree
     D.str.forEach(function (s) { if (s) s.t += dt; }); D.gone.forEach(function (o) { o.t += dt; }); D.gone = D.gone.filter(function (o) { return o.t < 0.6; }); },
-  draw: function (g, c) { var D = g.data, i; if (!g.bg()) xmSky(c, '#2a1a14', '#5a3a28'); c.fillStyle = 'rgba(10,8,20,.32)'; c.fillRect(0, 0, 360, 640);
+  draw: function (g, c) { var D = g.data, i, CUE = xmCue(g, D.plucks); if (!g.bg()) xmSky(c, '#2a1a14', '#5a3a28'); c.fillStyle = 'rgba(10,8,20,.32)'; c.fillRect(0, 0, 360, 640);
     g.sprite('tree_hero', TP_X, TP_Y, TP_W, TP_H, function (c2) { c2.fillStyle = '#2e6b34'; c2.beginPath(); c2.moveTo(TP_X, TP_Y - 160); c2.lineTo(TP_X + 120, TP_Y + 130); c2.lineTo(TP_X - 120, TP_Y + 130); c2.fill(); });
     var on = false;
     for (i = 0; i < 6; i++) { var p = tpHook(i), s = D.str[i], lit = i === D.glint && g.state !== 'title';
@@ -58,10 +59,12 @@ EagleGame.run({ id: 'tinselpluck', title: XM_NAMES['tinselpluck'],
         if (s.c > 0 && !g.art['tinsel_swing_sheet_' + TP_C[s.c]]) tpMarks(s.c, c, p[0], p[1] + 2, h - 14, g.t * 5 + s.ph); c.restore();
         if (lit && s.c === D.want) on = true; }
       c.fillStyle = '#e8c45a'; c.beginPath(); c.arc(p[0], p[1], 3, 0, 7); c.fill();
-      if (lit && g.art.tinsel_glint_sheet) g.frame('tinsel_glint_sheet', Math.floor(g.t * 12) % 4, 0, 4, 1, p[0], p[1] + 10, 38, 38); }
+      if (lit) { // the lit hook always shows a ring + the glint (twinkle synced to the dwell: small, big, peak; never the faded frame)
+        c.save(); c.strokeStyle = '#ffe27a'; c.lineWidth = 2.5; c.beginPath(); c.arc(p[0], p[1], 11, 0, 7); c.stroke(); c.restore();
+        g.frame('tinsel_glint_sheet', Math.min(2, Math.floor(D.gt / tpDwell(g) * 3)), 0, 4, 1, p[0], p[1] + 10, 38, 38); } }
     D.gone.forEach(function (o) { var src = tpStrandSrc(g, 'pluck', o.c), fr = Math.min(3, Math.floor(o.t / 0.15)); c.save(); c.globalAlpha = 1 - o.t / 0.6;
       if (src) c.drawImage(src, fr * (src.width / 4), 0, src.width / 4, src.height, o.x - 18, o.y - 8 - o.t * 60, 36, 108); c.restore(); });
-    if (on && (D.plucks < 3 || g.reducedMotion)) { var q = tpHook(D.glint); xmNow(g, c, q[0], q[1] + 30, 30, 'NOW'); }
+    if (on) { var q = tpHook(D.glint); xmNow(g, c, q[0], q[1] + 30, 30, 'NOW'); }
     // the colour tag
     if (g.state !== 'title') { c.save(); c.fillStyle = 'rgba(16,20,38,.8)'; xmRound(c, 8, 98, 108, 44, 22); c.fill(); c.strokeStyle = TP_HEX[D.want]; c.lineWidth = 3; c.stroke();
       tpIcon(g, D.want, c, 32, 120, 32); c.textAlign = 'left'; c.fillStyle = '#c9d2e8'; c.font = 'bold 10px system-ui'; c.fillText('PLUCK', 52, 114); c.fillStyle = '#fff'; c.font = 'bold 15px system-ui'; c.fillText(TP_C[D.want], 52, 132); c.restore(); }

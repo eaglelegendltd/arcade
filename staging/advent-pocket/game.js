@@ -36,7 +36,7 @@ EagleGame.run({ id: 'advent-pocket', title: XM_NAMES['advent-pocket'],
     if (side !== 0 && D.was === 0) { D.passes++; if (D.passes >= 3) { D.combo = 0; D.passes = 0; xmFloat(g, s[0], s[1] - 34, 'It stayed shut', '#ffb3b3'); if (xmMiss(g, 'the pocket stayed shut')) return; } }
     if (side !== 0 && D.was != null && D.was !== 0 && side !== D.was) { D.passes++; if (D.passes >= 3) { D.combo = 0; D.passes = 0; if (xmMiss(g, 'the pocket stayed shut')) return; } } // skipped the window in one frame
     D.was = side; },
-  draw: function (g, c) { var D = g.data, i; if (!g.bg()) xmSky(c, '#2a1a14', '#5a3a28'); c.fillStyle = 'rgba(10,8,20,.30)'; c.fillRect(0, 0, 360, 640);
+  draw: function (g, c) { var D = g.data, i, CUE = xmCue(g, D.opened); if (!g.bg()) xmSky(c, '#2a1a14', '#5a3a28'); c.fillStyle = 'rgba(10,8,20,.30)'; c.fillRect(0, 0, 360, 640);
     g.sprite('board_panel_960x1280', AP_X, AP_Y, AP_W, AP_H, function (c2) { c2.fillStyle = '#efe6d2'; c2.fillRect(AP_X - AP_W / 2, AP_Y - AP_H / 2, AP_W, AP_H); });
     var row = D.row, ry = apSlot(row * 4)[1];
     if (g.state !== 'title' && D.done <= 0) { c.fillStyle = 'rgba(255,226,122,.16)'; xmRound(c, AP_X - 142, ry - 34, 284, 68, 14); c.fill(); }
@@ -47,7 +47,7 @@ EagleGame.run({ id: 'advent-pocket', title: XM_NAMES['advent-pocket'],
       else { g.frame('pocket_colours_sheet', Math.floor(i / 4) % 4, 0, 4, 1, p[0], p[1], 66, 66, function (c2, x, y) { c2.fillStyle = '#b33'; c2.fillRect(x - 26, y - 22, 52, 44); });
         c.font = 'bold 17px system-ui'; c.textAlign = 'center'; c.lineWidth = 4; c.strokeStyle = 'rgba(40,20,10,.75)'; c.strokeText(D.days[i], p[0], p[1] + 14); c.fillStyle = '#fff6dc'; c.fillText(D.days[i], p[0], p[1] + 14); } }
     // the sweeping star
-    if (g.state !== 'title' && D.done <= 0) { var tp = apSlot(D.target), on = Math.abs(D.sx - tp[0]) <= apTol(g);
+    if (g.state !== 'title' && D.done <= 0) { var tp = apSlot(D.target), on = CUE > 0 && Math.abs(D.sx - tp[0]) <= apTol(g);
       c.save(); c.translate(D.sx, ry - 30); c.fillStyle = on ? '#ffe27a' : '#f5d77a'; c.strokeStyle = 'rgba(80,40,10,.8)'; c.lineWidth = 2; c.beginPath();
       for (var k = 0; k < 10; k++) { var r = k % 2 ? 5 : 12, an = -Math.PI / 2 + k * Math.PI / 5; c.lineTo(Math.cos(an) * r, Math.sin(an) * r); } c.closePath(); c.fill(); c.stroke(); c.restore();
       c.strokeStyle = 'rgba(255,226,122,.5)'; c.lineWidth = 1.5; c.beginPath(); c.moveTo(D.sx, ry - 18); c.lineTo(D.sx, ry + 30); c.stroke();

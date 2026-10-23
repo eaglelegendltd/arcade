@@ -2,7 +2,7 @@
 // Tap to reverse the spin (and the direction) to sweep in falling sparkles and stay clear of soot puffs. It turns round by itself at
 // the ends of the ridge. Sparkles you miss only break the streak; soot costs a holly. Every 12th sparkle is a big one (x3).
 // Craft: the opening sparkles fall gently on the side you're not heading to, so the first tap is taught; the first soot hit is free;
-// every falling thing casts a marker on the ridge (gold = sparkle, grey = soot), and the marker under the whirligig rings NOW.
+// every falling thing casts a marker on the ridge (gold = sparkle, grey = soot), and the marker under the whirligig rings NOW (learning phase only: xmCue).
 var YW_RAIL = 470, YW_SIZE = 112, YW_HUB = YW_RAIL - 54, YW_L = 44, YW_R = 316, YW_CATCH = 40;
 function ywSpeed(g) { var D = g.data; return Math.min(230, 105 + D.caught * 1.4 + (g.level - 1) * 8); }
 function ywFall(g) { var D = g.data; return Math.min(250, 95 + D.caught * 1.6 + (g.level - 1) * 10); }
@@ -34,12 +34,12 @@ EagleGame.run({ id: 'yulewhirl', title: XM_NAMES['yulewhirl'],
           xmAnim(g, 'collect_burst_sheet', it.x, it.y, it.big ? 96 : 72, 6, 0.45); g.sfx(it.big ? 'perfect' : 'good', D.combo - 1, 'coin'); if (D.combo % 10 === 0) D.toast = { text: D.combo + ' sparkles in a row!', t: 1.3 }; } }
       if (!it.done && it.y > YW_RAIL + 6) { it.done = true; if (!it.soot) { if (D.combo >= 3) xmFloat(g, it.x, YW_RAIL - 10, 'streak lost', '#c9d6ff'); D.combo = 0; } } }
     D.items = D.items.filter(function (it) { return !it.done; }); },
-  draw: function (g, c) { var D = g.data, i; if (!g.bg()) xmSky(c, '#141c45', '#3b4f8a'); xmSnow(g, c, 24);
+  draw: function (g, c) { var D = g.data, i, CUE = xmCue(g, D.caught); if (!g.bg()) xmSky(c, '#141c45', '#3b4f8a'); xmSnow(g, c, 24);
     // the ridge
     c.fillStyle = 'rgba(20,26,56,.55)'; c.fillRect(0, YW_RAIL + 4, 360, 200); c.fillStyle = '#eef3fa'; xmRound(c, 16, YW_RAIL - 4, 328, 14, 7); c.fill();
     c.fillStyle = 'rgba(120,140,190,.5)'; c.fillRect(24, YW_RAIL + 6, 312, 2);
     // landing markers ('now' cue)
-    D.items.forEach(function (it) { var a = Math.max(0.15, Math.min(0.9, it.y / YW_HUB)); c.globalAlpha = a; c.fillStyle = it.soot ? '#4a4a5a' : '#ffe27a';
+    D.items.forEach(function (it) { var a = Math.max(0.15, Math.min(0.9, it.y / YW_HUB)) * CUE; if (a <= 0) return; c.globalAlpha = a; c.fillStyle = it.soot ? '#4a4a5a' : '#ffe27a';
       c.beginPath(); c.ellipse(it.x, YW_RAIL + 2, it.soot ? 12 : 9, 3, 0, 0, 7); c.fill(); c.globalAlpha = 1; });
     // falling things
     D.items.forEach(function (it) { var x = it.x + Math.sin(it.ph * 2) * it.sway * 0.05, f = Math.floor(it.ph * 8) % 4;

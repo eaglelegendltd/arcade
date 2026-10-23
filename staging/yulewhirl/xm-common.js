@@ -21,7 +21,7 @@ function xmPick(a) { return a[Math.floor(xmRand() * a.length)]; }
 function xmClamp(v, a, b) { return v < a ? a : v > b ? b : v; }
 
 // ---- craft rules shared by every game ----
-// 1) cheap first misses: xmMiss() forgives the first miss of every run (and the first one after each level up for the first 2 levels).
+// 1) cheap first misses: xmMiss() forgives the first miss of every run.
 // 2) a visible 'now' cue: xmNow() draws a pulsing ring + label where the next action lands.
 // 3) the first decision is taught for free: each game slows / widens its first target and shows a hint pill until the first success.
 function xmMiss(g, why, cost) { var D = g.data; D.flash = 0.25; g.shake(5); g.vibrate(30);
@@ -29,8 +29,8 @@ function xmMiss(g, why, cost) { var D = g.data; D.flash = 0.25; g.shake(5); g.vi
   D.lives -= cost || 1; g.sfx('miss', null, 'hit'); if (D.lives <= 0) { g.gameOver(why); return true; } return false; }
 function xmLives(g, c, icon) { var D = g.data, k = icon || 'holly'; for (var i = 0; i < (D.maxLives || 3); i++) { var x = 338 - i * 26, y = g.safeTop + 74, on = i < D.lives;
     c.globalAlpha = on ? 1 : 0.25; if (g.art[k]) g.sprite(k, x, y, 24, 24); else { c.fillStyle = on ? '#e2363f' : '#888'; c.beginPath(); c.arc(x - 4, y + 3, 5, 0, 7); c.arc(x + 4, y + 3, 5, 0, 7); c.arc(x, y - 4, 5, 0, 7); c.fill(); } c.globalAlpha = 1; } }
-function xmNow(g, c, x, y, r, label, col) { var p = g.reducedMotion ? 0.5 : (Math.sin(g.t * 7) + 1) / 2; c.save(); c.strokeStyle = col || '#ffe27a'; c.lineWidth = 3; c.globalAlpha = 0.55 + p * 0.45;
-  c.beginPath(); c.arc(x, y, r + p * 5, 0, 7); c.stroke(); if (label) { c.globalAlpha = 1; c.font = 'bold 14px system-ui'; c.textAlign = 'center'; c.lineWidth = 4; c.strokeStyle = 'rgba(20,24,40,.85)'; c.strokeText(label, x, y - r - 12); c.fillStyle = col || '#ffe27a'; c.fillText(label, x, y - r - 12); } c.restore(); }
+function xmNow(g, c, x, y, r, label, col) { var A = g.data.cueA == null ? 1 : g.data.cueA; if (A <= 0) return; var p = g.reducedMotion ? 0.5 : (Math.sin(g.t * 7) + 1) / 2; c.save(); c.strokeStyle = col || '#ffe27a'; c.lineWidth = 3; c.globalAlpha = (0.55 + p * 0.45) * A;
+  c.beginPath(); c.arc(x, y, r + p * 5, 0, 7); c.stroke(); if (label) { c.globalAlpha = A; c.font = 'bold 14px system-ui'; c.textAlign = 'center'; c.lineWidth = 4; c.strokeStyle = 'rgba(20,24,40,.85)'; c.strokeText(label, x, y - r - 12); c.fillStyle = col || '#ffe27a'; c.fillText(label, x, y - r - 12); } c.restore(); }
 function xmPill(g, c, text, y, col) { c.save(); c.font = 'bold 15px system-ui'; c.textAlign = 'center'; var w = c.measureText(text).width + 28; y = g.safeY(y, 14);
   c.fillStyle = 'rgba(16,20,38,.72)'; xmRound(c, 180 - w / 2, y - 18, w, 28, 14); c.fill(); c.fillStyle = col || '#fff'; c.fillText(text, 180, y + 1); c.restore(); }
 function xmRound(c, x, y, w, h, r) { c.beginPath(); c.moveTo(x + r, y); c.arcTo(x + w, y, x + w, y + h, r); c.arcTo(x + w, y + h, x, y + h, r); c.arcTo(x, y + h, x, y, r); c.arcTo(x, y, x + w, y, r); c.closePath(); }
@@ -56,3 +56,12 @@ function xmSky(c, top, bot) { var gr = c.createLinearGradient(0, 0, 0, 640); gr.
 function xmBlob(c, x, y, r, col) { c.fillStyle = col; c.beginPath(); c.arc(x, y, r, 0, 7); c.fill(); }
 // draw an art key or a placeholder; returns nothing
 function xmArt(g, key, x, y, w, h, fb, rot) { g.sprite(key, x, y, w, h, fb || function (c, x, y) { xmBlob(c, x, y, Math.min(w, h) / 2.2, '#c33'); }, rot); }
+// art that actually shipped in this build (xm-have.js from xm-build.py); filters a game's art list so pending sheets are not requested
+function xmHas(n) { return !window.XM_HAVE || window.XM_HAVE.indexOf(n) >= 0; }
+function xmArtList(a) { return a.filter(xmHas); }
+// 'now' timing cue lifetime (Richie, 23 Oct): only while learning. On for levels 1-2 and the first 8 successes, then it fades out
+// over ~1 s and stays off for the rest of the run. Games call xmCue(g, successes) at the top of draw(); xmNow and the games'
+// own cue visuals use the returned alpha (0 = hidden). The free first move and the forgiven first miss are unchanged.
+var XM_CUE_LEVELS = 2, XM_CUE_SUCCESSES = 8;
+function xmCue(g, n) { var D = g.data; if (D.cueOffAt == null && (g.level > XM_CUE_LEVELS || n >= XM_CUE_SUCCESSES)) D.cueOffAt = g.t;
+  D.cueA = D.cueOffAt == null ? 1 : Math.max(0, 1 - (g.t - D.cueOffAt)); return D.cueA; }

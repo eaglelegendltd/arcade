@@ -1,6 +1,6 @@
 // Mincepie Stack: a mince pie slides above the stack; tap to drop it. Overhang is trimmed off, a perfect drop keeps the full width,
 // and three perfects in a row grow the pie back. Every 10th pie is golden (triple points).
-// Craft: the first drop is lined up for you and snaps if it is half on; the first miss of a run is free; gold guide lines + NOW show the moment.
+// Craft: the first drop is lined up for you and snaps if it is half on; the first miss of a run is free; gold guide lines + NOW show the moment (learning phase only: xmCue).
 var MS_PH = 28, MS_BASE = 532, MS_MAXW = 150, MS_ART_H = 34;
 // Luna's pie_layer_sheet (3 tops: star, lattice, holly; 576x192 frames, pie body at x 10-570, y 43-169) drawn 3-slice so the
 // crimped ends survive any trimmed width; gold pies use a cached warm-gold tint of the same frame.
@@ -43,18 +43,18 @@ EagleGame.run({ id: 'mincepie-stack', title: XM_NAMES['mincepie-stack'],
     var want = Math.max(0, D.stack.length * MS_PH - (MS_BASE - 330)); D.cam += (want - D.cam) * Math.min(1, dt * 6);
     D.stack.forEach(function (p) { if (p.sq) p.sq = Math.max(0, p.sq - dt * 5); });
     D.fall.forEach(function (f) { f.vy += 900 * dt; f.y += f.vy * dt; f.x += f.vx * dt; f.r += (f.vx > 0 ? 3 : -3) * dt; }); D.fall = D.fall.filter(function (f) { return f.y < 700; }); },
-  draw: function (g, c) { var D = g.data, i; if (!g.bg()) xmSky(c, '#cdb799', '#734c38');   // Luna's kitchen baking table (23 Oct): indoors, so no snow
+  draw: function (g, c) { var D = g.data, i, CUE = xmCue(g, D.n); if (!g.bg()) xmSky(c, '#cdb799', '#734c38');   // Luna's kitchen baking table (23 Oct): indoors, so no snow
     c.fillStyle = 'rgba(40,24,12,.12)'; c.fillRect(0, 0, 360, 640);
     var py = MS_BASE + D.cam; c.fillStyle = 'rgba(0,0,0,.25)'; c.beginPath(); c.ellipse(180, py + 14, 110, 14, 0, 0, 7); c.fill();
     if (g.art.plate_base) g.sprite('plate_base', 180, py + 4, 240, 80); else { c.fillStyle = '#f4f6fb'; c.beginPath(); c.ellipse(180, py + 6, 104, 14, 0, 0, 7); c.fill(); c.strokeStyle = '#4a74b8'; c.lineWidth = 3; c.beginPath(); c.ellipse(180, py + 6, 92, 10, 0, 0, 7); c.stroke(); }
     for (i = 0; i < D.stack.length; i++) { var p = D.stack[i], y = MS_BASE - (i + 1) * MS_PH + D.cam; if (y > 700) continue; var s = 1 + (p.sq || 0) * 0.12; msPie(c, p.x, y + MS_PH * (1 - 1 / s), p.w * s, MS_PH / s, p.gold, 1, p.v); }
     D.fall.forEach(function (f) { c.save(); c.translate(f.x, f.y + MS_PH / 2); c.rotate(f.r); msPie(c, 0, -MS_PH / 2, f.w, MS_PH, f.gold, 0.9, f.v); c.restore(); });
-    var top = D.stack[D.stack.length - 1], ty = MS_BASE - D.stack.length * MS_PH + D.cam, sy = ty - 78, on = g.state === 'play' && Math.abs(D.cur.x - top.x) <= msTol(D);
+    var top = D.stack[D.stack.length - 1], ty = MS_BASE - D.stack.length * MS_PH + D.cam, sy = ty - 78, on = CUE > 0 && g.state === 'play' && Math.abs(D.cur.x - top.x) <= msTol(D);
     // 'now' cue: guide lines rise from the top pie's edges; they turn gold (and NOW shows) while a drop would be perfect
     c.save(); c.setLineDash([5, 6]); c.lineWidth = on ? 3 : 1.5; c.strokeStyle = on ? '#ffe27a' : 'rgba(255,255,255,.45)';
     [top.x - top.w / 2, top.x + top.w / 2].forEach(function (x) { c.beginPath(); c.moveTo(x, ty); c.lineTo(x, sy - 6); c.stroke(); }); c.restore();
     c.fillStyle = 'rgba(0,0,0,.18)'; c.beginPath(); c.ellipse(D.cur.x, ty - 2, D.cur.w / 2, 4, 0, 0, 7); c.fill();
-    msPie(c, D.cur.x, sy, D.cur.w, MS_PH, D.cur.gold, 1, D.cur.v); if (on) { c.font = 'bold 15px system-ui'; c.textAlign = 'center'; c.fillStyle = '#ffe27a'; c.fillText('NOW', top.x, sy - 10); }
+    msPie(c, D.cur.x, sy, D.cur.w, MS_PH, D.cur.gold, 1, D.cur.v); if (on) { c.save(); c.globalAlpha = CUE; c.font = 'bold 15px system-ui'; c.textAlign = 'center'; c.fillStyle = '#ffe27a'; c.fillText('NOW', top.x, sy - 10); c.restore(); }
     if (g.art.hog) g.frame('hog', Math.floor(g.t * 5) % 4, 0, 4, 1, 300, Math.min(g.safeBottom - 44, py - 30), 88, 88);
     xmFx(g, c); xmLives(g, c, 'holly'); xmToast(g, c); xmFlash(g, c);
     if (g.state === 'play' && D.n === 0) xmPill(g, c, 'Tap when the pie lines up with the stack', 600);

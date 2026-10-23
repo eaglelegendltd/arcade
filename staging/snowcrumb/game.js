@@ -2,7 +2,7 @@
 // side to side ahead of the trail; tap to toss a crumb there. The robin hops straight to each crumb in turn, so place them to
 // lead it round the pine trees, cones and sledges. Bumping into one is a miss, and so is letting the robin go hungry.
 // Craft: the first crumb has nothing in the way; the first miss is free; the line from the trail end to the marker turns gold
-// (NOW) when the way is clear and red when something's in the way.
+// (NOW) when the way is clear and red when something's in the way (learning phase only: xmCue).
 var SC_AHEAD = 125, SC_SCREEN = 470, SC_R = 12;
 var SC_OB = { pine: { s: 64, r: 22 }, cone: { s: 40, r: 13 }, sledge: { s: 70, r: 24 } };
 function scSpeed(g) { var D = g.data; return Math.min(170, 92 + D.eaten * 1.2 + (g.level - 1) * 5); }
@@ -41,7 +41,7 @@ EagleGame.run({ id: 'snowcrumb', title: XM_NAMES['snowcrumb'],
         var bx = D.x - o.x, by = D.y - o.y, bl = Math.hypot(bx, by) || 1; D.x += bx / bl * 14; D.y += by / bl * 14; if (xmMiss(g, 'the robin bumped into a ' + (o.k === 'pine' ? 'pine tree' : o.k))) return; break; } }
     D.cam += (D.y - SC_SCREEN - D.cam) * Math.min(1, dt * 3);
     while (D.rowY > D.cam - 200) scRow(g); D.obs = D.obs.filter(function (o) { return o.y - D.cam < 760; }); },
-  draw: function (g, c) { var D = g.data, i; if (!g.bg()) xmSky(c, '#c9d6e6', '#eef3f8'); c.fillStyle = 'rgba(255,255,255,.22)'; c.fillRect(0, 0, 360, 640);
+  draw: function (g, c) { var D = g.data, i, CUE = xmCue(g, D.eaten); if (!g.bg()) xmSky(c, '#c9d6e6', '#eef3f8'); c.fillStyle = 'rgba(255,255,255,.22)'; c.fillRect(0, 0, 360, 640);
     // snowy ground scrolls with the garden: faint drift lines
     c.strokeStyle = 'rgba(150,170,200,.25)'; c.lineWidth = 2; for (var yy = -((-D.cam) % 90) - 90; yy < 700; yy += 90) { c.beginPath(); c.moveTo(0, yy); c.quadraticCurveTo(180, yy + 18, 360, yy); c.stroke(); }
     D.prints.forEach(function (p, k) { c.globalAlpha = 0.25 + 0.5 * k / D.prints.length; g.sprite('robin_prints', p.x, p.y - D.cam + 12, 34, 17, null, p.f < 0 ? Math.PI : 0); }); c.globalAlpha = 1;
@@ -51,8 +51,9 @@ EagleGame.run({ id: 'snowcrumb', title: XM_NAMES['snowcrumb'],
     D.fly.forEach(function (f) { var x = f.x0 + (f.x - f.x0) * f.t, y = f.y0 + (f.y - f.y0) * f.t - Math.sin(f.t * Math.PI) * 50 - D.cam; g.frame('crumb_spin_sheet', Math.floor(f.t * 12) % 4, 0, 4, 1, x, y, 22, 22, function (c2, x2, y2) { xmBlob(c2, x2, y2, 4, '#c8954a'); }); });
     // aim marker + path cue
     if (g.state === 'play') { var e = scEnd(g), m = scMark(g), ok = scClear(g, e, m) && !D.obs.some(function (o) { return !o.hit && Math.hypot(o.x - m[0], o.y - m[1]) < SC_OB[o.k].r + 4; });
-      c.save(); c.setLineDash([4, 6]); c.strokeStyle = ok ? '#e0a400' : 'rgba(210,60,60,.8)'; c.lineWidth = 2.5; c.beginPath(); c.moveTo(e[0], e[1] - D.cam); c.lineTo(m[0], m[1] - D.cam); c.stroke(); c.restore();
-      c.strokeStyle = ok ? '#e0a400' : '#d23c3c'; c.lineWidth = 3; c.beginPath(); c.arc(m[0], m[1] - D.cam, 11, 0, 7); c.stroke(); c.beginPath(); c.moveTo(m[0] - 16, m[1] - D.cam); c.lineTo(m[0] + 16, m[1] - D.cam); c.moveTo(m[0], m[1] - D.cam - 16); c.lineTo(m[0], m[1] - D.cam + 16); c.stroke();
+      if (CUE <= 0) ok = null; // after the learning phase the marker is neutral and the path line is gone
+      c.save(); c.globalAlpha = CUE; c.setLineDash([4, 6]); c.strokeStyle = ok ? '#e0a400' : 'rgba(210,60,60,.8)'; c.lineWidth = 2.5; c.beginPath(); c.moveTo(e[0], e[1] - D.cam); c.lineTo(m[0], m[1] - D.cam); c.stroke(); c.restore();
+      c.strokeStyle = ok === null ? '#6b4a2a' : ok ? '#e0a400' : '#d23c3c'; c.lineWidth = 3; c.beginPath(); c.arc(m[0], m[1] - D.cam, 11, 0, 7); c.stroke(); c.beginPath(); c.moveTo(m[0] - 16, m[1] - D.cam); c.lineTo(m[0] + 16, m[1] - D.cam); c.moveTo(m[0], m[1] - D.cam - 16); c.lineTo(m[0], m[1] - D.cam + 16); c.stroke();
       if (ok && D.crumbs.length + D.fly.length < 3) xmNow(g, c, m[0], m[1] - D.cam, 18, 'NOW', '#c98a00'); }
     // robin
     var ry = D.y - D.cam, moving = D.crumbs.length && D.peck <= 0;
