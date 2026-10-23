@@ -20,7 +20,7 @@ EagleGame.run({ id: 'yulewhirl', title: XM_NAMES['yulewhirl'],
   fill: { top: '#141c45', bottom: { tile: 'band_bottom', size: 180, originY: 640, color: '#dfe6ee' } }, levelEvery: 20, likeScore: 30,
   achievements: [{ id: 's15', score: 15, name: 'Sparkle Sweeper' }, { id: 's75', score: 75, name: 'Whirling Wonder' }, { id: 's180', score: 180, name: 'Yule Tornado' }],
   init: function (g) { xmSeed(); g.data = { x: 180, dir: 1, spin: 0, flip: 0, items: [], spawned: 0, sparks: 0, caught: 0, combo: 0, lives: 3, maxLives: 3, next: 0.6, fx: [] }; },
-  down: function (g) { var D = g.data; D.dir = -D.dir; D.flip = 0.15; g.sfx('soft', null, 'jump'); D.taps = (D.taps || 0) + 1; },
+  down: function (g) { var D = g.data; D.dir = -D.dir; D.flip = 0.15; g.sfx('reverse', null, 'jump'); D.taps = (D.taps || 0) + 1; },
   update: function (g, dt) { var D = g.data, i; xmTick(g, dt); if (D.flip) D.flip = Math.max(0, D.flip - dt);
     var v = ywSpeed(g); D.x += D.dir * v * dt; if (D.x < YW_L) { D.x = YW_L; D.dir = 1; } if (D.x > YW_R) { D.x = YW_R; D.dir = -1; }
     D.spin += D.dir * dt * (6 + v / 25);
