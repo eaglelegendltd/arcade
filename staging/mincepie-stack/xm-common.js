@@ -21,7 +21,7 @@ function xmPick(a) { return a[Math.floor(xmRand() * a.length)]; }
 function xmClamp(v, a, b) { return v < a ? a : v > b ? b : v; }
 
 // ---- craft rules shared by every game ----
-// 1) cheap first misses: xmMiss() forgives the first miss of every run (and the first one after each level up for the first 2 levels).
+// 1) cheap first misses: xmMiss() forgives the first miss of every run.
 // 2) a visible 'now' cue: xmNow() draws a pulsing ring + label where the next action lands.
 // 3) the first decision is taught for free: each game slows / widens its first target and shows a hint pill until the first success.
 function xmMiss(g, why, cost) { var D = g.data; D.flash = 0.25; g.shake(5); g.vibrate(30);
@@ -56,3 +56,6 @@ function xmSky(c, top, bot) { var gr = c.createLinearGradient(0, 0, 0, 640); gr.
 function xmBlob(c, x, y, r, col) { c.fillStyle = col; c.beginPath(); c.arc(x, y, r, 0, 7); c.fill(); }
 // draw an art key or a placeholder; returns nothing
 function xmArt(g, key, x, y, w, h, fb, rot) { g.sprite(key, x, y, w, h, fb || function (c, x, y) { xmBlob(c, x, y, Math.min(w, h) / 2.2, '#c33'); }, rot); }
+// art that actually shipped in this build (xm-have.js from xm-build.py); filters a game's art list so pending sheets are not requested
+function xmHas(n) { return !window.XM_HAVE || window.XM_HAVE.indexOf(n) >= 0; }
+function xmArtList(a) { return a.filter(xmHas); }

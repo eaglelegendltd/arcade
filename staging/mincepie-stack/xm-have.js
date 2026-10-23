@@ -1,0 +1,1 @@
+window.XM_HAVE = ["band_bottom", "bg", "crumb_burst_sheet", "eagle_legend_logo", "hog", "holly", "perfect_burst_sheet", "pie_layer", "pie_layer_sheet", "plate_base", "star_coin", "thumbnail_1080x1920", "thumbnail_neutral_1080x1920"]; window.XM_FIX = {};

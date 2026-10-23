@@ -23,7 +23,7 @@ function msNext(g) { var D = g.data, top = D.stack[D.stack.length - 1], side = D
   D.v = Math.min(300, 80 + D.n * 5 + (g.level - 1) * 12); if (D.n === 0) D.v = 55; }
 EagleGame.run({ id: 'mincepie-stack', title: XM_NAMES['mincepie-stack'],
   howto: 'A mince pie slides along. Tap to drop it on the stack: any overhang is trimmed off. Perfect drops keep the pie whole, and 3 in a row make it grow. Every 10th pie is golden. Keys: Space / Enter drops.',
-  art: ['hog', 'holly', 'star_coin', 'pie_layer_sheet', 'plate_base', 'crumb_burst_sheet', 'perfect_burst_sheet'], fill: { top: '#1b2a52', bottom: { tile: 'band_bottom', size: 180, originY: 640, color: '#dfe6ee' } }, levelEvery: 25, likeScore: 30,
+  art: ['hog', 'holly', 'star_coin', 'pie_layer_sheet', 'plate_base', 'crumb_burst_sheet', 'perfect_burst_sheet'], fill: { top: '#cdb799', bottom: { tile: 'band_bottom', size: 180, originY: 640, color: '#734c38' } }, levelEvery: 25, likeScore: 30,
   achievements: [{ id: 's10', score: 10, name: 'Plate Starter' }, { id: 's60', score: 60, name: 'Tower of Treats' }, { id: 's150', score: 150, name: 'Pie in the Sky' }],
   init: function (g) { xmSeed(); g.data = { stack: [{ x: 180, w: 120, sq: 0, v: 0 }], n: 0, lives: 3, maxLives: 3, combo: 0, cam: 0, fall: [], fx: [] }; msNext(g); },
   down: function (g) { var D = g.data, top = D.stack[D.stack.length - 1], cur = D.cur, dx = cur.x - top.x, tol = msTol(D);
@@ -43,8 +43,8 @@ EagleGame.run({ id: 'mincepie-stack', title: XM_NAMES['mincepie-stack'],
     var want = Math.max(0, D.stack.length * MS_PH - (MS_BASE - 330)); D.cam += (want - D.cam) * Math.min(1, dt * 6);
     D.stack.forEach(function (p) { if (p.sq) p.sq = Math.max(0, p.sq - dt * 5); });
     D.fall.forEach(function (f) { f.vy += 900 * dt; f.y += f.vy * dt; f.x += f.vx * dt; f.r += (f.vx > 0 ? 3 : -3) * dt; }); D.fall = D.fall.filter(function (f) { return f.y < 700; }); },
-  draw: function (g, c) { var D = g.data, i; if (!g.bg()) xmSky(c, '#1b2a52', '#a9c3dd'); xmSnow(g, c, 26);
-    c.fillStyle = 'rgba(12,18,40,.28)'; c.fillRect(0, 0, 360, 640);
+  draw: function (g, c) { var D = g.data, i; if (!g.bg()) xmSky(c, '#cdb799', '#734c38');   // Luna's kitchen baking table (23 Oct): indoors, so no snow
+    c.fillStyle = 'rgba(40,24,12,.12)'; c.fillRect(0, 0, 360, 640);
     var py = MS_BASE + D.cam; c.fillStyle = 'rgba(0,0,0,.25)'; c.beginPath(); c.ellipse(180, py + 14, 110, 14, 0, 0, 7); c.fill();
     if (g.art.plate_base) g.sprite('plate_base', 180, py + 4, 240, 80); else { c.fillStyle = '#f4f6fb'; c.beginPath(); c.ellipse(180, py + 6, 104, 14, 0, 0, 7); c.fill(); c.strokeStyle = '#4a74b8'; c.lineWidth = 3; c.beginPath(); c.ellipse(180, py + 6, 92, 10, 0, 0, 7); c.stroke(); }
     for (i = 0; i < D.stack.length; i++) { var p = D.stack[i], y = MS_BASE - (i + 1) * MS_PH + D.cam; if (y > 700) continue; var s = 1 + (p.sq || 0) * 0.12; msPie(c, p.x, y + MS_PH * (1 - 1 / s), p.w * s, MS_PH / s, p.gold, 1, p.v); }

@@ -19,7 +19,7 @@ EagleGame.run({ id: 'flue-drop', title: XM_NAMES['flue-drop'],
   howto: 'Chimneys slide along the rooftops. Tap to drop the parcel so it falls straight into a chimney. Every chimney wants a parcel, so don\'t let one pass unfed. Every 10th parcel is gold. Keys: Space / Enter drops.',
   art: ['present_red_fall_sheet', 'present_green_fall_sheet', 'present_blue_fall_sheet', 'present_gold_fall_sheet', 'chimney_target', 'chimney_target_lit', 'chimney_puff_sheet',
     'miss_snow_puff_sheet', 'stoat_idle_sheet', 'roof', 'holly'],
-  fill: { top: '#141c45', bottom: { tile: 'band_bottom', size: 180, originY: 640, color: '#dfe6ee' } }, levelEvery: 15, likeScore: 25,
+  fill: { top: '#141c45', bottom: { tile: 'band_bottom', size: 180, originY: 640, color: '#867e98' } }, levelEvery: 15, likeScore: 25,
   achievements: [{ id: 's10', score: 10, name: 'First Round' }, { id: 's50', score: 50, name: 'Every Rooftop' }, { id: 's120', score: 120, name: 'Down the Flue' }],
   init: function (g) { xmSeed(); g.data = { ch: [], n: 0, hits: 0, combo: 0, lives: 3, maxLives: 3, px: 120, pv: 0, wire: 0, v: 48, roofX: 0, fx: [], reload: 0 };
     fdSpawn(g, 300); fdNewParcel(g); },
@@ -46,7 +46,6 @@ EagleGame.run({ id: 'flue-drop', title: XM_NAMES['flue-drop'],
           xmAnim(g, 'miss_snow_puff_sheet', x, my - 4, 72, 6, 0.5); D.combo = 0; D.p = null; D.reload = 0.35; if (xmMiss(g, 'the parcel bounced off a chimney pot')) return; return; } }
       if (p.y > FD_ROOF + 6) { xmAnim(g, 'miss_snow_puff_sheet', x, FD_ROOF, 72, 6, 0.5); D.combo = 0; D.p = null; D.reload = 0.35; xmFloat(g, x, FD_ROOF - 30, 'Plop! In the snow', '#ffb3b3'); if (xmMiss(g, 'the parcel landed in the snow')) return; } } },
   draw: function (g, c) { var D = g.data, i; if (!g.bg()) xmSky(c, '#141c45', '#3b4f8a'); xmSnow(g, c, 30);
-    var sh = c.createLinearGradient(0, 300, 0, 500); sh.addColorStop(0, 'rgba(8,10,30,0)'); sh.addColorStop(1, 'rgba(8,10,30,.6)'); c.fillStyle = sh; c.fillRect(0, 300, 360, 200);
     // wire across the sky
     c.strokeStyle = 'rgba(30,24,30,.75)'; c.lineWidth = 2; c.beginPath(); c.moveTo(-5, FD_PY - 34); c.quadraticCurveTo(180, FD_PY - 20, 365, FD_PY - 34); c.stroke();
     // chimneys (behind the roof strip)
